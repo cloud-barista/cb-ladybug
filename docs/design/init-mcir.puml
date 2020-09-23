@@ -1,7 +1,11 @@
 @@startuml
 
 header Cloud-Barista
+<<<<<<< HEAD
 title Initialize MCIR
+=======
+title Initialize Cloud Connection Info.
+>>>>>>> Add base source code
 hide footbox
 
 participant	"Webtool"		as webtool		#d1e0ff
