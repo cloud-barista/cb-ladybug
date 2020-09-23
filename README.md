@@ -37,6 +37,7 @@ $ go get -v all
 
 ```
 $ export CBLOG_ROOT="$(pwd)"
+$ export CBSTORE_ROOT="$(pwd)"
 $ go run src/main.go
 ```
 
@@ -48,6 +49,7 @@ $ go build -o cb-ladybug src/main.go
 
 ```
 $ export CBLOG_ROOT="$(pwd)"
+$ export CBSTORE_ROOT="$(pwd)"
 $ nohup ./cb-ladybug & > /dev/null
 ```
 
@@ -62,7 +64,7 @@ code:200
 
 ### API documentation (swagger)
 
-* Run 
+* Execute or Run
 * Open http://localhost:8080/swagger/index.html in your web browser 
 
 ## Documentation
