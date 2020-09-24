@@ -33,20 +33,14 @@ $ cd cb-ladybug
 $ go get -v all
 ```
 
-### Run
+### Run 
 
 ```
 $ export CBLOG_ROOT="$(pwd)"
 $ go run src/main.go
 ```
 
-```
-$ curl -s  http://localhost:8080/ladybug/healthy -o /dev/null -w "code:%{http_code}"
-
-code:200
-```
-
-### Build
+### Build and Execute
 
 ```
 $ go build -o cb-ladybug src/main.go
@@ -56,6 +50,15 @@ $ go build -o cb-ladybug src/main.go
 $ export CBLOG_ROOT="$(pwd)"
 $ nohup ./cb-ladybug & > /dev/null
 ```
+
+### Test
+
+```
+$ curl -s  http://localhost:8080/ladybug/healthy -o /dev/null -w "code:%{http_code}"
+
+code:200
+```
+
 
 ### API documentation (swagger)
 
