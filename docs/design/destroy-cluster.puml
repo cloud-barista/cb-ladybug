@@ -1,0 +1,72 @@
+@@startuml
+
+header Cloud-Barista
+title Destroy cluster
+hide footbox
+
+actor		"User"			as user			#d1e0ff
+participant	"Webtool"		as webtool		#d1e0ff
+participant	"Ladybug"		as ladybug
+database	"Ladybug data"	as db
+participant	"Ladybug"		as provider
+participant	"Tumblebug"		as tumblebug	#d1e0ff
+participant	"Spider"		as spider		#d1e0ff
+
+
+user		->	webtool		: destroy cluster {cluster}
+activate webtool
+	webtool		->	ladybug		: DELETE\n/cluster {cluster}
+
+	activate ladybug
+		ladybug		->o	db			: update {cluster}
+		ladybug		->	provider	: destroy MCIS {mcis}
+
+		' -- mcis
+		activate provider
+			provider	->	tumblebug	: DELETE\n/mcis
+		
+			activate tumblebug
+				tumblebug	->o	spider		: DELETE\n/vm
+				tumblebug	-->	provider 	: ack
+			deactivate tumblebug
+
+			provider	->	provider	: wait
+			provider	-->	ladybug 	: ack
+		deactivate provider
+		' //-- mcis
+
+		' -- mcir
+		ladybug		->o	db			: update {cluster}
+		ladybug		->	provider	: destroy MCIR {mcir}
+		activate provider
+			provider	->	tumblebug	: DELETE\n /ns/:ns/resources/sshKey
+			activate tumblebug
+				tumblebug	->o	spider		: DELETE\n/keypair
+				tumblebug	-->	provider	: ack
+			deactivate tumblebug
+
+			provider	->	tumblebug	: DELETE\n /ns/:ns/resources/securityGroup
+			activate tumblebug
+				tumblebug	->o	spider		: DELETE\n /ns/:ns/securitygroup
+				tumblebug	-->	provider	: ack
+			deactivate tumblebug
+
+			provider	->	tumblebug	: DELETE\n /ns/:ns/resources/vNet
+			activate tumblebug
+				tumblebug	->o	spider		: DELETE\n /ns/:ns/vpc
+				tumblebug	-->	provider	: ack
+			deactivate tumblebug
+
+			provider	-->	ladybug	: ack
+
+		deactivate provider
+		' //-- mcir
+
+		ladybug		->o	db			: delete {cluster}
+		ladybug		-->	webtool		: ack
+	deactivate ladybug
+
+	webtool	-->	user	: ack
+deactivate webtool
+
+@@enduml
