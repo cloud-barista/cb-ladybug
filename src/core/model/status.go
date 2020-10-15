@@ -14,9 +14,8 @@ type Status struct {
 	Message string `json:"message"`
 }
 
-func NewStatus(code int) *Status {
+func NewStatus() *Status {
 	return &Status{
 		Kind: KIND_STATUS,
-		Code: code,
 	}
 }

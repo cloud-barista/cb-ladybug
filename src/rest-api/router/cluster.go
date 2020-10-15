@@ -1,7 +1,9 @@
 package router
 
 import (
+	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/cloud-barista/cb-ladybug/src/core/common"
 	"github.com/cloud-barista/cb-ladybug/src/core/model"
@@ -21,11 +23,6 @@ import (
 // @Success 200 {object} model.ClusterList
 // @Router /ns/{namespace}/clusters [get]
 func ListCluster(c echo.Context) error {
-	if err := app.Validate(c, []string{"namespace"}); err != nil {
-		common.CBLog.Error(err)
-		return app.SendMessage(c, http.StatusBadRequest, err.Error())
-	}
-
 	clusterList, err := service.ListCluster(c.Param("namespace"))
 	if err != nil {
 		common.CBLog.Error(err)
@@ -69,28 +66,31 @@ func GetCluster(c echo.Context) error {
 // @Accept json
 // @Produce json
 // @Param	namespace	path	string	true  "namespace"
-// @Param	cluster	path	string	true  "cluster"
 // @Param json body model.ClusterReq true "Reuest json"
 // @Success 200 {object} model.Cluster
-// @Router /ns/{namespace}/clusters/{cluster} [post]
+// @Router /ns/{namespace}/clusters [post]
 func CreateCluster(c echo.Context) error {
-	if err := app.Validate(c, []string{"namespace", "cluster"}); err != nil {
-		common.CBLog.Error(err)
-		return app.SendMessage(c, http.StatusBadRequest, err.Error())
-	}
-
+	start := time.Now()
 	clusterReq := &model.ClusterReq{}
 	if err := c.Bind(clusterReq); err != nil {
 		common.CBLog.Error(err)
 		return app.SendMessage(c, http.StatusBadRequest, err.Error())
 	}
 
-	cluster, err := service.CreateCluster(c.Param("namespace"), c.Param("cluster"), clusterReq)
+	err := app.ClusterReqValidate(c, *clusterReq)
 	if err != nil {
 		common.CBLog.Error(err)
 		return app.SendMessage(c, http.StatusBadRequest, err.Error())
 	}
 
+	cluster, err := service.CreateCluster(c.Param("namespace"), clusterReq)
+	if err != nil {
+		common.CBLog.Error(err)
+		return app.SendMessage(c, http.StatusBadRequest, err.Error())
+	}
+
+	duration := time.Since(start)
+	fmt.Println(" duration // ", duration)
 	return app.Send(c, http.StatusOK, cluster)
 }
 

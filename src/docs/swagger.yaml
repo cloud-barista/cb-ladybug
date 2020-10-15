@@ -16,6 +16,10 @@ definitions:
         items:
           $ref: '#/definitions/model.Node'
         type: array
+      status:
+        type: string
+      uId:
+        type: string
     type: object
   model.ClusterList:
     properties:
@@ -28,11 +32,9 @@ definitions:
     type: object
   model.ClusterReq:
     properties:
-      clusterConfig:
-        type: string
       controlPlaneNodeCount:
         type: integer
-      controlPlaneSpec:
+      controlPlaneNodeSpec:
         type: string
       name:
         type: string
@@ -43,13 +45,16 @@ definitions:
     type: object
   model.Node:
     properties:
-      credential:
-        type: string
-      kind:
+      Credential:
         type: string
       name:
+        description: Model
         type: string
-      publicIp:
+      publicIP:
+        type: string
+      role:
+        type: string
+      uId:
         type: string
     type: object
   model.Status:
@@ -113,6 +118,33 @@ paths:
       summary: List Cluster
       tags:
       - Cluster
+    post:
+      consumes:
+      - application/json
+      description: Create Cluster
+      operationId: CreateCluster
+      parameters:
+      - description: namespace
+        in: path
+        name: namespace
+        required: true
+        type: string
+      - description: Reuest json
+        in: body
+        name: json
+        required: true
+        schema:
+          $ref: '#/definitions/model.ClusterReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Cluster'
+      summary: Create Cluster
+      tags:
+      - Cluster
   /ns/{namespace}/clusters/{cluster}:
     delete:
       consumes:
@@ -164,38 +196,6 @@ paths:
           schema:
             $ref: '#/definitions/model.Cluster'
       summary: Get Cluster
-      tags:
-      - Cluster
-    post:
-      consumes:
-      - application/json
-      description: Create Cluster
-      operationId: CreateCluster
-      parameters:
-      - description: namespace
-        in: path
-        name: namespace
-        required: true
-        type: string
-      - description: cluster
-        in: path
-        name: cluster
-        required: true
-        type: string
-      - description: Reuest json
-        in: body
-        name: json
-        required: true
-        schema:
-          $ref: '#/definitions/model.ClusterReq'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Cluster'
-      summary: Create Cluster
       tags:
       - Cluster
 swagger: "2.0"

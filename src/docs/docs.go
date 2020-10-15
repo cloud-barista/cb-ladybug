@@ -88,6 +88,46 @@ var doc = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "description": "Create Cluster",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Cluster"
+                ],
+                "summary": "Create Cluster",
+                "operationId": "CreateCluster",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "namespace",
+                        "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Reuest json",
+                        "name": "json",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.ClusterReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Cluster"
+                        }
+                    }
+                }
             }
         },
         "/ns/{namespace}/clusters/{cluster}": {
@@ -118,53 +158,6 @@ var doc = `{
                         "name": "cluster",
                         "in": "path",
                         "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Cluster"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Create Cluster",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Cluster"
-                ],
-                "summary": "Create Cluster",
-                "operationId": "CreateCluster",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "namespace",
-                        "name": "namespace",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "cluster",
-                        "name": "cluster",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Reuest json",
-                        "name": "json",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.ClusterReq"
-                        }
                     }
                 ],
                 "responses": {
@@ -240,6 +233,12 @@ var doc = `{
                     "items": {
                         "$ref": "#/definitions/model.Node"
                     }
+                },
+                "status": {
+                    "type": "string"
+                },
+                "uId": {
+                    "type": "string"
                 }
             }
         },
@@ -260,13 +259,10 @@ var doc = `{
         "model.ClusterReq": {
             "type": "object",
             "properties": {
-                "clusterConfig": {
-                    "type": "string"
-                },
                 "controlPlaneNodeCount": {
                     "type": "integer"
                 },
-                "controlPlaneSpec": {
+                "controlPlaneNodeSpec": {
                     "type": "string"
                 },
                 "name": {
@@ -283,16 +279,20 @@ var doc = `{
         "model.Node": {
             "type": "object",
             "properties": {
-                "credential": {
-                    "type": "string"
-                },
-                "kind": {
+                "Credential": {
                     "type": "string"
                 },
                 "name": {
+                    "description": "Model",
                     "type": "string"
                 },
-                "publicIp": {
+                "publicIP": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "uId": {
                     "type": "string"
                 }
             }
