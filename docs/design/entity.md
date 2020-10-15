@@ -1,6 +1,9 @@
 # Entity
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> Update entity
 ## Key
 ```
 /ns/{namespace}/cluster/{cluster}
@@ -12,6 +15,7 @@
     kind: "Cluster",
     name: "",
     status: "",
+<<<<<<< HEAD
     uid: "",
     mcis: "",
     namespace: "",
@@ -22,13 +26,31 @@
         credential: "",
         publicIp: "",
         uid: "",
+=======
+    uId: "",
+    mcis: "",
+    namespace: "",
+    clusterConfig: "",
+    nodes: [
+      {
+        name: "",
+        Credential: "",
+        publicIP: "",
+        uId: "",
+>>>>>>> Update entity
         role: "control-plane",
       },
       {
         name: "",
+<<<<<<< HEAD
         credential: "",
         publicIp: "",
         uid: "",
+=======
+        Credential: "",
+        publicIP: "",
+        uId: "",
+>>>>>>> Update entity
         role: "worker",
       },
       ...
@@ -37,6 +59,7 @@
 ```
 
 ---
+<<<<<<< HEAD
 ## Cluster
 > 클러스터 정보
 
@@ -60,6 +83,20 @@
 |namespace      |MCIS 네임스페이스  |string |NN |                                   |
 |mcis           |MCIS 명            |string |NN |                                   |
 |cluster-config |클러스터 연결정보  |string |   |Kubernetes 인 경우 kubeconfig.yaml |
+=======
+## Cluster
+> 클러스터 정보
+
+|속성           |이름               |타입   |비고                               |
+|---            |---                |---    |---                                |
+|kind           |종류        |string |Cluster                                   |
+|name           |클러스터 명        |string |                                   |
+|status            |클러스터 상태정보       |string |created/provisioning/completed/failed|
+|uId            |클러스터 uid       |string |입력시 값 생성                     |
+|mcis           |MCIS 명            |string |                                   |
+|namespace      |MCIS 네임스페이스  |string |                                   |
+|clusterConfig |클러스터 연결정보  |string |Kubernetes 인 경우 kubeconfig.yaml |
+>>>>>>> Update entity
 
 >>>>>>> Add base source code
 
@@ -67,6 +104,7 @@
 ## Node
 > 클러스터의 노드 정보
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 |속성           |이름               |타입   |비고                       |
 |---            |---                |---    |---                        |
@@ -86,3 +124,15 @@
 |cluster-uid    |클러스터 uid       |string |FK |cluster foreign-key                |
 
 >>>>>>> Add base source code
+=======
+|속성           |이름               |타입   |비고                        |
+|---            |---                |---    |---|---                |
+|name           |노드명             |string |mcis vm 이름과 동일        |
+|Credential    |private key       |string |                         |
+|publicIP      |공인 IP            |string |                          |
+|uId            |노드 uid           |string |uuid                     |
+|role           |역할               |string |control-plane/worker    |
+
+
+
+>>>>>>> Update entity
