@@ -33,10 +33,10 @@ type ClusterList struct {
 
 type ClusterReq struct {
 	Name                  string `json:"name"`
-	ControlPlaneNodeSpec  string `json:"controlPlaneNodeSpec"`
-	ControlPlaneNodeCount int    `json:"controlPlaneNodeCount"`
-	WorkerNodeSpec        string `json:"workerNodeSpec"`
-	WorkerNodeCount       int    `json:"workerNodeCount"`
+	ControlPlaneNodeSpec  string `json:"control-plane-node-spec"`
+	ControlPlaneNodeCount int    `json:"control-plane-node-count"`
+	WorkerNodeSpec        string `json:"worker-node-spec"`
+	WorkerNodeCount       int    `json:"worker-node-count"`
 }
 
 func NewCluster(namespace string, name string) *Cluster {

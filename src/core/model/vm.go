@@ -41,7 +41,7 @@ func (v *VM) ConnectionTest(sshInfo *ssh.SSHInfo, vm *VM) error {
 }
 
 func (v *VM) CopyScripts(sshInfo *ssh.SSHInfo, vm *VM) error {
-	sourcePath := os.Getenv("GOPATH") + "/src/github.com/cloud-barista/cb-ladybug/docs/scripts/"
+	sourcePath := os.Getenv("GOPATH") + "/src/github.com/cloud-barista/cb-ladybug/src/scripts/"
 	sourceFile := []string{config.BOOTSTRAP_FILE}
 	if vm.Role == config.CONTROL_PLANE {
 		sourceFile = append(sourceFile, config.INIT_FILE)
