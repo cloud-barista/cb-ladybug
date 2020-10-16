@@ -3,7 +3,6 @@ package model
 import (
 	"errors"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/cloud-barista/cb-ladybug/src/utils/config"
@@ -41,13 +40,7 @@ func (v *VM) ConnectionTest(sshInfo *ssh.SSHInfo, vm *VM) error {
 }
 
 func (v *VM) CopyScripts(sshInfo *ssh.SSHInfo, vm *VM) error {
-	var sourcePath string
-	pwd, err := os.Getwd()
-	if err != nil {
-		sourcePath = os.Getenv("GOPATH") + "/src/github.com/cloud-barista/cb-ladybug/src/scripts/"
-	} else {
-		sourcePath = pwd + "/scripts/"
-	}
+	sourcePath := lang.GetScriptsPath()
 	sourceFile := []string{config.BOOTSTRAP_FILE}
 	if vm.Role == config.CONTROL_PLANE {
 		sourceFile = append(sourceFile, config.INIT_FILE)

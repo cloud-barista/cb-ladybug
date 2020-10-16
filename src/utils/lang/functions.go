@@ -2,6 +2,7 @@ package lang
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 
 	"github.com/google/uuid"
@@ -18,6 +19,23 @@ func NVL(str string, def string) string {
 // get store key
 func GetStoreKey(namespace string, clusterName string) string {
 	return fmt.Sprintf("/ns/%s/cluster/%s", namespace, clusterName)
+}
+
+// get scripts file path
+func GetScriptsPath() string {
+	var sourcePath string
+	pwd, err := os.Getwd()
+	if err != nil {
+		sourcePath = os.Getenv("GOPATH") + "/src/github.com/cloud-barista/cb-ladybug/src/scripts/"
+	} else {
+		pathRegex, _ := regexp.Compile("(.*?)\\/github.com\\/cloud-barista\\/cb-ladybug(.*?)")
+		if pathRegex.MatchString(pwd) {
+			res := pathRegex.FindStringSubmatch(pwd)
+			pwd = res[0]
+		}
+		sourcePath = pwd + "/src/scripts/"
+	}
+	return sourcePath
 }
 
 // for worker node join command
