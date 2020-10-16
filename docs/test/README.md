@@ -1,5 +1,5 @@
 # Test 
-> Test shell scripts 사용법
+Test shell scripts 사용법
 
 ## Prerequisites 
 > 클러스터 생성/삭제 기능을 이용하기 위해서는 Cloud Connection 정보를 등록해야 합니다.
@@ -31,7 +31,7 @@
 ▒ export SA="<service account email>"
 ```
 
-* 환경변수 : REGIN, ZONE
+* 환경변수 : REGION, ZONE
 
 ```
 ▒ export REGION="<region name>" 
@@ -63,7 +63,7 @@
 ▒ export SECRET="<aws_secret_access_key>"
 ```
 
-* 환경변수 : REGIN, ZONE
+* 환경변수 : REGION, ZONE
 
 ```
 ▒ export REGION="<region name>" 
@@ -99,8 +99,10 @@
 ### 클러스터 생성
 ```
 ▒ /ladybug.sh create [GCP/AWS] <cluster name> <spec:machine-type> <worker-node-count>
+```
 
-# 예
+* 예
+```
 ▒ ./ladybug.sh create GCP cb-cluster n1-standard-2 1   # GCP
 ▒ ./ladybug.sh create AWS cb-cluster t2.medium 1       # AWS
 ```
@@ -108,8 +110,10 @@
 ### 클러스터 삭제
 ```
 ▒ /ladybug.sh destroy [GCP/AWS] <cluster name>
+```
 
-# 예
+* 예
+```
 ▒ ./ladybug.sh destroy GCP cb-cluster   # GCP
 ▒ ./ladybug.sh destroy AWS cb-cluster   # AWS
 ```
@@ -121,8 +125,10 @@
 
 ```
 ▒ ./savekey.sh [AWS/GCP] <cluster name>
+```
 
-# 예
+* 예
+```
 ▒ ./savekey.sh AWS cb-cluster
 ▒ cat *.pem
 ```
@@ -135,7 +141,7 @@
 ▒ source ./env.sh GCP "<json file path>"
 
 # 예
-▒ source ./env.sh GCP "${HOME}/google-credential-cloudbarista.json"
+▒ source ./env.sh GCP "${HOME}/.ssh/google-credential-cloudbarista.json"
 ```
 
 * AWS

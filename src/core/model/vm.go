@@ -40,13 +40,14 @@ func (v *VM) ConnectionTest(sshInfo *ssh.SSHInfo, vm *VM) error {
 }
 
 func (v *VM) CopyScripts(sshInfo *ssh.SSHInfo, vm *VM) error {
-	sourcePath := lang.GetScriptsPath()
+	sourcePath := fmt.Sprintf("%s/src/scripts/", config.Config.AppRootPath)
 	sourceFile := []string{config.BOOTSTRAP_FILE}
 	if vm.Role == config.CONTROL_PLANE {
 		sourceFile = append(sourceFile, config.INIT_FILE)
 	}
 	targetPath := config.Config.TargetPath + "/"
 
+	fmt.Printf("start script file copy (src=%s, dest=%s)\n", sourcePath, targetPath)
 	for _, f := range sourceFile {
 		src := fmt.Sprintf("%s%s", sourcePath, f)
 		dest := fmt.Sprintf("%s%s", targetPath, f)

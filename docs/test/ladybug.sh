@@ -125,7 +125,7 @@ create() {
 		"worker-node-spec"         : "${v_SPEC}" 
 	}
 EOF
-	); echo ${resp} | jq -r ".\"cluster-config\"" > kube-config.yaml
+	); echo ${resp} | jq
 }
 
 # ------------------------------------------------------------------------------
