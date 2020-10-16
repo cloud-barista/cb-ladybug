@@ -259,19 +259,19 @@ var doc = `{
         "model.ClusterReq": {
             "type": "object",
             "properties": {
-                "controlPlaneNodeCount": {
+                "control-plane-node-count": {
                     "type": "integer"
                 },
-                "controlPlaneNodeSpec": {
+                "control-plane-node-spec": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
                 },
-                "workerNodeCount": {
+                "worker-node-count": {
                     "type": "integer"
                 },
-                "workerNodeSpec": {
+                "worker-node-spec": {
                     "type": "string"
                 }
             }
@@ -283,7 +283,6 @@ var doc = `{
                     "type": "string"
                 },
                 "name": {
-                    "description": "Model",
                     "type": "string"
                 },
                 "publicIP": {
