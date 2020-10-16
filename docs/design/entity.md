@@ -16,6 +16,7 @@
     name: "",
     status: "",
 <<<<<<< HEAD
+<<<<<<< HEAD
     uid: "",
     mcis: "",
     namespace: "",
@@ -28,20 +29,30 @@
         uid: "",
 =======
     uId: "",
+=======
+    uid: "",
+>>>>>>> Fix json in model.Cluster, model.Node
     mcis: "",
     namespace: "",
-    clusterConfig: "",
+    cluster-config: "",
     nodes: [
       {
         name: "",
+<<<<<<< HEAD
         Credential: "",
         publicIP: "",
         uId: "",
 >>>>>>> Update entity
+=======
+        credential: "",
+        publicIp: "",
+        uid: "",
+>>>>>>> Fix json in model.Cluster, model.Node
         role: "control-plane",
       },
       {
         name: "",
+<<<<<<< HEAD
 <<<<<<< HEAD
         credential: "",
         publicIp: "",
@@ -51,6 +62,11 @@
         publicIP: "",
         uId: "",
 >>>>>>> Update entity
+=======
+        credential: "",
+        publicIp: "",
+        uid: "",
+>>>>>>> Fix json in model.Cluster, model.Node
         role: "worker",
       },
       ...
@@ -92,18 +108,23 @@
 |kind           |종류        |string |Cluster                                   |
 |name           |클러스터 명        |string |                                   |
 |status            |클러스터 상태정보       |string |created/provisioning/completed/failed|
-|uId            |클러스터 uid       |string |입력시 값 생성                     |
+|uid            |클러스터 uid       |string |uuid                     |
 |mcis           |MCIS 명            |string |                                   |
 |namespace      |MCIS 네임스페이스  |string |                                   |
+<<<<<<< HEAD
 |clusterConfig |클러스터 연결정보  |string |Kubernetes 인 경우 kubeconfig.yaml |
 >>>>>>> Update entity
 
 >>>>>>> Add base source code
+=======
+|cluster-config |클러스터 연결정보  |string |Kubernetes 인 경우 kubeconfig.yaml |
+>>>>>>> Fix json in model.Cluster, model.Node
 
 
 ## Node
 > 클러스터의 노드 정보
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 |속성           |이름               |타입   |비고                       |
@@ -126,11 +147,14 @@
 >>>>>>> Add base source code
 =======
 |속성           |이름               |타입   |비고                        |
+=======
+|속성           |이름               |타입   |비고                      |
+>>>>>>> Fix json in model.Cluster, model.Node
 |---            |---                |---    |---|---                |
 |name           |노드명             |string |mcis vm 이름과 동일        |
-|Credential    |private key       |string |                         |
-|publicIP      |공인 IP            |string |                          |
-|uId            |노드 uid           |string |uuid                     |
+|credential    |private key       |string |                         |
+|publicIp      |공인 IP            |string |                          |
+|uid            |노드 uid           |string |uuid                     |
 |role           |역할               |string |control-plane/worker    |
 
 

@@ -2,9 +2,9 @@ package model
 
 type Node struct {
 	Name       string `json:"name"`
-	Credential string `json:"Credential"`
-	PublicIP   string `json:"publicIP"`
-	UId        string `json:"uId"`
+	Credential string `json:"credential"`
+	PublicIP   string `json:"publicIp"`
+	UId        string `json:"uid"`
 	Role       string `json:"role"`
 }
 
