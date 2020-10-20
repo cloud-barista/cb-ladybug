@@ -12,7 +12,7 @@ Test shell scripts 사용법
 ▒ brew install jq
 ```
 
-### cb-spider, cb-tumblebug 실행
+### CB-Spider, CB-Tumblebug 실행
 
 ```
 ▒  docker run -d -p 1024:1024 --name cb-spider cloudbaristaorg/cb-spider:v0.2.0-20200715
