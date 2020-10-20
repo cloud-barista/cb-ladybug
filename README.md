@@ -73,4 +73,4 @@ code:200
 
 
 ## Contribution
-Learn how to start contribution on the [Contributing Guidline](https://github.com/cloud-barista/docs/tree/master/contributing)
+Learn how to start contribution on the [Contributing Guideline](https://github.com/cloud-barista/docs/tree/master/contributing)
