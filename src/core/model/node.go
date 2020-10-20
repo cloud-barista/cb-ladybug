@@ -1,7 +1,7 @@
 package model
 
 type Node struct {
-	Name       string `json:"name"`
+	Model
 	Credential string `json:"credential"`
 	PublicIP   string `json:"publicIp"`
 	UId        string `json:"uid"`
@@ -10,7 +10,7 @@ type Node struct {
 
 func NewNode(vm VM) *Node {
 	return &Node{
-		Name:       vm.Name,
+		Model:      Model{Kind: KIND_NODE, Name: vm.Name},
 		Credential: vm.Credential,
 		PublicIP:   vm.PublicIP,
 		UId:        vm.UId,

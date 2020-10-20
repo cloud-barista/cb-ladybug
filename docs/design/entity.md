@@ -55,6 +55,7 @@
 
 |속성           |이름               |타입   |비고                       |
 |---            |---                |---    |---                        |
+|kind           |종류               |string |Node                       |
 |name           |노드명             |string |mcis vm 이름과 동일        |
 |credential     |private key        |string |                           |
 |publicIp       |공인 IP            |string |                           |
