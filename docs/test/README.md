@@ -9,7 +9,8 @@ Test shell scripts 사용법
 * https://stedolan.github.io/jq/
 
 ```
-▒ brew install jq
+▒ brew install jq           # mac os
+▒ sudo apt-get install jq   # linux
 ```
 
 ### CB-Spider, CB-Tumblebug 실행
@@ -18,7 +19,6 @@ Test shell scripts 사용법
 ▒  docker run -d -p 1024:1024 --name cb-spider cloudbaristaorg/cb-spider:v0.x.0-yyyymmdd
 ▒  docker run -d -p 1323:1323 --name cb-tumblebug --link cb-spider:cb-spider cloudbaristaorg/cb-tumblebug:v0.x.0-yyyymmdd
 ```
-
 * 각 컨테이너 이미지의 최신 tag는 다음을 참조
   * https://hub.docker.com/r/cloudbaristaorg/cb-spider/tags
   * https://hub.docker.com/r/cloudbaristaorg/cb-tumblebug/tags
