@@ -244,19 +244,19 @@
         "model.ClusterReq": {
             "type": "object",
             "properties": {
-                "control-plane-node-count": {
+                "controlPlaneNodeCount": {
                     "type": "integer"
                 },
-                "control-plane-node-spec": {
+                "controlPplaneNodeSpec": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
                 },
-                "worker-node-count": {
+                "workerNodeCount": {
                     "type": "integer"
                 },
-                "worker-node-spec": {
+                "workerNodeSpec": {
                     "type": "string"
                 }
             }

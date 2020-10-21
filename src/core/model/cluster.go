@@ -22,7 +22,7 @@ type Cluster struct {
 	UId           string `json:"uid"`
 	MCIS          string `json:"mcis"`
 	Namespace     string `json:"namespace"`
-	ClusterConfig string `json:"cluster-config"`
+	ClusterConfig string `json:"clusterConfig"`
 	Nodes         []Node `json:"nodes"`
 }
 
@@ -33,10 +33,10 @@ type ClusterList struct {
 
 type ClusterReq struct {
 	Name                  string `json:"name"`
-	ControlPlaneNodeSpec  string `json:"control-plane-node-spec"`
-	ControlPlaneNodeCount int    `json:"control-plane-node-count"`
-	WorkerNodeSpec        string `json:"worker-node-spec"`
-	WorkerNodeCount       int    `json:"worker-node-count"`
+	ControlPlaneNodeSpec  string `json:"controlPlaneNodeSpec"`
+	ControlPlaneNodeCount int    `json:"controlPlaneNodeCount"`
+	WorkerNodeSpec        string `json:"workerNodeSpec"`
+	WorkerNodeCount       int    `json:"workerNodeCount"`
 }
 
 func NewCluster(namespace string, name string) *Cluster {

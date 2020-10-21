@@ -14,7 +14,7 @@
     uid: "",
     mcis: "",
     namespace: "",
-    cluster-config: "",
+    clusterConfig: "",
     nodes: [
       {
         name: "",
@@ -47,7 +47,7 @@
 |uid            |클러스터 uid       |string |uuid                                  |
 |mcis           |MCIS 명            |string |                                      |
 |namespace      |MCIS 네임스페이스  |string |                                      |
-|cluster-config |클러스터 연결정보  |string |Kubernetes 인 경우 kubeconfig.yaml    |
+|clusterConfig  |클러스터 연결정보  |string |Kubernetes 인 경우 kubeconfig.yaml    |
 
 
 ## Node

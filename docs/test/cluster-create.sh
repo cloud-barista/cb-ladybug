@@ -85,11 +85,11 @@ create() {
 
 	resp=$(curl -sX POST ${c_URL_LADYBUG_NS}/clusters -H "${c_CT}" -d @- <<EOF
 	{
-		"name"                     : "${v_CLUSTER_NAME}",
-		"control-plane-node-count" : 1,
-		"control-plane-node-spec"  : "${v_SPEC}",
-		"worker-node-count"        : ${v_WORKER_NODE_COUNT},
-		"worker-node-spec"         : "${v_SPEC}" 
+		"name"                  : "${v_CLUSTER_NAME}",
+		"controlPlaneNodeCount" : 1,
+		"controlPlaneNodeSpec"  : "${v_SPEC}",
+		"workerNodeCount"       : ${v_WORKER_NODE_COUNT},
+		"workerNodeSpec"        : "${v_SPEC}" 
 	}
 EOF
 	); echo ${resp} | jq
