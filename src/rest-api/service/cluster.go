@@ -15,12 +15,12 @@ import (
 )
 
 type CSP struct {
-	Name                  string `json:"name"`
-	Config                string `json:"config"`
-	ControlPlaneNodeSpec  string `json:"controlPlaneNodeSpec"`
-	ControlPlaneNodeCount int    `json:"controlPlaneNodeCount"`
-	WorkerNodeSpec        string `json:"workerNodeSpec"`
-	WorkerNodeCount       int    `json:"workerNodeCount"`
+	Name                  string
+	Config                string
+	ControlPlaneNodeSpec  string
+	ControlPlaneNodeCount int
+	WorkerNodeSpec        string
+	WorkerNodeCount       int
 }
 
 func ListCluster(namespace string) (*model.ClusterList, error) {
