@@ -67,7 +67,7 @@ object cluster {
 	+name
 	+namespace
 	+mcis
-	+cluster-config
+	+clusterConfig
 	+uid
 }
 object kubernetesCluster {

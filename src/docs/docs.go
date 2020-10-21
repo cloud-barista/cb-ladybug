@@ -88,6 +88,46 @@ var doc = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "description": "Create Cluster",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Cluster"
+                ],
+                "summary": "Create Cluster",
+                "operationId": "CreateCluster",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "namespace",
+                        "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Reuest json",
+                        "name": "json",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.ClusterReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Cluster"
+                        }
+                    }
+                }
             }
         },
         "/ns/{namespace}/clusters/{cluster}": {
@@ -129,55 +169,8 @@ var doc = `{
                     }
                 }
             },
-            "post": {
-                "description": "Create Cluster",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Cluster"
-                ],
-                "summary": "Create Cluster",
-                "operationId": "CreateCluster",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "namespace",
-                        "name": "namespace",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "cluster",
-                        "name": "cluster",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Reuest json",
-                        "name": "json",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.ClusterReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Cluster"
-                        }
-                    }
-                }
-            },
             "delete": {
-                "description": "Destroy Cluster",
+                "description": "Delete a cluster",
                 "consumes": [
                     "application/json"
                 ],
@@ -187,8 +180,8 @@ var doc = `{
                 "tags": [
                     "Cluster"
                 ],
-                "summary": "Destroy Cluster",
-                "operationId": "DestroyCluster",
+                "summary": "Delete a cluster",
+                "operationId": "DeleteCluster",
                 "parameters": [
                     {
                         "type": "string",
@@ -240,6 +233,12 @@ var doc = `{
                     "items": {
                         "$ref": "#/definitions/model.Node"
                     }
+                },
+                "status": {
+                    "type": "string"
+                },
+                "uId": {
+                    "type": "string"
                 }
             }
         },
@@ -260,13 +259,10 @@ var doc = `{
         "model.ClusterReq": {
             "type": "object",
             "properties": {
-                "clusterConfig": {
-                    "type": "string"
-                },
                 "controlPlaneNodeCount": {
                     "type": "integer"
                 },
-                "controlPlaneSpec": {
+                "controlPlaneNodeSpec": {
                     "type": "string"
                 },
                 "name": {
@@ -283,16 +279,22 @@ var doc = `{
         "model.Node": {
             "type": "object",
             "properties": {
-                "credential": {
-                    "type": "string"
-                },
-                "kind": {
+                "Credential": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
                 },
-                "publicIp": {
+                "kind": {
+                    "type": "string"
+                },
+                "publicIP": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "uId": {
                     "type": "string"
                 }
             }

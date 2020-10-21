@@ -1,0 +1,154 @@
+@@startuml
+
+header Cloud-Barista
+title Create a cluster
+hide footbox
+
+actor		"User"					as user			#d1e0ff
+participant	"Webtool"				as webtool		#d1e0ff
+
+participant	"Ladybug"				as ladybug
+database	"Ladybug data"			as db
+participant	"Ladybug"				as provider
+
+participant	"Tumblebug"				as tumblebug	#d1e0ff
+participant	"Spider"				as spider		#d1e0ff
+participant	"Master node"			as mNodes		#eeeeee
+participant	"Worker nodes"			as wNodes		#eeeeee
+
+activate user
+	user		->	webtool		: create a cluster
+
+	activate webtool
+		webtool		->	ladybug		: POST/ns/:ns/clusters/:cluster\n {name,cp-spec,cp-count,wk-spec,wk-count}
+
+
+		activate ladybug
+
+
+			ladybug		->	provider	: create cloud connection info.\n {ns,config}
+
+			' -- 1.infra
+			activate provider
+
+				'-- 1.1. vpc
+				provider	->	tumblebug		: POST\n/ns/:ns/resources/vNet
+				activate tumblebug
+					tumblebug	->	spider		: POST /vpc
+					activate spider
+						tumblebug	<--	spider
+					deactivate spider
+					tumblebug	-->	provider	: ack
+				deactivate tumblebug
+
+				'-- 1.2. sg(fw)
+				provider	->	tumblebug		: POST\n/ns/:ns/resources/securityGroup
+				activate tumblebug
+					tumblebug	->	spider		: POST /securitygroup
+					activate spider
+						tumblebug	<--	spider
+					deactivate spider
+					tumblebug	-->	provider	: ack
+				deactivate tumblebug
+
+				'-- 1.3. ssh
+				provider	->	tumblebug	: POST\n/ns/:ns/resources/sshKey
+				activate tumblebug
+					tumblebug	->	spider		: POST /keypair
+					activate spider
+						tumblebug	<--	spider
+					deactivate spider
+					tumblebug	-->	provider	: ack
+				deactivate tumblebug
+				
+				'-- 1.4. image
+				provider	->	tumblebug 	: POST\n/ns/:ns/resources/image
+				activate tumblebug
+					tumblebug	->	spider		: POST /vmimage
+					activate spider
+						tumblebug	<--	spider
+					deactivate spider
+					tumblebug	-->	provider	: ack
+				deactivate tumblebug
+
+				'-- 1.5. spec
+				provider	->	tumblebug 	: POST\n/ns/:ns/resources/spec
+				activate tumblebug
+					tumblebug	->	spider		: POST /spec
+					activate spider
+						tumblebug	<--	spider
+					deactivate spider
+					tumblebug	-->	provider	: ack
+				deactivate tumblebug
+
+
+				provider	-->	ladybug 	: ack {cloud connection info.}
+
+			deactivate provider
+			' //-- 1.infra
+
+			ladybug		->o	db			: insert {cloud connection info.}
+
+			' -- 2.mcis
+			ladybug		->	provider	: create MCIS {cp-count,wk-count}
+			activate provider
+				provider	->	tumblebug	: POST\n/mcis
+
+				activate tumblebug
+					tumblebug	->o	spider		: POST/vm
+					activate spider
+						tumblebug	<--	spider
+					deactivate spider
+					tumblebug	-->	provider 	: ack {vm}
+				deactivate tumblebug
+
+				provider	->	provider	: wait
+				provider	-->	ladybug 	: ack {mcis}
+
+			deactivate provider
+			' //-- 2.mcis
+
+			' -- 3.provisioning
+			ladybug		->	provider	: Provisioning
+
+			activate provider
+				provider	->	mNodes		: bootstrap (ssh)
+				activate mNodes
+					provider	<--	mNodes		: ack
+				deactivate mNodes
+
+				provider	->	wNodes		: bootstrap (ssh)
+				activate wNodes
+					provider	<--	wNodes		: ack
+				deactivate wNodes
+
+				provider	->	mNodes		: init (ssh)
+				activate mNodes
+					provider	<--	mNodes		: ack
+				deactivate mNodes
+
+				provider	->	mNodes		: query variable (ssh)
+				activate mNodes
+					provider	<-	mNodes		: {endpoint, token, hash, kubeconfig}
+				deactivate mNodes
+
+				loop workers
+					provider	->	wNodes		: join {endpoint, token, hash}
+					activate wNodes
+						provider	<--	wNodes	: ack
+					deactivate wNodes
+				end
+				provider	->	ladybug		: ack {kubeconfig}
+			deactivate provider
+			' //-- 3.provisioning
+
+			ladybug	->o	db			: update {kubeconfig}
+			ladybug	-->	webtool		: ack {clusater}
+		deactivate ladybug
+
+		webtool	-->	user	: ack
+	deactivate webtool
+
+deactivate user
+
+@@enduml

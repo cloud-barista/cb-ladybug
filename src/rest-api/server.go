@@ -3,6 +3,7 @@ package restapi
 import (
 	"net/http"
 
+	"github.com/cloud-barista/cb-ladybug/src/core/common"
 	"github.com/cloud-barista/cb-ladybug/src/rest-api/router"
 	"github.com/cloud-barista/cb-ladybug/src/utils/config"
 	"github.com/labstack/echo/v4"
@@ -28,13 +29,13 @@ func Server() {
 
 	e.GET(config.Config.BasePath+"/healthy", router.Healthy)
 
-	g := e.Group(config.Config.BasePath + "/ns")
+	g := e.Group(config.Config.BasePath+"/ns", common.NsValidate())
 
 	// Routes
 	g.GET("/:namespace/clusters", router.ListCluster)
+	g.POST("/:namespace/clusters", router.CreateCluster)
 	g.GET("/:namespace/clusters/:cluster", router.GetCluster)
-	g.POST("/:namespace/clusters/:cluster", router.CreateCluster)
-	g.DELETE("/:namespace/clusters/:cluster", router.DestroyCluster)
+	g.DELETE("/:namespace/clusters/:cluster", router.DeleteCluster)
 
 	// Start server
 	e.Logger.Fatal(e.Start(":8080"))

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/astaxie/beego/validation"
+	"github.com/cloud-barista/cb-ladybug/src/core/model"
 	"github.com/labstack/echo/v4"
 )
 
@@ -32,5 +33,16 @@ func Validate(c echo.Context, params []string) error {
 			return errors.New(fmt.Sprintf("[%s]%s", err.Key, err.Error()))
 		}
 	}
+	return nil
+}
+
+func ClusterReqValidate(c echo.Context, req model.ClusterReq) error {
+	if req.ControlPlaneNodeCount != 1 {
+		return errors.New("control plane node count must be one")
+	}
+	if req.WorkerNodeCount < 1 {
+		return errors.New("worker node count must be at least one")
+	}
+
 	return nil
 }
