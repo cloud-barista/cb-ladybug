@@ -247,7 +247,7 @@
                 "controlPlaneNodeCount": {
                     "type": "integer"
                 },
-                "controlPplaneNodeSpec": {
+                "controlPlaneNodeSpec": {
                     "type": "string"
                 },
                 "name": {
