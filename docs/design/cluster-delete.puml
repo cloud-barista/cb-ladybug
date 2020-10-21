@@ -1,7 +1,7 @@
 @@startuml
 
 header Cloud-Barista
-title Destroy cluster
+title Delete a cluster
 hide footbox
 
 actor		"User"			as user			#d1e0ff
@@ -13,13 +13,13 @@ participant	"Tumblebug"		as tumblebug	#d1e0ff
 participant	"Spider"		as spider		#d1e0ff
 
 
-user		->	webtool		: destroy cluster {cluster}
+user		->	webtool		: Delete a cluster {cluster}
 activate webtool
 	webtool		->	ladybug		: DELETE\n/cluster {cluster}
 
 	activate ladybug
 		ladybug		->o	db			: update {cluster}
-		ladybug		->	provider	: destroy MCIS {mcis}
+		ladybug		->	provider	: delete MCIS {mcis}
 
 		' -- mcis
 		activate provider
@@ -37,7 +37,7 @@ activate webtool
 
 		' -- mcir
 		ladybug		->o	db			: update {cluster}
-		ladybug		->	provider	: destroy MCIR {mcir}
+		ladybug		->	provider	: delete MCIR {mcir}
 		activate provider
 			provider	->	tumblebug	: DELETE\n /ns/:ns/resources/sshKey
 			activate tumblebug

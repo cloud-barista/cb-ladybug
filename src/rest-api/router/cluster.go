@@ -94,24 +94,24 @@ func CreateCluster(c echo.Context) error {
 	return app.Send(c, http.StatusOK, cluster)
 }
 
-// DestroyCluster
+// DeleteCluster
 // @Tags Cluster
-// @Summary Destroy Cluster
-// @Description Destroy Cluster
-// @ID DestroyCluster
+// @Summary Delete a cluster
+// @Description Delete a cluster
+// @ID DeleteCluster
 // @Accept json
 // @Produce json
 // @Param	namespace	path	string	true  "namespace"
 // @Param	cluster	path	string	true  "cluster"
 // @Success 200 {object} model.Status
 // @Router /ns/{namespace}/clusters/{cluster} [delete]
-func DestroyCluster(c echo.Context) error {
+func DeleteCluster(c echo.Context) error {
 	if err := app.Validate(c, []string{"namespace", "cluster"}); err != nil {
 		common.CBLog.Error(err)
 		return app.SendMessage(c, http.StatusBadRequest, err.Error())
 	}
 
-	status, err := service.DestroyCluster(c.Param("namespace"), c.Param("cluster"))
+	status, err := service.DeleteCluster(c.Param("namespace"), c.Param("cluster"))
 	if err != nil {
 		common.CBLog.Error(err)
 		return app.SendMessage(c, http.StatusBadRequest, err.Error())

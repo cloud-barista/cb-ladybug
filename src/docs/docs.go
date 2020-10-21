@@ -170,7 +170,7 @@ var doc = `{
                 }
             },
             "delete": {
-                "description": "Destroy Cluster",
+                "description": "Delete a cluster",
                 "consumes": [
                     "application/json"
                 ],
@@ -180,8 +180,8 @@ var doc = `{
                 "tags": [
                     "Cluster"
                 ],
-                "summary": "Destroy Cluster",
-                "operationId": "DestroyCluster",
+                "summary": "Delete a cluster",
+                "operationId": "DeleteCluster",
                 "parameters": [
                     {
                         "type": "string",
@@ -283,6 +283,9 @@ var doc = `{
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "kind": {
                     "type": "string"
                 },
                 "publicIP": {

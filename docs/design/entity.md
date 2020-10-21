@@ -2,7 +2,7 @@
 
 ## Key
 ```
-/ns/{namespace}/cluster/{cluster}
+/ns/{namespace}/clusters/{cluster}
 ```
 
 ## Value

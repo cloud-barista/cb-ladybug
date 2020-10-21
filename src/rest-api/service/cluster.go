@@ -335,7 +335,7 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 	return cluster, nil
 }
 
-func DestroyCluster(namespace string, clusterName string) (*model.Status, error) {
+func DeleteCluster(namespace string, clusterName string) (*model.Status, error) {
 	mcisName := clusterName //cluster 이름과 동일하게 (임시)
 
 	status := model.NewStatus()

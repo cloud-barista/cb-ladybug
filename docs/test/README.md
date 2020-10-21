@@ -108,24 +108,24 @@ $ go run src/main.go
 
 ### 클러스터 생성
 ```
-$ /ladybug.sh create [GCP/AWS] <cluster name> <spec:machine-type> <worker-node-count>
+$ /cluster-create.sh [GCP/AWS] <cluster name> <spec:machine-type> <worker-node-count>
 ```
 
 * 예
 ```
-$ ./ladybug.sh create GCP cb-cluster n1-standard-2 1   # GCP
-$ ./ladybug.sh create AWS cb-cluster t2.medium 1       # AWS
+$ ./cluster-create.sh GCP cb-cluster n1-standard-2 1   # GCP
+$ ./cluster-create.sh AWS cb-cluster t2.medium 1       # AWS
 ```
 
 ### 클러스터 삭제
 ```
-$ /ladybug.sh destroy [GCP/AWS] <cluster name>
+$ /cluster-delete.sh [GCP/AWS] <cluster name>
 ```
 
 * 예
 ```
-$ ./ladybug.sh destroy GCP cb-cluster   # GCP
-$ ./ladybug.sh destroy AWS cb-cluster   # AWS
+$ ./cluster-delete.sh GCP cb-cluster   # GCP
+$ ./cluster-delete.sh AWS cb-cluster   # AWS
 ```
 
 

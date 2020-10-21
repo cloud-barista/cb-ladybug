@@ -1,7 +1,7 @@
 @@startuml
 
 header Cloud-Barista
-title Create cluster
+title Create a cluster
 hide footbox
 
 actor		"User"					as user			#d1e0ff
@@ -17,10 +17,10 @@ participant	"Master node"			as mNodes		#eeeeee
 participant	"Worker nodes"			as wNodes		#eeeeee
 
 activate user
-	user		->	webtool		: create cluster
+	user		->	webtool		: create a cluster
 
 	activate webtool
-		webtool		->	ladybug		: POST/ns/:ns/cluster/:cluster\n {name,cp-spec,cp-count,wk-spec,wk-count}
+		webtool		->	ladybug		: POST/ns/:ns/clusters/:cluster\n {name,cp-spec,cp-count,wk-spec,wk-count}
 
 
 		activate ladybug
