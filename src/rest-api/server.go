@@ -37,6 +37,11 @@ func Server() {
 	g.GET("/:namespace/clusters/:cluster", router.GetCluster)
 	g.DELETE("/:namespace/clusters/:cluster", router.DeleteCluster)
 
+	g.GET("/:namespace/clusters/:cluster/nodes", router.ListNode)
+	g.POST("/:namespace/clusters/:cluster/nodes", router.AddNode)
+	g.GET("/:namespace/clusters/:cluster/nodes/:node", router.GetNode)
+	g.DELETE("/:namespace/clusters/:cluster/nodes/:node", router.RemoveNode)
+
 	// Start server
 	e.Logger.Fatal(e.Start(":8080"))
 }

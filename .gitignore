@@ -21,3 +21,6 @@
 *.iml
 *.swp
 .vscode
+
+# DB
+meta_db/

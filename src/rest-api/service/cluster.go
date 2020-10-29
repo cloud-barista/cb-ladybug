@@ -6,6 +6,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/cloud-barista/cb-ladybug/src/core/common"
 	"github.com/cloud-barista/cb-ladybug/src/core/model"
 	"github.com/cloud-barista/cb-ladybug/src/core/model/tumblebug"
 	"github.com/cloud-barista/cb-ladybug/src/utils/config"
@@ -36,7 +37,6 @@ func ListCluster(namespace string) (*model.ClusterList, error) {
 
 func GetCluster(namespace string, clusterName string) (*model.Cluster, error) {
 	cluster := model.NewCluster(namespace, clusterName)
-
 	result, err := cluster.Select(cluster)
 	if err != nil {
 		return nil, err
@@ -52,11 +52,11 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 	if strings.Contains(namespace, "gcp") {
 		userAccount = "cb-user"
 		cspPrefix = "cb-gcp"
-		imageId = "https://www.googleapis.com/compute/v1/projects/ubuntu-os-cloud/global/images/ubuntu-1804-bionic-v20201014"
+		imageId = config.GCP_IMAGE_ID
 	} else {
 		userAccount = "ubuntu"
 		cspPrefix = "cb-aws"
-		imageId = "ami-02b658ac34935766f"
+		imageId = config.AWS_IMAGE_ID
 	}
 
 	csps = append(csps, CSP{Name: cspPrefix, Config: cspPrefix + "-config", ControlPlaneNodeSpec: req.ControlPlaneNodeSpec, ControlPlaneNodeCount: req.ControlPlaneNodeCount, WorkerNodeSpec: req.WorkerNodeSpec, WorkerNodeCount: req.WorkerNodeCount})
@@ -118,7 +118,7 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 		// 3. create sshKey
 		fmt.Println(fmt.Sprintf("start create ssh key (name=%s)", sshkeyName))
 		sshKey := tumblebug.NewSSHKey(namespace, sshkeyName, csp.Config)
-		sshKey.Username = "cb-cluster"
+		sshKey.Username = userAccount
 		exists, e = sshKey.GET()
 		if e != nil {
 			return cluster, e
@@ -169,11 +169,10 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 			fmt.Println(fmt.Sprintf("create control plane spec OK.. (name=%s)", specName))
 		}
 
-		nodeCnt := 1
 		// 6. vm
 		for i := 0; i < csp.ControlPlaneNodeCount; i++ {
 			vm := model.VM{
-				Name:         fmt.Sprintf("%s-%s-%d", csp.Name, clusterName, nodeCnt),
+				Name:         lang.GetNodeName(csp.Name, clusterName, spec.Role),
 				Config:       csp.Config,
 				VPC:          vpc.Name,
 				Subnet:       vpc.Subnets[0].Name,
@@ -188,7 +187,6 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 				Role:         spec.Role,
 			}
 			mcis.VMs = append(mcis.VMs, vm)
-			nodeCnt++
 		}
 
 		// worker node
@@ -213,7 +211,7 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 		// 6. vm
 		for i := 0; i < csp.WorkerNodeCount; i++ {
 			vm := model.VM{
-				Name:         fmt.Sprintf("%s-%s-%d", csp.Name, clusterName, nodeCnt),
+				Name:         lang.GetNodeName(csp.Name, clusterName, spec.Role),
 				Config:       csp.Config,
 				VPC:          vpc.Name,
 				Subnet:       vpc.Subnets[0].Name,
@@ -228,7 +226,6 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 				Role:         spec.Role,
 			}
 			mcis.VMs = append(mcis.VMs, vm)
-			nodeCnt++
 		}
 	}
 
@@ -240,11 +237,18 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 	fmt.Println(fmt.Sprintf("create MCIS OK.. (name=%s)", mcisName))
 
 	// 결과값 저장
+	var nodes []model.Node
 	cluster.MCIS = mcisName
 	for _, vm := range mcis.VMs {
 		node := model.NewNode(vm)
 		node.UId = lang.GetUid()
-		cluster.Nodes = append(cluster.Nodes, *node)
+
+		// insert node in store
+		nodes = append(nodes, *node)
+		_, err := node.Insert(namespace, cluster.Name, node)
+		if err != nil {
+			common.CBLog.Error(err)
+		}
 	}
 	cluster.Insert(cluster)
 
@@ -331,6 +335,7 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 	fmt.Println("end k8s init & join")
 
 	cluster.Complete(cluster)
+	cluster.Nodes = nodes
 
 	return cluster, nil
 }

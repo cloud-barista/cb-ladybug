@@ -46,3 +46,17 @@ func ClusterReqValidate(c echo.Context, req model.ClusterReq) error {
 
 	return nil
 }
+
+func NodeReqValidate(c echo.Context, req model.NodeReq) error {
+	if req.Config == "" {
+		return errors.New("config is required")
+	}
+	if req.WorkerNodeSpec == "" {
+		return errors.New("worker node spec is required")
+	}
+	if req.WorkerNodeCount < 1 {
+		return errors.New("worker node count must be at least one")
+	}
+
+	return nil
+}

@@ -74,7 +74,6 @@ func (fw *Firewall) POST() error {
 		SetBody(fw).
 		SetResult(&fw).
 		Post(conf.TumblebugUrl + fmt.Sprintf("/ns/%s/resources/securityGroup", fw.namespace))
-	fmt.Println(resp)
 
 	if err = fw.response(resp, err); err != nil {
 		return err
