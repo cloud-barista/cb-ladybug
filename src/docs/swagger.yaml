@@ -18,12 +18,12 @@ definitions:
         type: array
       status:
         type: string
-      uId:
+      uid:
         type: string
     type: object
   model.ClusterList:
     properties:
-      clusters:
+      items:
         items:
           $ref: '#/definitions/model.Cluster'
         type: array
@@ -45,17 +45,37 @@ definitions:
     type: object
   model.Node:
     properties:
-      Credential:
-        type: string
-      name:
+      credential:
         type: string
       kind:
         type: string
-      publicIP:
+      name:
+        type: string
+      publicIp:
         type: string
       role:
         type: string
-      uId:
+      spec:
+        type: string
+      uid:
+        type: string
+    type: object
+  model.NodeList:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/model.Node'
+        type: array
+      kind:
+        type: string
+    type: object
+  model.NodeReq:
+    properties:
+      config:
+        type: string
+      workerNodeCount:
+        type: integer
+      workerNodeSpec:
         type: string
     type: object
   model.Status:
@@ -199,4 +219,126 @@ paths:
       summary: Get Cluster
       tags:
       - Cluster
+  /ns/{namespace}/clusters/{cluster}/nodes:
+    get:
+      consumes:
+      - application/json
+      description: List Node
+      operationId: ListNode
+      parameters:
+      - description: namespace
+        in: path
+        name: namespace
+        required: true
+        type: string
+      - description: cluster
+        in: path
+        name: cluster
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.NodeList'
+      summary: List Node
+      tags:
+      - Node
+    post:
+      consumes:
+      - application/json
+      description: Add Node
+      operationId: AddNode
+      parameters:
+      - description: namespace
+        in: path
+        name: namespace
+        required: true
+        type: string
+      - description: cluster
+        in: path
+        name: cluster
+        required: true
+        type: string
+      - description: Reuest json
+        in: body
+        name: json
+        required: true
+        schema:
+          $ref: '#/definitions/model.NodeReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Node'
+      summary: Add Node
+      tags:
+      - Node
+  /ns/{namespace}/clusters/{cluster}/nodes/{node}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove Node
+      operationId: RemoveNode
+      parameters:
+      - description: namespace
+        in: path
+        name: namespace
+        required: true
+        type: string
+      - description: cluster
+        in: path
+        name: cluster
+        required: true
+        type: string
+      - description: node
+        in: path
+        name: node
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Status'
+      summary: Remove Node
+      tags:
+      - Node
+    get:
+      consumes:
+      - application/json
+      description: Get Node
+      operationId: GetNode
+      parameters:
+      - description: namespace
+        in: path
+        name: namespace
+        required: true
+        type: string
+      - description: cluster
+        in: path
+        name: cluster
+        required: true
+        type: string
+      - description: node
+        in: path
+        name: node
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Node'
+      summary: Get Node
+      tags:
+      - Node
 swagger: "2.0"

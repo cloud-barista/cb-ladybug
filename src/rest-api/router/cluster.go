@@ -1,7 +1,6 @@
 package router
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -90,7 +89,7 @@ func CreateCluster(c echo.Context) error {
 	}
 
 	duration := time.Since(start)
-	fmt.Println(" duration // ", duration)
+	common.CBLog.Info(" duration := ", duration)
 	return app.Send(c, http.StatusOK, cluster)
 }
 

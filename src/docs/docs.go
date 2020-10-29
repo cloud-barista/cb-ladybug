@@ -207,6 +207,185 @@ var doc = `{
                     }
                 }
             }
+        },
+        "/ns/{namespace}/clusters/{cluster}/nodes": {
+            "get": {
+                "description": "List Node",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Node"
+                ],
+                "summary": "List Node",
+                "operationId": "ListNode",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "namespace",
+                        "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "cluster",
+                        "name": "cluster",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.NodeList"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Add Node",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Node"
+                ],
+                "summary": "Add Node",
+                "operationId": "AddNode",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "namespace",
+                        "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "cluster",
+                        "name": "cluster",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Reuest json",
+                        "name": "json",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.NodeReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Node"
+                        }
+                    }
+                }
+            }
+        },
+        "/ns/{namespace}/clusters/{cluster}/nodes/{node}": {
+            "get": {
+                "description": "Get Node",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Node"
+                ],
+                "summary": "Get Node",
+                "operationId": "GetNode",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "namespace",
+                        "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "cluster",
+                        "name": "cluster",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "node",
+                        "name": "node",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Node"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Remove Node",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Node"
+                ],
+                "summary": "Remove Node",
+                "operationId": "RemoveNode",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "namespace",
+                        "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "cluster",
+                        "name": "cluster",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "node",
+                        "name": "node",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Status"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -237,7 +416,7 @@ var doc = `{
                 "status": {
                     "type": "string"
                 },
-                "uId": {
+                "uid": {
                     "type": "string"
                 }
             }
@@ -245,7 +424,7 @@ var doc = `{
         "model.ClusterList": {
             "type": "object",
             "properties": {
-                "clusters": {
+                "items": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/model.Cluster"
@@ -279,22 +458,53 @@ var doc = `{
         "model.Node": {
             "type": "object",
             "properties": {
-                "Credential": {
-                    "type": "string"
-                },
-                "name": {
+                "credential": {
                     "type": "string"
                 },
                 "kind": {
                     "type": "string"
                 },
-                "publicIP": {
+                "name": {
+                    "type": "string"
+                },
+                "publicIp": {
                     "type": "string"
                 },
                 "role": {
                     "type": "string"
                 },
-                "uId": {
+                "spec": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.NodeList": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Node"
+                    }
+                },
+                "kind": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.NodeReq": {
+            "type": "object",
+            "properties": {
+                "config": {
+                    "type": "string"
+                },
+                "workerNodeCount": {
+                    "type": "integer"
+                },
+                "workerNodeSpec": {
                     "type": "string"
                 }
             }

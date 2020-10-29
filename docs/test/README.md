@@ -26,7 +26,7 @@ $  docker run -d -p 1323:1323 --name cb-tumblebug --link cb-spider:cb-spider clo
 * 예
 ```
 $  docker run -d -p 1024:1024 --name cb-spider cloudbaristaorg/cb-spider:v0.2.0-20200715
-$  docker run -d -p 1323:1323 --name cb-tumblebug --link cb-spider:cb-spider cloudbaristaorg/cb-tumblebug:v0.2.0-20200715
+$  docker run -d -p 1323:1323 --name cb-tumblebug --link cb-spider:cb-spider cloudbaristaorg/cb-tumblebug:v0.2.5
 ```
 
 ### Cloud Connection Info. 등록
@@ -126,6 +126,29 @@ $ /cluster-delete.sh [GCP/AWS] <cluster name>
 ```
 $ ./cluster-delete.sh GCP cb-cluster   # GCP
 $ ./cluster-delete.sh AWS cb-cluster   # AWS
+```
+
+### 노드 생성
+```
+$ /node-add.sh [GCP/AWS] <cluster name> <spec:machine-type> <worker-node-count>
+```
+
+* 예
+```
+$ ./node-add.sh GCP cb-cluster n1-standard-2 1   # GCP
+$ ./node-add.sh AWS cb-cluster t2.medium 1       # AWS
+```
+
+### 노드 삭제
+
+```
+$ /node-remove.sh [GCP/AWS] <cluster name> <node name>
+```
+
+* 예
+```
+$ ./node-remove.sh GCP cb-cluster cb-gcp-cluster-test-1-w-q3ui2  # GCP
+$ ./node-remove.sh AWS cb-cluster cb-aws-cluster-test-1-w-iqp7n  # AWS
 ```
 
 

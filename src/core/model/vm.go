@@ -25,8 +25,8 @@ type VM struct {
 	Description  string   `json:"description"`
 	PublicIP     string   `json:"publicIP"` // output
 	Credential   string   // private
-	UId          string   `json:"uId"`  // output
-	Role         string   `json:"role"` // output
+	UId          string   `json:"uid"`
+	Role         string   `json:"role"`
 }
 
 func (v *VM) ConnectionTest(sshInfo *ssh.SSHInfo, vm *VM) error {
@@ -102,7 +102,24 @@ func (v *VM) WorkerJoin(sshInfo *ssh.SSHInfo, workerJoinCmd *string) (bool, erro
 	if *workerJoinCmd == "" {
 		return false, errors.New("worker node join command empty")
 	}
-	cmd := fmt.Sprintf("cd %s;%s", config.Config.TargetPath, *workerJoinCmd)
+	cmd := *workerJoinCmd
+	result, err := ssh.SSHRun(*sshInfo, cmd)
+	if err != nil {
+		fmt.Println("Error while running cmd: "+cmd, err)
+		return false, errors.New("k8s worker node join error")
+	}
+	if strings.Contains(result, "This node has joined the cluster") {
+		return true, nil
+	} else {
+		return false, errors.New("worker node join failed")
+	}
+}
+
+func (v *VM) WorkerJoinForAddNode(sshInfo *ssh.SSHInfo, workerJoinCmd *string) (bool, error) {
+	if *workerJoinCmd == "" {
+		return false, errors.New("worker node join command empty")
+	}
+	cmd := fmt.Sprintf("sudo %s", *workerJoinCmd)
 	result, err := ssh.SSHRun(*sshInfo, cmd)
 	if err != nil {
 		fmt.Println("Error while running cmd: "+cmd, err)

@@ -22,6 +22,7 @@
         publicIp: "",
         uid: "",
         role: "control-plane",
+        spec: "",
       },
       {
         name: "",
@@ -29,6 +30,7 @@
         publicIp: "",
         uid: "",
         role: "worker",
+        spec: "",
       },
       ...
     ]
@@ -61,4 +63,5 @@
 |publicIp       |공인 IP            |string |                           |
 |uid            |노드 uid           |string |uuid                       |
 |role           |역할               |string |control-plane/worker       |
+|spec           |spec               |string |                          |
 
