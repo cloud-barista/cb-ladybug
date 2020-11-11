@@ -178,10 +178,15 @@ $ source ./env.sh GCP "${HOME}/.ssh/google-credential-cloudbarista.json"
 ```
 
 * AWS
-
 ```
 $ source ./env.sh AWS "<credentials file path>"
 
 # 예
 $ source ./env.sh AWS "${HOME}/.aws/credentials"
+
+# '${HOME}/.aws/credentials' file format which is created by awscli
+$ cat ${HOME}/.aws/credentials
+[default]
+aws_secret_access_key = y7Ganz6A.................................
+aws_access_key_id = AKIA2Z........................
 ```
