@@ -4,52 +4,48 @@ header Cloud-Barista
 title Initialize cloud connection info.
 hide footbox
 
-participant	"Webtool"		as webtool		#d1e0ff
-
-participant	"Ladybug"		as ladybug
-
+actor		"User"			as user
 participant	"Tumblebug"		as tumblebug	#d1e0ff
-database	"tumblebug db"			as tumblebug_db	#d1e0ff
-
+database	"tumblebug db"	as tumblebug_db	#d1e0ff
 participant	"Spider"		as spider		#d1e0ff
-database	"spider db"			as spider_db	#d1e0ff
+database	"spider db"		as spider_db	#d1e0ff
 
 ' # driver
-webtool		->	spider		: POST/driver\n {name,csp,driver}
+user		->	spider		: POST/driver\n {name,csp,driver}
 activate spider
 	spider		<->o	spider_db	: {driver}
-	spider		->		webtool		: {driver}
+	spider		->		user		: {driver}
 deactivate spider
 
 ' # region
-webtool		->	spider		: POST/region\n {name,csp,reigin,zone}
+user		->	spider		: POST/region\n {name,csp,reigin,zone}
 activate spider
 	spider		<->o	spider_db	: {region}
-	spider		->		webtool		: {region}
+	spider		->		user		: {region}
 deactivate spider
 
 
 ' # credential
-webtool		->	spider		: POST/credential\n {name,csp,credentials}
+user		->	spider		: POST/credential\n {name,csp,credentials}
 activate spider
 	spider		<->o	spider_db	: {credential}
-	spider		->		webtool		: {credential}
+	spider		->		user		: {credential}
 deactivate spider
 
 
 ' # config
-webtool		->	spider		: POST/connectionconfig]\n {name,csp,driver,credential,region}
+user		->	spider		: POST/connectionconfig]\n {name,csp,driver,credential,region}
 activate spider
 	spider		<->o	spider_db	: {config}
-	spider		->		webtool		: {config}
+	spider		->		user		: {config}
 deactivate spider
 
 
 ' # namespace
-webtool		->	tumblebug	: POST/ns\n {name}
+user		->	tumblebug	: POST/ns\n {name}
 activate tumblebug
 	tumblebug		<->o	tumblebug_db	: {ns}
-	tumblebug		->		webtool			: {ns}
+	tumblebug		->		user			: {ns}
 deactivate tumblebug
 
 ' //-- namespace

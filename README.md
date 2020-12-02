@@ -21,8 +21,8 @@ If you have any difficulties in using CB-Ladybug, please let us know.
 
 ### Dependencies
 
-* CB-Spider [v0.2.0-cappuccino](https://github.com/cloud-barista/cb-tumblebug/releases/tag/v0.2.0-cappuccino)
-* CB-Tumbluebug [v0.2.0-cappuccino](https://github.com/cloud-barista/cb-spider/releases/tag/v0.2.0-cappuccino)
+* CB-Spider [v0.3.0-espresso](https://github.com/cloud-barista/cb-tumblebug/releases/tag/v0.3.0-espresso)
+* CB-Tumbluebug [v0.3.0-espresso](https://github.com/cloud-barista/cb-spider/releases/tag/v0.3.0-espresso)
 
 
 ### Clone

@@ -93,12 +93,12 @@ info:
     email: contact-to-cloud-barista@googlegroups.com
     name: API Support
     url: http://cloud-barista.github.io
-  description: CB-Laydbug REST API
+  description: CB-Ladybug REST API
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   termsOfService: http://swagger.io/terms/
-  title: CB-Laydbug REST API
+  title: CB-Ladybug REST API
   version: "1.0"
 paths:
   /healthy:

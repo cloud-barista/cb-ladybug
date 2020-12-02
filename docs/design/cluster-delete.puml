@@ -1,72 +1,41 @@
 @@startuml
 
-header Cloud-Barista
+header **Cloud-Barista Ladybug** (Espresso version)
 title Delete a cluster
 hide footbox
 
 actor		"User"			as user			#d1e0ff
 participant	"Webtool"		as webtool		#d1e0ff
-participant	"Ladybug"		as ladybug
-database	"Ladybug data"	as db
 participant	"Ladybug"		as provider
+database	"Ladybug data"	as db
 participant	"Tumblebug"		as tumblebug	#d1e0ff
 participant	"Spider"		as spider		#d1e0ff
 
 
-user		->	webtool		: Delete a cluster {cluster}
+user		->	webtool		: delete a cluster
+
 activate webtool
-	webtool		->	ladybug		: DELETE\n/cluster {cluster}
+	webtool		->	provider		: DELETE\n/ns/:ns/clusters/:cluster
 
-	activate ladybug
-		ladybug		->o	db			: update {cluster}
-		ladybug		->	provider	: delete MCIS {mcis}
+	activate provider
+		provider	->	tumblebug	: GET\n/mcis
+		activate tumblebug
+			tumblebug	-->	provider 	: ack {mcis}
+		deactivate tumblebug
 
-		' -- mcis
-		activate provider
-			provider	->	tumblebug	: DELETE\n/mcis
-		
-			activate tumblebug
-				tumblebug	->o	spider		: DELETE\n/vm
-				tumblebug	-->	provider 	: ack
-			deactivate tumblebug
+		provider	->	tumblebug	: DELETE\n/mcis
+	
+		activate tumblebug
+			tumblebug	->o	spider		: DELETE\n/vm
+			tumblebug	-->	provider 	: ack
+		deactivate tumblebug
 
-			provider	->	provider	: wait
-			provider	-->	ladybug 	: ack
-		deactivate provider
-		' //-- mcis
+		provider	->o	db	: delete
+		provider		-->	webtool		: ack {result}
 
-		' -- mcir
-		ladybug		->o	db			: update {cluster}
-		ladybug		->	provider	: delete MCIR {mcir}
-		activate provider
-			provider	->	tumblebug	: DELETE\n /ns/:ns/resources/sshKey
-			activate tumblebug
-				tumblebug	->o	spider		: DELETE\n/keypair
-				tumblebug	-->	provider	: ack
-			deactivate tumblebug
+	deactivate provider
 
-			provider	->	tumblebug	: DELETE\n /ns/:ns/resources/securityGroup
-			activate tumblebug
-				tumblebug	->o	spider		: DELETE\n /ns/:ns/securitygroup
-				tumblebug	-->	provider	: ack
-			deactivate tumblebug
-
-			provider	->	tumblebug	: DELETE\n /ns/:ns/resources/vNet
-			activate tumblebug
-				tumblebug	->o	spider		: DELETE\n /ns/:ns/vpc
-				tumblebug	-->	provider	: ack
-			deactivate tumblebug
-
-			provider	-->	ladybug	: ack
-
-		deactivate provider
-		' //-- mcir
-
-		ladybug		->o	db			: delete {cluster}
-		ladybug		-->	webtool		: ack
-	deactivate ladybug
-
-	webtool	-->	user	: ack
+	webtool	-->	user	: ack {result}
 deactivate webtool
 
 @@enduml

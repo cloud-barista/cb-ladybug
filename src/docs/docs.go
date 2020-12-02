@@ -541,8 +541,8 @@ var SwaggerInfo = swaggerInfo{
 	Host:        "localhost:8080",
 	BasePath:    "/ladybug",
 	Schemes:     []string{},
-	Title:       "CB-Laydbug REST API",
-	Description: "CB-Laydbug REST API",
+	Title:       "CB-Ladybug REST API",
+	Description: "CB-Ladybug REST API",
 }
 
 type s struct{}
