@@ -5,9 +5,9 @@ import (
 	"github.com/cloud-barista/cb-ladybug/src/utils/config"
 )
 
-// @title CB-Laydbug REST API
+// @title CB-Ladybug REST API
 // @version 1.0
-// @description CB-Laydbug REST API
+// @description CB-Ladybug REST API
 // @termsOfService http://swagger.io/terms/
 
 // @contact.name API Support
