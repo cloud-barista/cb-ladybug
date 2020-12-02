@@ -151,6 +151,27 @@ $ ./node-remove.sh GCP cb-cluster cb-gcp-cluster-test-1-w-q3ui2  # GCP
 $ ./node-remove.sh AWS cb-cluster cb-aws-cluster-test-1-w-iqp7n  # AWS
 ```
 
+## Kubernetes 클러스터 연결
+
+### kubeconfig 파일 다운로드
+
+* `kubeconfig.yaml` 파일이 생성됩니다.
+```
+$ ./cluster-kubeconfig.sh [GCP/AWS] <cluster name>
+```
+
+* 예
+```
+$ ./cluster-kubeconfig.sh AWS cb-cluster
+```
+
+### kubectl 사용하기
+
+```
+$ export KUBECONFIG=$(pwd)/kubeconfig.yaml
+$ kubectl config set-cluster kubernetes --insecure-skip-tls-verify=true
+$ kubectl get nodes
+```
 
 ## 기타
 
