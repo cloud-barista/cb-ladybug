@@ -67,6 +67,14 @@ code:200
 * Execute or Run
 * Open http://localhost:8080/swagger/index.html in your web browser 
 
+#### How to generate an updated swagger.yaml
+```
+$ go get -u github.com/swaggo/swag/cmd/swag
+
+# in src/ folder
+$ swag init
+```
+
 ## Documentation
 
 * [Design](./docs/design)
