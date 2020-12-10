@@ -2,7 +2,7 @@
 # ------------------------------------------------------------------------------
 # usage
 if [ "$1" == "-h" ]; then 
-	echo "./get.sh [GCP/AWS] [config/ns/vpc/fm/ssh/image/spec/mcis/ip]"
+	echo "./get.sh [GCP/AWS] [config/region/ns/vpc/fm/ssh/image/spec/mcis/ip]"
 	echo "./get.sh GCP ns"
 	echo "./get.sh GCP ns,spec"
 	exit 0
@@ -51,7 +51,7 @@ if [ "${v_QUERY}" == "" ]; then
 	read -e -p "Query ? [all/ns/vpc/fw/ssh/image/spec/mcis/ip] : "  v_QUERY
 fi
 if [ "${v_QUERY}" == "" ]; then echo "[ERROR] missing <query>"; exit -1; fi
-if [ "${v_QUERY}" == "all" ]; then v_QUERY="config/ns/vpc/fm/ssh/image/spec/mcis/ip"; fi
+if [ "${v_QUERY}" == "all" ]; then v_QUERY="config/region/ns/vpc/fm/ssh/image/spec/mcis/ip"; fi
 
 
 
@@ -64,6 +64,7 @@ NM_SSH_KEY="${v_PREFIX}-sshkey"
 NM_IMAGE="${v_PREFIX}-image"
 NM_MACHINE="${v_PREFIX}-spec"
 NM_MCIS="${v_PREFIX}" 
+NM_REGION="${v_PREFIX}-region" 
 
 c_URL_TUMBLEBUG_NS="${c_URL_TUMBLEBUG}/ns/${NM_NAMESPACE}"
 
@@ -73,6 +74,7 @@ echo "[INFO]"
 echo "- Prefix                     is '${v_PREFIX}'"
 echo "- Namespace                  is '${NM_NAMESPACE}'"
 echo "- (Name of Connection Info.) is '${NM_CONFIG}'"
+echo "- (Name of Region)           is '${NM_CONFIG}'"
 echo "- (Name of vpc)              is '${NM_VPC}'"
 echo "- (Name of firewall)         is '${NM_FW}'"
 echo "- (Name of ssh key)          is '${NM_SSH_KEY}'"
@@ -84,7 +86,8 @@ echo "- (Name of MCIS)             is '${NM_MCIS}'"
 # ------------------------------------------------------------------------------
 # get Infrastructure
 get() {
-	if [[ "${v_QUERY}" == *"config"* ]]; then		echo "@_CONFIG_@";		curl -sX GET ${c_URL_SPIDER}/connectionconfig/${NM_CONFIG}          -H "${c_AUTH}" -H "${c_CT}" | jq; fi
+	if [[ "${v_QUERY}" == *"config"* ]]; then		echo "@_CONFIG_@";		curl -sX GET ${c_URL_SPIDER}/connectionconfig/${NM_CONFIG}          -H "${c_CT}" | jq; fi
+	if [[ "${v_QUERY}" == *"region"* ]]; then		echo "@_MCIS_@";		curl -sX GET ${c_URL_SPIDER}/region/${NM_REGION}                 	-H "${c_CT}" | jq; fi
 	if [[ "${v_QUERY}" == *"ns"* ]]; then			echo "@_NAMESPACE_@";	curl -sX GET ${c_URL_TUMBLEBUG}/ns/${NM_NAMESPACE}                  -H "${c_AUTH}" -H "${c_CT}" | jq; fi
 	if [[ "${v_QUERY}" == *"vpc"* ]]; then			echo "@_VPC_@";			curl -sX GET ${c_URL_TUMBLEBUG_NS}/resources/vNet/${NM_VPC}         -H "${c_AUTH}" -H "${c_CT}" -d '{"connectionName" : "'${NM_CONFIG}'"}' | jq; fi
 	if [[ "${v_QUERY}" == *"vpc.spider"* ]]; then	echo "@_VPC_SPIDER@";	curl -sX GET ${c_URL_SPIDER}/vpc/${NM_VPC}                          -H "${c_AUTH}" -H "${c_CT}" -d '{"ConnectionName":"'${NM_CONFIG}'"}' | jq; fi
@@ -93,7 +96,6 @@ get() {
 	if [[ "${v_QUERY}" == *"image"* ]]; then		echo "@_IMAGE_@";		curl -sX GET ${c_URL_TUMBLEBUG_NS}/resources/image/${NM_IMAGE}      -H "${c_AUTH}" -H "${c_CT}" -d '{"connectionName" : "'${NM_CONFIG}'"}' | jq; fi
 	if [[ "${v_QUERY}" == *"spec"* ]]; then			echo "@_SPEC_@";		curl -sX GET ${c_URL_TUMBLEBUG_NS}/resources/spec/${NM_MACHINE}     -H "${c_AUTH}" -H "${c_CT}" -d '{"connectionName" : "'${NM_CONFIG}'"}' | jq; fi
 	if [[ "${v_QUERY}" == *"mcis"* ]]; then			echo "@_MCIS_@";		curl -sX GET ${c_URL_TUMBLEBUG_NS}/mcis/${NM_MCIS}                  -H "${c_AUTH}" -H "${c_CT}" | jq; fi
-
 	if [[ "$q" == *"ip"* ]]
 	then
 		RESP=$(curl -sX GET ${c_URL_TUMBLEBUG_NS}/mcis/${NM_MCIS} -H "${c_AUTH}" -H "${c_CT}")

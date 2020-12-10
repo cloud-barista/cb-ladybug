@@ -15,15 +15,6 @@ import (
 	ssh "github.com/cloud-barista/cb-spider/cloud-control-manager/vm-ssh"
 )
 
-type CSP struct {
-	Name                  string
-	Config                string
-	ControlPlaneNodeSpec  string
-	ControlPlaneNodeCount int
-	WorkerNodeSpec        string
-	WorkerNodeCount       int
-}
-
 func ListCluster(namespace string) (*model.ClusterList, error) {
 	clusters := model.NewClusterList()
 
@@ -46,20 +37,6 @@ func GetCluster(namespace string, clusterName string) (*model.Cluster, error) {
 }
 
 func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, error) {
-	var csps []CSP
-
-	var cspPrefix, imageId, userAccount string
-	if strings.Contains(namespace, "gcp") {
-		userAccount = "cb-user"
-		cspPrefix = "cb-gcp"
-		imageId = config.GCP_IMAGE_ID
-	} else {
-		userAccount = "ubuntu"
-		cspPrefix = "cb-aws"
-		imageId = config.AWS_IMAGE_ID
-	}
-
-	csps = append(csps, CSP{Name: cspPrefix, Config: cspPrefix + "-config", ControlPlaneNodeSpec: req.ControlPlaneNodeSpec, ControlPlaneNodeCount: req.ControlPlaneNodeCount, WorkerNodeSpec: req.WorkerNodeSpec, WorkerNodeCount: req.WorkerNodeCount})
 
 	clusterName := req.Name
 	cluster := model.NewCluster(namespace, clusterName)
@@ -75,158 +52,172 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 		return cluster, errors.New("MCIS already exists")
 	}
 
-	// MCIR 생성 (존재하면 재활용 없다면 생성 기준)
+	// MCIR 명칭 정의 (존재하면 재활용 없다면 생성 기준)
 	vpcName := fmt.Sprintf("%s-vpc", clusterName)
 	firewallName := fmt.Sprintf("%s-allow-external", clusterName)
 	sshkeyName := fmt.Sprintf("%s-sshkey", clusterName)
 	specName := fmt.Sprintf("%s-spec", clusterName)
 
-	for _, csp := range csps {
-		// 1. create vpc
-		fmt.Println(fmt.Sprintf("start create vpc (name=%s)", vpcName))
-		vpc := tumblebug.NewVPC(namespace, vpcName, csp.Config)
-		exists, e := vpc.GET()
-		if e != nil {
+	//TODO [update/hard-coding] connection config
+	csp := config.CSP_GCP
+	if strings.Contains(namespace, "aws") {
+		csp = config.CSP_AWS
+	}
+	connConfig := fmt.Sprintf("cb-%s-config", csp)
+
+	//host user account
+	account := GetUserAccount(csp)
+
+	// get image id
+	imageId, e := GetVmImageId(csp, connConfig)
+	if e != nil {
+		return cluster, e
+	}
+
+	// 1. create vpc
+	fmt.Println(fmt.Sprintf("start create vpc (name=%s)", vpcName))
+	vpc := tumblebug.NewVPC(namespace, vpcName, connConfig)
+	exists, e = vpc.GET()
+	if e != nil {
+		return cluster, e
+	}
+	if exists {
+		fmt.Println(fmt.Sprintf("reuse vpc (name=%s, cause='already exists')", vpcName))
+	} else {
+		if e = vpc.POST(); e != nil {
 			return cluster, e
 		}
-		if exists {
-			fmt.Println(fmt.Sprintf("reuse vpc (name=%s, cause='already exists')", vpcName))
-		} else {
-			if e = vpc.POST(); e != nil {
-				return cluster, e
-			}
-			fmt.Println(fmt.Sprintf("create vpc OK.. (name=%s)", vpcName))
-		}
+		fmt.Println(fmt.Sprintf("create vpc OK.. (name=%s)", vpcName))
+	}
 
-		// 2. create firewall
-		fmt.Println(fmt.Sprintf("start create firewall (name=%s)", firewallName))
-		fw := tumblebug.NewFirewall(namespace, firewallName, csp.Config)
-		fw.VPCId = vpcName
-		exists, e = fw.GET()
-		if e != nil {
+	// 2. create firewall
+	fmt.Println(fmt.Sprintf("start create firewall (name=%s)", firewallName))
+	fw := tumblebug.NewFirewall(namespace, firewallName, connConfig)
+	fw.VPCId = vpcName
+	exists, e = fw.GET()
+	if e != nil {
+		return cluster, e
+	}
+	if exists {
+		fmt.Println(fmt.Sprintf("reuse firewall (name=%s, cause='already exists')", firewallName))
+	} else {
+		if e = fw.POST(); e != nil {
 			return cluster, e
 		}
-		if exists {
-			fmt.Println(fmt.Sprintf("reuse firewall (name=%s, cause='already exists')", firewallName))
-		} else {
-			if e = fw.POST(); e != nil {
-				return cluster, e
-			}
-			fmt.Println(fmt.Sprintf("create firewall OK.. (name=%s)", firewallName))
-		}
+		fmt.Println(fmt.Sprintf("create firewall OK.. (name=%s)", firewallName))
+	}
 
-		// 3. create sshKey
-		fmt.Println(fmt.Sprintf("start create ssh key (name=%s)", sshkeyName))
-		sshKey := tumblebug.NewSSHKey(namespace, sshkeyName, csp.Config)
-		sshKey.Username = userAccount
-		exists, e = sshKey.GET()
-		if e != nil {
+	// 3. create sshKey
+	fmt.Println(fmt.Sprintf("start create ssh key (name=%s)", sshkeyName))
+	sshKey := tumblebug.NewSSHKey(namespace, sshkeyName, connConfig)
+	sshKey.Username = account
+	exists, e = sshKey.GET()
+	if e != nil {
+		return cluster, e
+	}
+	if exists {
+		fmt.Println(fmt.Sprintf("reuse ssh key (name=%s, cause='already exists')", sshkeyName))
+	} else {
+		if e = sshKey.POST(); e != nil {
 			return cluster, e
 		}
-		if exists {
-			fmt.Println(fmt.Sprintf("reuse ssh key (name=%s, cause='already exists')", sshkeyName))
-		} else {
-			if e = sshKey.POST(); e != nil {
-				return cluster, e
-			}
-			fmt.Println(fmt.Sprintf("create ssh key OK.. (name=%s)", sshkeyName))
-		}
+		fmt.Println(fmt.Sprintf("create ssh key OK.. (name=%s)", sshkeyName))
+	}
 
-		// 4. create image
-		imageName := fmt.Sprintf("%s-Ubuntu1804", csp.Config)
-		fmt.Println(fmt.Sprintf("start create image (name=%s)", imageName))
-		image := tumblebug.NewImage(namespace, imageName, csp.Config)
-		image.CspImageId = imageId
-		exists, e = image.GET()
-		if e != nil {
+	// 4. create image
+	imageName := fmt.Sprintf("%s-Ubuntu1804", connConfig)
+	fmt.Println(fmt.Sprintf("start create image (name=%s)", imageName))
+	image := tumblebug.NewImage(namespace, imageName, connConfig)
+	image.CspImageId = imageId
+	exists, e = image.GET()
+	if e != nil {
+		return cluster, e
+	}
+	if exists {
+		fmt.Println(fmt.Sprintf("reuse image (name=%s, cause='already exists')", imageName))
+	} else {
+		if e = image.POST(); e != nil {
 			return cluster, e
 		}
-		if exists {
-			fmt.Println(fmt.Sprintf("reuse image (name=%s, cause='already exists')", imageName))
-		} else {
-			if e = image.POST(); e != nil {
-				return cluster, e
-			}
-			fmt.Println(fmt.Sprintf("create image OK.. (name=%s)", imageName))
-		}
+		fmt.Println(fmt.Sprintf("create image OK.. (name=%s)", imageName))
+	}
 
-		// control-plane
-		// 5. create spec
-		fmt.Println(fmt.Sprintf("start create control plane spec (name=%s)", specName))
-		spec := tumblebug.NewSpec(namespace, specName, csp.Config)
-		spec.CspSpecName = csp.ControlPlaneNodeSpec
-		spec.Role = config.CONTROL_PLANE
-		exists, e = spec.GET()
-		if e != nil {
+	// control-plane
+	// 5. create spec
+	fmt.Println(fmt.Sprintf("start create control plane spec (name=%s)", specName))
+	spec := tumblebug.NewSpec(namespace, specName, connConfig)
+	spec.CspSpecName = req.ControlPlaneNodeSpec
+	spec.Role = config.CONTROL_PLANE
+	exists, e = spec.GET()
+	if e != nil {
+		return cluster, e
+	}
+	if exists {
+		fmt.Println(fmt.Sprintf("reuse control plane spec (name=%s, cause='already exists')", specName))
+	} else {
+		if e = spec.POST(); e != nil {
 			return cluster, e
 		}
-		if exists {
-			fmt.Println(fmt.Sprintf("reuse control plane spec (name=%s, cause='already exists')", specName))
-		} else {
-			if e = spec.POST(); e != nil {
-				return cluster, e
-			}
-			fmt.Println(fmt.Sprintf("create control plane spec OK.. (name=%s)", specName))
-		}
+		fmt.Println(fmt.Sprintf("create control plane spec OK.. (name=%s)", specName))
+	}
 
-		// 6. vm
-		for i := 0; i < csp.ControlPlaneNodeCount; i++ {
-			vm := model.VM{
-				Name:         lang.GetNodeName(csp.Name, clusterName, spec.Role),
-				Config:       csp.Config,
-				VPC:          vpc.Name,
-				Subnet:       vpc.Subnets[0].Name,
-				Firewall:     []string{fw.Name},
-				SSHKey:       sshKey.Name,
-				Image:        image.Name,
-				Spec:         spec.Name,
-				UserAccount:  userAccount,
-				UserPassword: "",
-				Description:  "",
-				Credential:   sshKey.PrivateKey,
-				Role:         spec.Role,
-			}
-			mcis.VMs = append(mcis.VMs, vm)
+	// 6. vm
+	for i := 0; i < req.ControlPlaneNodeCount; i++ {
+		vm := model.VM{
+			Name:         lang.GetNodeName(clusterName, spec.Role),
+			Config:       connConfig,
+			VPC:          vpc.Name,
+			Subnet:       vpc.Subnets[0].Name,
+			Firewall:     []string{fw.Name},
+			SSHKey:       sshKey.Name,
+			Image:        image.Name,
+			Spec:         spec.Name,
+			UserAccount:  account,
+			UserPassword: "",
+			Description:  "",
+			Credential:   sshKey.PrivateKey,
+			Role:         spec.Role,
 		}
+		mcis.VMs = append(mcis.VMs, vm)
+	}
 
-		// worker node
-		// 5. create spec
-		fmt.Println(fmt.Sprintf("start create worker node spec (name=%s)", specName))
-		spec = tumblebug.NewSpec(namespace, specName, csp.Config)
-		spec.CspSpecName = csp.WorkerNodeSpec
-		spec.Role = config.WORKER
-		exists, e = spec.GET()
-		if e != nil {
+	// worker node
+	// 5. create spec
+	fmt.Println(fmt.Sprintf("start create worker node spec (name=%s)", specName))
+	spec = tumblebug.NewSpec(namespace, specName, connConfig)
+	spec.CspSpecName = req.WorkerNodeSpec
+	spec.Role = config.WORKER
+	exists, e = spec.GET()
+	if e != nil {
+		return cluster, e
+	}
+	if exists {
+		fmt.Println(fmt.Sprintf("reuse worker node spec (name=%s, cause='already exists')", specName))
+	} else {
+		if e = spec.POST(); e != nil {
 			return cluster, e
 		}
-		if exists {
-			fmt.Println(fmt.Sprintf("reuse worker node spec (name=%s, cause='already exists')", specName))
-		} else {
-			if e = spec.POST(); e != nil {
-				return cluster, e
-			}
-			fmt.Println(fmt.Sprintf("create worker node spec OK.. (name=%s)", specName))
-		}
+		fmt.Println(fmt.Sprintf("create worker node spec OK.. (name=%s)", specName))
+	}
 
-		// 6. vm
-		for i := 0; i < csp.WorkerNodeCount; i++ {
-			vm := model.VM{
-				Name:         lang.GetNodeName(csp.Name, clusterName, spec.Role),
-				Config:       csp.Config,
-				VPC:          vpc.Name,
-				Subnet:       vpc.Subnets[0].Name,
-				Firewall:     []string{fw.Name},
-				SSHKey:       sshKey.Name,
-				Image:        image.Name,
-				Spec:         spec.Name,
-				UserAccount:  userAccount,
-				UserPassword: "",
-				Description:  "",
-				Credential:   sshKey.PrivateKey,
-				Role:         spec.Role,
-			}
-			mcis.VMs = append(mcis.VMs, vm)
+	// 6. vm
+	for i := 0; i < req.WorkerNodeCount; i++ {
+		vm := model.VM{
+			Name:         lang.GetNodeName(clusterName, spec.Role),
+			Config:       connConfig,
+			VPC:          vpc.Name,
+			Subnet:       vpc.Subnets[0].Name,
+			Firewall:     []string{fw.Name},
+			SSHKey:       sshKey.Name,
+			Image:        image.Name,
+			Spec:         spec.Name,
+			UserAccount:  account,
+			UserPassword: "",
+			Description:  "",
+			Credential:   sshKey.PrivateKey,
+			Role:         spec.Role,
 		}
+		mcis.VMs = append(mcis.VMs, vm)
 	}
 
 	// MCIS 생성
@@ -265,7 +256,7 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 		go func(vm model.VM) {
 			defer wg.Done()
 			sshInfo := ssh.SSHInfo{
-				UserName:   userAccount,
+				UserName:   account,
 				PrivateKey: []byte(vm.Credential),
 				ServerPort: fmt.Sprintf("%s:22", vm.PublicIP),
 			}
@@ -305,7 +296,7 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 	fmt.Println("start k8s init & join")
 	for _, vm := range mcis.VMs {
 		sshInfo := ssh.SSHInfo{
-			UserName:   userAccount,
+			UserName:   account,
 			PrivateKey: []byte(vm.Credential),
 			ServerPort: fmt.Sprintf("%s:22", vm.PublicIP),
 		}

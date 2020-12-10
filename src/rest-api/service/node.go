@@ -37,23 +37,21 @@ func GetNode(namespace string, clusterName string, nodeName string) (*model.Node
 }
 
 func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.NodeList, error) {
-	var cspPrefix, imageId, userAccount string
-	if strings.Contains(namespace, "gcp") {
-		cspPrefix = "cb-gcp"
-		userAccount = "cb-user"
-		imageId = config.GCP_IMAGE_ID
-	} else {
-		cspPrefix = "cb-aws"
-		userAccount = "ubuntu"
-		imageId = config.AWS_IMAGE_ID
+
+	//TODO [update/hard-coding] connection config
+	csp := config.CSP_GCP
+	if strings.Contains(namespace, "aws") {
+		csp = config.CSP_AWS
 	}
+	//host user account
+	account := GetUserAccount(csp)
 
 	// get join command
 	cpNode, err := getCPNode(namespace, clusterName)
 	if err != nil {
 		return nil, errors.New("control-plane node not found")
 	}
-	workerJoinCmd, err := getWorkerJoinCmdForAddNode(userAccount, cpNode)
+	workerJoinCmd, err := getWorkerJoinCmdForAddNode(account, cpNode)
 	if err != nil {
 		return nil, errors.New("get join command error")
 	}
@@ -127,6 +125,12 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 
 	// image
 	fmt.Println(fmt.Sprintf("start create image (name=%s)", imageName))
+	// get image id
+	imageId, e := GetVmImageId(csp, req.Config)
+	if e != nil {
+		return nil, e
+	}
+
 	image := tumblebug.NewImage(namespace, imageName, req.Config)
 	image.CspImageId = imageId
 	exists, e = image.GET()
@@ -165,7 +169,7 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 	for i := 0; i < req.WorkerNodeCount; i++ {
 		vm := tumblebug.NewTVm(namespace, mcisName)
 		vm.VM = model.VM{
-			Name:         lang.GetNodeName(cspPrefix, clusterName, spec.Role),
+			Name:         lang.GetNodeName(clusterName, spec.Role),
 			Config:       req.Config,
 			VPC:          vpc.Name,
 			Subnet:       vpc.Subnets[0].Name,
@@ -173,7 +177,7 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 			SSHKey:       sshKey.Name,
 			Image:        image.Name,
 			Spec:         spec.Name,
-			UserAccount:  userAccount,
+			UserAccount:  account,
 			UserPassword: "",
 			Description:  "",
 			Credential:   sshKey.PrivateKey,
@@ -200,7 +204,7 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 		go func(vm model.VM) {
 			defer wg.Done()
 			sshInfo := ssh.SSHInfo{
-				UserName:   userAccount,
+				UserName:   account,
 				PrivateKey: []byte(vm.Credential),
 				ServerPort: fmt.Sprintf("%s:22", vm.PublicIP),
 			}
