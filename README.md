@@ -2,11 +2,11 @@
 > Multi-Cloud Application Management Framework
 
 
-![License](https://img.shields.io/github/license/cloud-barista/cb-ladybug)
+![Version](https://img.shields.io/github/release/cloud-barista/cb-ladybug) ![License](https://img.shields.io/github/license/cloud-barista/cb-ladybug) ![issues](https://img.shields.io/github/issues/cloud-barista/cb-ladybug) ![issues](https://img.shields.io/github/issues-closed/cloud-barista/cb-ladybug) ![pull requests](https://img.shields.io/github/issues-pr-closed/cloud-barista/cb-ladybug) ![workflow](https://img.shields.io/github/workflow/status/cloud-barista/cb-ladybug/Docker) ![code size](https://img.shields.io/github/languages/code-size/cloud-barista/cb-ladybug) 
 
 ```
 [NOTE]
-CB-Ladybug is currently under development. 
+CB-Ladybug is currently under development. (the latest release is 0.3.0 espresso)
 So, we do not recommend using the current release in production.
 Please note that the functionalities of CB-Ladybug are not stable and secure yet.
 If you have any difficulties in using CB-Ladybug, please let us know.

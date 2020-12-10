@@ -89,6 +89,6 @@ func GetRandomString(n int) string {
 }
 
 // get node name
-func GetNodeName(cspName string, clusterName string, role string) string {
-	return fmt.Sprintf("%s-%s-%s-%s", cspName, clusterName, role[:1], GetRandomString(5))
+func GetNodeName(clusterName string, role string) string {
+	return fmt.Sprintf("%s-%s-%s", clusterName, role[:1], GetRandomString(5))
 }
