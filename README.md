@@ -2,7 +2,8 @@
 > Multi-Cloud Application Management Framework
 
 
-![Version](https://img.shields.io/github/release/cloud-barista/cb-ladybug) ![License](https://img.shields.io/github/license/cloud-barista/cb-ladybug) ![issues](https://img.shields.io/github/issues/cloud-barista/cb-ladybug) ![issues](https://img.shields.io/github/issues-closed/cloud-barista/cb-ladybug) ![pull requests](https://img.shields.io/github/issues-pr-closed/cloud-barista/cb-ladybug) ![workflow](https://img.shields.io/github/workflow/status/cloud-barista/cb-ladybug/Docker) ![code size](https://img.shields.io/github/languages/code-size/cloud-barista/cb-ladybug) 
+![Version](https://img.shields.io/github/release/cloud-barista/cb-ladybug) ![License](https://img.shields.io/github/license/cloud-barista/cb-ladybug) ![issues](https://img.shields.io/github/issues/cloud-barista/cb-ladybug) ![issues](https://img.shields.io/github/issues-closed/cloud-barista/cb-ladybug) ![pull requests](https://img.shields.io/github/issues-pr-closed/cloud-barista/cb-ladybug) ![workflow](https://img.shields.io/github/workflow/status/cloud-barista/cb-ladybug/Docker) ![code size](https://img.shields.io/github/languages/code-size/cloud-barista/cb-ladybug) [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fcloud-barista%2Fcb-ladybug.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fcloud-barista%2Fcb-ladybug?ref=badge_shield)
+
 
 ```
 [NOTE]
@@ -82,3 +83,7 @@ $ swag init
 
 ## Contribution
 Learn how to start contribution on the [Contributing Guideline](https://github.com/cloud-barista/docs/tree/master/contributing)
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fcloud-barista%2Fcb-ladybug.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fcloud-barista%2Fcb-ladybug?ref=badge_large)
