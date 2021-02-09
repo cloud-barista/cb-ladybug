@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/astaxie/beego/validation"
+	"github.com/beego/beego/v2/core/validation"
 	"github.com/cloud-barista/cb-ladybug/src/core/model"
 	"github.com/go-resty/resty/v2"
 )
