@@ -6,34 +6,34 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/cloud-barista/cb-ladybug/src/core/common"
 	"github.com/cloud-barista/cb-ladybug/src/core/model"
 	"github.com/cloud-barista/cb-ladybug/src/core/model/tumblebug"
 	"github.com/cloud-barista/cb-ladybug/src/utils/config"
 	"github.com/cloud-barista/cb-ladybug/src/utils/lang"
 
 	ssh "github.com/cloud-barista/cb-spider/cloud-control-manager/vm-ssh"
+	logger "github.com/sirupsen/logrus"
 )
 
 func ListCluster(namespace string) (*model.ClusterList, error) {
-	clusters := model.NewClusterList()
+	clusters := model.NewClusterList(namespace)
 
-	result, err := clusters.SelectList(namespace, clusters)
+	err := clusters.SelectList()
 	if err != nil {
 		return nil, err
 	}
 
-	return result, nil
+	return clusters, nil
 }
 
 func GetCluster(namespace string, clusterName string) (*model.Cluster, error) {
 	cluster := model.NewCluster(namespace, clusterName)
-	result, err := cluster.Select(cluster)
+	err := cluster.Select()
 	if err != nil {
 		return nil, err
 	}
 
-	return result, nil
+	return cluster, nil
 }
 
 func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, error) {
@@ -43,8 +43,19 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 	cluster.UId = lang.GetUid()
 	mcisName := clusterName
 
+	// Namespace 존재여부 확인
+	ns := tumblebug.NewNS(namespace)
+	exists, err := ns.GET()
+	if err != nil {
+		return cluster, err
+	}
+	if !exists {
+		return cluster, errors.New(fmt.Sprintf("namespace does not exist (name=%s)", namespace))
+	}
+
+	// MCIR 존재여부 확인
 	mcis := tumblebug.NewMCIS(namespace, mcisName)
-	exists, err := mcis.GET()
+	exists, err = mcis.GET()
 	if err != nil {
 		return cluster, err
 	}
@@ -75,23 +86,23 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 	}
 
 	// 1. create vpc
-	fmt.Println(fmt.Sprintf("start create vpc (name=%s)", vpcName))
+	logger.Infof("start create vpc (name=%s)", vpcName)
 	vpc := tumblebug.NewVPC(namespace, vpcName, connConfig)
 	exists, e = vpc.GET()
 	if e != nil {
 		return cluster, e
 	}
 	if exists {
-		fmt.Println(fmt.Sprintf("reuse vpc (name=%s, cause='already exists')", vpcName))
+		logger.Infof("reuse vpc (name=%s, cause='already exists')", vpcName)
 	} else {
 		if e = vpc.POST(); e != nil {
 			return cluster, e
 		}
-		fmt.Println(fmt.Sprintf("create vpc OK.. (name=%s)", vpcName))
+		logger.Infof("create vpc OK.. (name=%s)", vpcName)
 	}
 
 	// 2. create firewall
-	fmt.Println(fmt.Sprintf("start create firewall (name=%s)", firewallName))
+	logger.Infof("start create firewall (name=%s)", firewallName)
 	fw := tumblebug.NewFirewall(namespace, firewallName, connConfig)
 	fw.VPCId = vpcName
 	exists, e = fw.GET()
@@ -99,16 +110,16 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 		return cluster, e
 	}
 	if exists {
-		fmt.Println(fmt.Sprintf("reuse firewall (name=%s, cause='already exists')", firewallName))
+		logger.Infof("reuse firewall (name=%s, cause='already exists')", firewallName)
 	} else {
 		if e = fw.POST(); e != nil {
 			return cluster, e
 		}
-		fmt.Println(fmt.Sprintf("create firewall OK.. (name=%s)", firewallName))
+		logger.Infof("create firewall OK.. (name=%s)", firewallName)
 	}
 
 	// 3. create sshKey
-	fmt.Println(fmt.Sprintf("start create ssh key (name=%s)", sshkeyName))
+	logger.Infof("start create ssh key (name=%s)", sshkeyName)
 	sshKey := tumblebug.NewSSHKey(namespace, sshkeyName, connConfig)
 	sshKey.Username = account
 	exists, e = sshKey.GET()
@@ -116,17 +127,17 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 		return cluster, e
 	}
 	if exists {
-		fmt.Println(fmt.Sprintf("reuse ssh key (name=%s, cause='already exists')", sshkeyName))
+		logger.Infof("reuse ssh key (name=%s, cause='already exists')", sshkeyName)
 	} else {
 		if e = sshKey.POST(); e != nil {
 			return cluster, e
 		}
-		fmt.Println(fmt.Sprintf("create ssh key OK.. (name=%s)", sshkeyName))
+		logger.Infof("create ssh key OK.. (name=%s)", sshkeyName)
 	}
 
 	// 4. create image
 	imageName := fmt.Sprintf("%s-Ubuntu1804", connConfig)
-	fmt.Println(fmt.Sprintf("start create image (name=%s)", imageName))
+	logger.Infof("start create image (name=%s)", imageName)
 	image := tumblebug.NewImage(namespace, imageName, connConfig)
 	image.CspImageId = imageId
 	exists, e = image.GET()
@@ -134,17 +145,17 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 		return cluster, e
 	}
 	if exists {
-		fmt.Println(fmt.Sprintf("reuse image (name=%s, cause='already exists')", imageName))
+		logger.Infof("reuse image (name=%s, cause='already exists')", imageName)
 	} else {
 		if e = image.POST(); e != nil {
 			return cluster, e
 		}
-		fmt.Println(fmt.Sprintf("create image OK.. (name=%s)", imageName))
+		logger.Infof("create image OK.. (name=%s)", imageName)
 	}
 
 	// control-plane
 	// 5. create spec
-	fmt.Println(fmt.Sprintf("start create control plane spec (name=%s)", specName))
+	logger.Infof("start create control plane spec (name=%s)", specName)
 	spec := tumblebug.NewSpec(namespace, specName, connConfig)
 	spec.CspSpecName = req.ControlPlaneNodeSpec
 	spec.Role = config.CONTROL_PLANE
@@ -153,12 +164,12 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 		return cluster, e
 	}
 	if exists {
-		fmt.Println(fmt.Sprintf("reuse control plane spec (name=%s, cause='already exists')", specName))
+		logger.Infof("reuse control plane spec (name=%s, cause='already exists')", specName)
 	} else {
 		if e = spec.POST(); e != nil {
 			return cluster, e
 		}
-		fmt.Println(fmt.Sprintf("create control plane spec OK.. (name=%s)", specName))
+		logger.Infof("create control plane spec OK.. (name=%s)", specName)
 	}
 
 	// 6. vm
@@ -183,7 +194,7 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 
 	// worker node
 	// 5. create spec
-	fmt.Println(fmt.Sprintf("start create worker node spec (name=%s)", specName))
+	logger.Infof("start create worker node spec (name=%s)", specName)
 	spec = tumblebug.NewSpec(namespace, specName, connConfig)
 	spec.CspSpecName = req.WorkerNodeSpec
 	spec.Role = config.WORKER
@@ -192,12 +203,12 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 		return cluster, e
 	}
 	if exists {
-		fmt.Println(fmt.Sprintf("reuse worker node spec (name=%s, cause='already exists')", specName))
+		logger.Infof("reuse worker node spec (name=%s, cause='already exists')", specName)
 	} else {
 		if e = spec.POST(); e != nil {
 			return cluster, e
 		}
-		fmt.Println(fmt.Sprintf("create worker node spec OK.. (name=%s)", specName))
+		logger.Infof("create worker node spec OK.. (name=%s)", specName)
 	}
 
 	// 6. vm
@@ -221,27 +232,30 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 	}
 
 	// MCIS 생성
-	fmt.Println(fmt.Sprintf("start create MCIS (name=%s)", mcisName))
+	logger.Infof("start create MCIS (name=%s)", mcisName)
 	if err = mcis.POST(); err != nil {
 		return cluster, err
 	}
-	fmt.Println(fmt.Sprintf("create MCIS OK.. (name=%s)", mcisName))
+	logger.Infof("create MCIS OK.. (name=%s)", mcisName)
 
 	// 결과값 저장
 	var nodes []model.Node
 	cluster.MCIS = mcisName
 	for _, vm := range mcis.VMs {
-		node := model.NewNode(vm)
+		node := model.NewNodeVM(namespace, cluster.Name, vm)
 		node.UId = lang.GetUid()
 
 		// insert node in store
 		nodes = append(nodes, *node)
-		_, err := node.Insert(namespace, cluster.Name, node)
+		err := node.Insert()
 		if err != nil {
-			common.CBLog.Error(err)
+			return nil, err
 		}
 	}
-	cluster.Insert(cluster)
+	err = cluster.Insert()
+	if err != nil {
+		return nil, err
+	}
 
 	var workerJoinCmd string
 	var wg sync.WaitGroup
@@ -249,9 +263,12 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 	wg.Add(len(mcis.VMs))
 
 	// bootstrap
-	fmt.Println("start k8s bootstrap")
+	logger.Infoln("start k8s bootstrap")
 	for _, vm := range mcis.VMs {
-		cluster.Update(cluster)
+		err = cluster.Update()
+		if err != nil {
+			return nil, err
+		}
 
 		go func(vm model.VM) {
 			defer wg.Done()
@@ -261,20 +278,20 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 				ServerPort: fmt.Sprintf("%s:22", vm.PublicIP),
 			}
 
-			_ = vm.ConnectionTest(&sshInfo, &vm)
-			err := vm.CopyScripts(&sshInfo, &vm)
+			_ = vm.ConnectionTest(&sshInfo)
+			err := vm.CopyScripts(&sshInfo)
 			if err != nil {
-				cluster.Fail(cluster)
+				cluster.Fail()
 				c <- err
 			}
 
 			bootstrapResult, err := vm.Bootstrap(&sshInfo)
 			if err != nil {
-				cluster.Fail(cluster)
+				cluster.Fail()
 				c <- err
 			}
 			if !bootstrapResult {
-				cluster.Fail(cluster)
+				cluster.Fail()
 				c <- errors.New(vm.Name + " bootstrap failed")
 			}
 		}(vm)
@@ -283,7 +300,7 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 	go func() {
 		wg.Wait()
 		close(c)
-		fmt.Println("end k8s bootstrap")
+		logger.Infoln("end k8s bootstrap")
 	}()
 
 	for err := range c {
@@ -293,7 +310,7 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 	}
 
 	// init & join
-	fmt.Println("start k8s init & join")
+	logger.Infoln("start k8s init & join")
 	for _, vm := range mcis.VMs {
 		sshInfo := ssh.SSHInfo{
 			UserName:   account,
@@ -305,27 +322,28 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 			var clusterConfig string
 			workerJoinCmd, clusterConfig, err = vm.ControlPlaneInit(&sshInfo, vm.PublicIP)
 			if err != nil {
-				fmt.Println(vm.Name+" init failed", err)
-				cluster.Fail(cluster)
+				logger.Warnf("%s init failed (cause=%v)", vm.Name, err)
+				cluster.Fail()
 				return nil, err
 			}
 			cluster.ClusterConfig = clusterConfig
 		} else {
 			joinResult, err := vm.WorkerJoin(&sshInfo, &workerJoinCmd)
 			if err != nil {
-				fmt.Println(vm.Name+" join error", err)
-				cluster.Fail(cluster)
+				logger.Warnf("%s join error (cause=%v)", vm.Name, err)
+				cluster.Fail()
 				return nil, err
 			}
 			if !joinResult {
-				cluster.Fail(cluster)
+				logger.Warnf("%s join failed", vm.Name)
+				cluster.Fail()
 				return nil, errors.New(vm.Name + " join failed")
 			}
 		}
 	}
-	fmt.Println("end k8s init & join")
+	logger.Infoln("end k8s init & join")
 
-	cluster.Complete(cluster)
+	cluster.Complete()
 	cluster.Nodes = nodes
 
 	return cluster, nil
@@ -338,7 +356,7 @@ func DeleteCluster(namespace string, clusterName string) (*model.Status, error) 
 	status.Code = model.STATUS_UNKNOWN
 
 	// 1. delete mcis
-	fmt.Println(fmt.Sprintf("start delete MCIS (name=%s)", mcisName))
+	logger.Infof("start delete MCIS (name=%s)", mcisName)
 	mcis := tumblebug.NewMCIS(namespace, mcisName)
 	exist, err := mcis.GET()
 	if err != nil {
@@ -349,18 +367,18 @@ func DeleteCluster(namespace string, clusterName string) (*model.Status, error) 
 			return status, err
 		}
 		// sleep 이후 확인하는 로직 추가 필요
-		fmt.Println(fmt.Sprintf("delete MCIS OK.. (name=%s)", mcisName))
+		logger.Infof("delete MCIS OK.. (name=%s)", mcisName)
 		status.Code = model.STATUS_SUCCESS
 		status.Message = "success"
 
 		cluster := model.NewCluster(namespace, clusterName)
-		if err := cluster.Delete(cluster); err != nil {
+		if err := cluster.Delete(); err != nil {
 			status.Message = "delete success but cannot delete from the store"
 			return status, nil
 		}
 	} else {
 		status.Code = model.STATUS_NOT_EXIST
-		fmt.Println(fmt.Sprintf("delete MCIS skip (cannot find).. (name=%s)", mcisName))
+		logger.Infof("delete MCIS skip (cannot find).. (name=%s)", mcisName)
 	}
 
 	return status, nil

@@ -77,7 +77,6 @@ list() {
 	if [[ "${v_QUERY}" == *"ns"* ]]; then		echo "@_NAMESPACE_@";	curl -sX GET ${c_URL_TUMBLEBUG}/ns                         -H "${c_AUTH}" | jq; fi
 	if [[ "${v_QUERY}" == *"vpc"* ]]; then		echo "@_VPC_@";			curl -sX GET ${c_URL_TUMBLEBUG_NS}/resources/vNet          -H "${c_AUTH}" | jq; fi
 	if [[ "${v_QUERY}" == *"fw"* ]]; then		echo "@_FW_@";			curl -sX GET ${c_URL_TUMBLEBUG_NS}/resources/securityGroup -H "${c_AUTH}" | jq; fi
-	if [[ "${v_QUERY}" == *"ssh"* ]]; then		echo "@_FW_@";			curl -sX GET ${c_URL_TUMBLEBUG_NS}/resources/securityGroup -H "${c_AUTH}" | jq; fi
 	if [[ "${v_QUERY}" == *"ssh"* ]]; then		echo "@_SSH_@";			curl -sX GET ${c_URL_TUMBLEBUG_NS}/resources/sshKey        -H "${c_AUTH}" -H "${c_CT}" -d '{"connectionName" : "'${NM_CONFIG}'"}' | jq; fi
 	if [[ "${v_QUERY}" == *"mcis"* ]]; then		echo "@_MCIS_@";		curl -sX GET ${c_URL_TUMBLEBUG_NS}/mcis                    -H "${c_AUTH}" | jq; fi
 }

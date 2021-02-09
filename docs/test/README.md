@@ -16,8 +16,8 @@ $ sudo apt-get install jq   # linux
 ### CB-Spider, CB-Tumblebug 실행
 
 ```
-$  docker run -d -p 1024:1024 --name cb-spider cloudbaristaorg/cb-spider:v0.x.0-yyyymmdd
-$  docker run -d -p 1323:1323 --name cb-tumblebug --link cb-spider:cb-spider cloudbaristaorg/cb-tumblebug:v0.x.0-yyyymmdd
+$ docker run -d -p 1024:1024 --name cb-spider cloudbaristaorg/cb-spider:v0.x.0-yyyymmdd
+$ docker run -d -p 1323:1323 --name cb-tumblebug --link cb-spider:cb-spider cloudbaristaorg/cb-tumblebug:v0.x.0-yyyymmdd
 ```
 * 각 컨테이너 이미지의 최신 tag는 다음을 참조
   * https://hub.docker.com/r/cloudbaristaorg/cb-spider/tags
@@ -25,8 +25,8 @@ $  docker run -d -p 1323:1323 --name cb-tumblebug --link cb-spider:cb-spider clo
 
 * 예
 ```
-$  docker run -d -p 1024:1024 --name cb-spider cloudbaristaorg/cb-spider:v0.2.0-20200715
-$  docker run -d -p 1323:1323 --name cb-tumblebug --link cb-spider:cb-spider cloudbaristaorg/cb-tumblebug:v0.2.5
+$ docker run -d -p 1024:1024 --name cb-spider cloudbaristaorg/cb-spider:v0.3.0-espresso
+$ docker run -d -p 1323:1323 --name cb-tumblebug --link cb-spider:cb-spider cloudbaristaorg/cb-tumblebug:v0.3.0-espresso
 ```
 
 ### Cloud Connection Info. 등록

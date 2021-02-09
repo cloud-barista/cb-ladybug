@@ -12,3 +12,6 @@ type Model struct {
 	Name string `json:"name"`
 	Kind string `json:"kind"`
 }
+type ListModel struct {
+	Kind string `json:"kind"`
+}
