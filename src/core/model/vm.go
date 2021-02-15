@@ -7,8 +7,9 @@ import (
 
 	"github.com/cloud-barista/cb-ladybug/src/utils/config"
 	"github.com/cloud-barista/cb-ladybug/src/utils/lang"
-
 	ssh "github.com/cloud-barista/cb-spider/cloud-control-manager/vm-ssh"
+
+	logger "github.com/sirupsen/logrus"
 )
 
 type VM struct {
@@ -29,42 +30,42 @@ type VM struct {
 	Role         string   `json:"role"`
 }
 
-func (v *VM) ConnectionTest(sshInfo *ssh.SSHInfo, vm *VM) error {
+const (
+	remoteTargetPath = "/tmp"
+)
+
+func (self *VM) ConnectionTest(sshInfo *ssh.SSHInfo) error {
 	cmd := "/bin/hostname"
 	_, err := ssh.SSHRun(*sshInfo, cmd)
 	if err != nil {
-		fmt.Println("Error while running cmd: "+cmd, err)
 		return err
 	}
 	return nil
 }
 
-func (v *VM) CopyScripts(sshInfo *ssh.SSHInfo, vm *VM) error {
-	sourcePath := fmt.Sprintf("%s/src/scripts/", config.Config.AppRootPath)
+func (self *VM) CopyScripts(sshInfo *ssh.SSHInfo) error {
+	sourcePath := fmt.Sprintf("%s/src/scripts", *config.Config.AppRootPath)
 	sourceFile := []string{config.BOOTSTRAP_FILE}
-	if vm.Role == config.CONTROL_PLANE {
+	if self.Role == config.CONTROL_PLANE {
 		sourceFile = append(sourceFile, config.INIT_FILE)
 	}
-	targetPath := config.Config.TargetPath + "/"
 
-	fmt.Printf("start script file copy (src=%s, dest=%s)\n", sourcePath, targetPath)
+	logger.Infof("start script file copy (vm=%s, src=%s, dest=%s)\n", self.Name, sourcePath, remoteTargetPath)
 	for _, f := range sourceFile {
-		src := fmt.Sprintf("%s%s", sourcePath, f)
-		dest := fmt.Sprintf("%s%s", targetPath, f)
+		src := fmt.Sprintf("%s/%s", sourcePath, f)
+		dest := fmt.Sprintf("%s/%s", remoteTargetPath, f)
 		if err := ssh.SSHCopy(*sshInfo, src, dest); err != nil {
-			fmt.Println("Error while copying file ", err)
-			return errors.New("copy scripts error")
+			return errors.New(fmt.Sprintf("copy scripts error (server=%s, cause=%s)", sshInfo.ServerPort, err))
 		}
 	}
 	return nil
 }
 
-func (v *VM) Bootstrap(sshInfo *ssh.SSHInfo) (bool, error) {
-	cmd := fmt.Sprintf("cd %s;./%s", config.Config.TargetPath, config.BOOTSTRAP_FILE)
+func (self *VM) Bootstrap(sshInfo *ssh.SSHInfo) (bool, error) {
+	cmd := fmt.Sprintf("cd %s;./%s", remoteTargetPath, config.BOOTSTRAP_FILE)
 
 	result, err := ssh.SSHRun(*sshInfo, cmd)
 	if err != nil {
-		fmt.Println("Error while running cmd: "+cmd, err)
 		return false, errors.New("k8s bootstrap error")
 	}
 	if strings.Contains(result, "kubectl set on hold") {
@@ -74,13 +75,12 @@ func (v *VM) Bootstrap(sshInfo *ssh.SSHInfo) (bool, error) {
 	}
 }
 
-func (v *VM) ControlPlaneInit(sshInfo *ssh.SSHInfo, ip string) (string, string, error) {
+func (self *VM) ControlPlaneInit(sshInfo *ssh.SSHInfo, ip string) (string, string, error) {
 	var workerJoinCmd string
 
-	cmd := fmt.Sprintf("cd %s;./%s", config.Config.TargetPath, config.INIT_FILE)
+	cmd := fmt.Sprintf("cd %s;./%s", remoteTargetPath, config.INIT_FILE)
 	cpInitResult, err := ssh.SSHRun(*sshInfo, cmd)
 	if err != nil {
-		fmt.Println("Error while running cmd: "+cmd, err)
 		return "", "", errors.New("k8s control plane node init error")
 	}
 	if strings.Contains(cpInitResult, "Your Kubernetes control-plane has initialized successfully") {
@@ -92,20 +92,19 @@ func (v *VM) ControlPlaneInit(sshInfo *ssh.SSHInfo, ip string) (string, string, 
 	cmd = fmt.Sprintf("sudo sed '5s/.*/    server: https:\\/\\/%s:6443/g' /etc/kubernetes/admin.conf", ip)
 	clusterConfig, err := ssh.SSHRun(*sshInfo, cmd)
 	if err != nil {
-		fmt.Println("Error while running cmd: "+cmd, err)
+		logger.Errorf("Error while running cmd %s (vm=%s, cause=%v)", cmd, self.Name, err)
 	}
 
 	return workerJoinCmd, clusterConfig, nil
 }
 
-func (v *VM) WorkerJoin(sshInfo *ssh.SSHInfo, workerJoinCmd *string) (bool, error) {
+func (self *VM) WorkerJoin(sshInfo *ssh.SSHInfo, workerJoinCmd *string) (bool, error) {
 	if *workerJoinCmd == "" {
 		return false, errors.New("worker node join command empty")
 	}
 	cmd := *workerJoinCmd
 	result, err := ssh.SSHRun(*sshInfo, cmd)
 	if err != nil {
-		fmt.Println("Error while running cmd: "+cmd, err)
 		return false, errors.New("k8s worker node join error")
 	}
 	if strings.Contains(result, "This node has joined the cluster") {
@@ -115,14 +114,13 @@ func (v *VM) WorkerJoin(sshInfo *ssh.SSHInfo, workerJoinCmd *string) (bool, erro
 	}
 }
 
-func (v *VM) WorkerJoinForAddNode(sshInfo *ssh.SSHInfo, workerJoinCmd *string) (bool, error) {
+func (self *VM) WorkerJoinForAddNode(sshInfo *ssh.SSHInfo, workerJoinCmd *string) (bool, error) {
 	if *workerJoinCmd == "" {
 		return false, errors.New("worker node join command empty")
 	}
 	cmd := fmt.Sprintf("sudo %s", *workerJoinCmd)
 	result, err := ssh.SSHRun(*sshInfo, cmd)
 	if err != nil {
-		fmt.Println("Error while running cmd: "+cmd, err)
 		return false, errors.New("k8s worker node join error")
 	}
 	if strings.Contains(result, "This node has joined the cluster") {

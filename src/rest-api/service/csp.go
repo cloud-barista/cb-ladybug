@@ -6,6 +6,7 @@ import (
 
 	"github.com/cloud-barista/cb-ladybug/src/core/model/spider"
 	"github.com/cloud-barista/cb-ladybug/src/utils/config"
+	logger "github.com/sirupsen/logrus"
 )
 
 const (
@@ -59,7 +60,7 @@ func GetVmImageId(csp config.CSP, configName string) (string, error) {
 			return "", err
 		}
 		if !exists {
-			return "", errors.New(fmt.Sprintf("Not found REGION (cause = not found connection config `%s`)", configName))
+			return "", errors.New(fmt.Sprintf("request not found AMI on AWS (cause = not found connection config `%s`)", configName))
 		}
 
 		// http get region data
@@ -69,7 +70,7 @@ func GetVmImageId(csp config.CSP, configName string) (string, error) {
 			return "", err
 		}
 		if !exists {
-			return "", errors.New(fmt.Sprintf("Not found REGION (connection='%s', region name='%s')", configName, conn.RegionName))
+			return "", errors.New(fmt.Sprintf("request not found AMI on AWS (cause = not found region, connection='%s', region name='%s')", configName, conn.RegionName))
 		}
 
 		// find region
@@ -81,20 +82,20 @@ func GetVmImageId(csp config.CSP, configName string) (string, error) {
 			}
 		}
 		if regionName == "" {
-			return "", errors.New(fmt.Sprintf("Not found REGION on KeyValueInfoList (connection='%s', region name='%s')", configName, conn.RegionName))
+			return "", errors.New(fmt.Sprintf("request not found AMI on AWS (cause = region name is empty, connection='%s', region name='%s')", configName, conn.RegionName))
 		}
 
 		// TODO [update/hard-coding] region별 image id
 		imageId := imageMap[regionName]
 		if imageId == "" {
-			return "", errors.New(fmt.Sprintf("Not found AMI (connection='%s', region='%s')", configName, regionName))
+			return "", errors.New(fmt.Sprintf("request not found AMI on AWS image map (connection='%s', region='%s')", configName, regionName))
 		}
 
-		fmt.Println(fmt.Sprintf("AMI find OK (ami='%s', region='%s')", imageId, regionName))
+		logger.Infof("AMI find OK (ami='%s', region='%s')", imageId, regionName)
 		return imageId, nil
 
 	} else {
-		return "", errors.New(fmt.Sprintf("CSP '%s' is not supported", csp))
+		return "", errors.New(fmt.Sprintf("CSP '%s' is not supported (Not found \"vm-machine-image\")", csp))
 	}
 
 }

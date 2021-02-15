@@ -14,26 +14,27 @@ import (
 	"github.com/cloud-barista/cb-ladybug/src/utils/lang"
 
 	ssh "github.com/cloud-barista/cb-spider/cloud-control-manager/vm-ssh"
+	logger "github.com/sirupsen/logrus"
 )
 
 func ListNode(namespace string, clusterName string) (*model.NodeList, error) {
-	nodes := model.NewNodeList()
-	result, err := nodes.SelectList(namespace, clusterName, nodes)
+	nodes := model.NewNodeList(namespace, clusterName)
+	err := nodes.SelectList()
 	if err != nil {
 		return nil, err
 	}
 
-	return result, nil
+	return nodes, nil
 }
 
 func GetNode(namespace string, clusterName string, nodeName string) (*model.Node, error) {
-	node := model.NewNodeDef(nodeName)
-	result, err := node.Select(namespace, clusterName, node)
+	node := model.NewNode(namespace, clusterName, nodeName)
+	err := node.Select()
 	if err != nil {
 		return nil, err
 	}
 
-	return result, nil
+	return node, nil
 }
 
 func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.NodeList, error) {
@@ -74,23 +75,23 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 	specName := fmt.Sprintf("%s-spec", clusterName)
 
 	// vpc
-	fmt.Println(fmt.Sprintf("start create vpc (name=%s)", vpcName))
+	logger.Infof("start create vpc (name=%s)", vpcName)
 	vpc := tumblebug.NewVPC(namespace, vpcName, req.Config)
 	exists, e := vpc.GET()
 	if e != nil {
 		return nil, e
 	}
 	if exists {
-		fmt.Println(fmt.Sprintf("reuse vpc (name=%s, cause='already exists')", vpcName))
+		logger.Infof("reuse vpc (name=%s, cause='already exists')", vpcName)
 	} else {
 		if e = vpc.POST(); e != nil {
 			return nil, e
 		}
-		fmt.Println(fmt.Sprintf("create vpc OK.. (name=%s)", vpcName))
+		logger.Infof("create vpc OK.. (name=%s)", vpcName)
 	}
 
 	// firewall
-	fmt.Println(fmt.Sprintf("start create firewall (name=%s)", firewallName))
+	logger.Infof("start create firewall (name=%s)", firewallName)
 	fw := tumblebug.NewFirewall(namespace, firewallName, req.Config)
 	fw.VPCId = vpcName
 	exists, e = fw.GET()
@@ -98,16 +99,16 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 		return nil, e
 	}
 	if exists {
-		fmt.Println(fmt.Sprintf("reuse firewall (name=%s, cause='already exists')", firewallName))
+		logger.Infof("reuse firewall (name=%s, cause='already exists')", firewallName)
 	} else {
 		if e = fw.POST(); e != nil {
 			return nil, e
 		}
-		fmt.Println(fmt.Sprintf("create firewall OK.. (name=%s)", firewallName))
+		logger.Infof("create firewall OK.. (name=%s)", firewallName)
 	}
 
 	// sshKey
-	fmt.Println(fmt.Sprintf("start create ssh key (name=%s)", sshkeyName))
+	logger.Infof("start create ssh key (name=%s)", sshkeyName)
 	sshKey := tumblebug.NewSSHKey(namespace, sshkeyName, req.Config)
 	sshKey.Username = "cb-cluster"
 	exists, e = sshKey.GET()
@@ -115,16 +116,16 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 		return nil, e
 	}
 	if exists {
-		fmt.Println(fmt.Sprintf("reuse ssh key (name=%s, cause='already exists')", sshkeyName))
+		logger.Infof("reuse ssh key (name=%s, cause='already exists')", sshkeyName)
 	} else {
 		if e = sshKey.POST(); e != nil {
 			return nil, e
 		}
-		fmt.Println(fmt.Sprintf("create ssh key OK.. (name=%s)", sshkeyName))
+		logger.Infof("create ssh key OK.. (name=%s)", sshkeyName)
 	}
 
 	// image
-	fmt.Println(fmt.Sprintf("start create image (name=%s)", imageName))
+	logger.Infof("start create image (name=%s)", imageName)
 	// get image id
 	imageId, e := GetVmImageId(csp, req.Config)
 	if e != nil {
@@ -138,16 +139,16 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 		return nil, e
 	}
 	if exists {
-		fmt.Println(fmt.Sprintf("reuse image (name=%s, cause='already exists')", imageName))
+		logger.Infof("reuse image (name=%s, cause='already exists')", imageName)
 	} else {
 		if e = image.POST(); e != nil {
 			return nil, e
 		}
-		fmt.Println(fmt.Sprintf("create image OK.. (name=%s)", imageName))
+		logger.Infof("create image OK.. (name=%s)", imageName)
 	}
 
 	// spec
-	fmt.Println(fmt.Sprintf("start create worker node spec (name=%s)", specName))
+	logger.Infof("start create worker node spec (name=%s)", specName)
 	spec := tumblebug.NewSpec(namespace, specName, req.Config)
 	spec.CspSpecName = req.WorkerNodeSpec
 	spec.Role = config.WORKER
@@ -156,12 +157,12 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 		return nil, e
 	}
 	if exists {
-		fmt.Println(fmt.Sprintf("reuse worker node spec (name=%s, cause='already exists')", specName))
+		logger.Infof("reuse worker node spec (name=%s, cause='already exists')", specName)
 	} else {
 		if e = spec.POST(); e != nil {
 			return nil, e
 		}
-		fmt.Println(fmt.Sprintf("create worker node spec OK.. (name=%s)", specName))
+		logger.Infof("create worker node spec OK.. (name=%s)", specName)
 	}
 
 	// vm
@@ -185,21 +186,21 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 		}
 
 		// vm 생성
-		fmt.Println(fmt.Sprintf("start create VM (mcisname=%s, nodename=%s)", mcisName, vm.VM.Name))
+		logger.Infof("start create VM (mcisname=%s, nodename=%s)", mcisName, vm.VM.Name)
 		err := vm.POST()
 		if err != nil {
-			fmt.Println(fmt.Sprintf("create VM error (mcisname=%s, nodename=%s)", mcisName, vm.VM.Name))
+			logger.Warnf("create VM error (mcisname=%s, nodename=%s)", mcisName, vm.VM.Name)
 			return nil, err
 		}
 		VMs = append(VMs, vm.VM)
-		fmt.Println(fmt.Sprintf("create VM OK.. (mcisname=%s, nodename=%s)", mcisName, vm.VM.Name))
+		logger.Infof("create VM OK.. (mcisname=%s, nodename=%s)", mcisName, vm.VM.Name)
 	}
 
 	var wg sync.WaitGroup
 	c := make(chan error)
 	wg.Add(len(VMs))
 
-	fmt.Println("start connect VMs")
+	logger.Infoln("start connect VMs")
 	for _, vm := range VMs {
 		go func(vm model.VM) {
 			defer wg.Done()
@@ -209,8 +210,8 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 				ServerPort: fmt.Sprintf("%s:22", vm.PublicIP),
 			}
 
-			_ = vm.ConnectionTest(&sshInfo, &vm)
-			err := vm.CopyScripts(&sshInfo, &vm)
+			_ = vm.ConnectionTest(&sshInfo)
+			err := vm.CopyScripts(&sshInfo)
 			if err != nil {
 				c <- err
 			}
@@ -234,25 +235,25 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 	go func() {
 		wg.Wait()
 		close(c)
-		fmt.Println("end connect VMs")
+		logger.Infoln("end connect VMs")
 	}()
 
 	for err := range c {
 		if err != nil {
-			common.CBLog.Error(" worker join error == ", err)
+			logger.Warnf("worker join error (cause=%v)", err)
 			return nil, err
 		}
 	}
 
 	// insert store
-	nodes := model.NewNodeList()
+	nodes := model.NewNodeList(namespace, clusterName)
 	for _, vm := range VMs {
-		node := model.NewNode(vm)
-		result, err := node.Insert(namespace, clusterName, node)
+		node := model.NewNodeVM(namespace, clusterName, vm)
+		err := node.Insert()
 		if err != nil {
 			return nil, err
 		}
-		nodes.Items = append(nodes.Items, *result)
+		nodes.Items = append(nodes.Items, *node)
 	}
 
 	return nodes, nil
@@ -296,7 +297,7 @@ func RemoveNode(namespace string, clusterName string, nodeName string) (*model.S
 		return status, err
 	}
 	if strings.Contains(result, fmt.Sprintf("node/%s drained", hostName)) || strings.Contains(result, fmt.Sprintf("node/%s evicted", hostName)) {
-		fmt.Println("drain node success")
+		logger.Infoln("drain node success")
 	} else {
 		status.Message = "kubectl drain failed"
 		return status, err
@@ -310,7 +311,7 @@ func RemoveNode(namespace string, clusterName string, nodeName string) (*model.S
 		return status, err
 	}
 	if strings.Contains(result, "deleted") {
-		fmt.Println("delete node success")
+		logger.Infoln("delete node success")
 	} else {
 		status.Message = "kubectl delete node failed"
 		return status, errors.New("kubectl delete node failed")
@@ -326,8 +327,8 @@ func RemoveNode(namespace string, clusterName string, nodeName string) (*model.S
 	}
 
 	// delete node in store
-	node := model.NewNodeDef(nodeName)
-	if err := node.Delete(namespace, clusterName, node); err != nil {
+	node := model.NewNode(namespace, clusterName, nodeName)
+	if err := node.Delete(); err != nil {
 		status.Message = err.Error()
 		return status, nil
 	}
@@ -404,17 +405,5 @@ func getWorkerJoinCmdForAddNode(userAccount string, cpNode *model.Node) (string,
 	if err != nil {
 		return "", err
 	}
-	// privateIp -> publicIP
-	// if strings.Contains(result, "kubeadm join") {
-	// 	ip := "(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])"
-	// 	ipRegEx, _ := regexp.Compile(fmt.Sprintf("%s\\.%s\\.%s\\.%s", ip, ip, ip, ip))
-	// 	if ipRegEx.MatchString(result) {
-	// 		res := ipRegEx.FindString(result)
-	// 		result = strings.Replace(result, res, cpNode.PublicIP, 1)
-	// 	}
-	// } else {
-	// 	return "", errors.New("get join command error")
-	// }
-
 	return result, nil
 }
