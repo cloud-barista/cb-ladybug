@@ -215,6 +215,7 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 			if err != nil {
 				c <- err
 			}
+			logger.Infoln("bootstrap")
 			bootstrapResult, err := vm.Bootstrap(&sshInfo)
 			if err != nil {
 				c <- err
@@ -222,12 +223,19 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 			if !bootstrapResult {
 				c <- errors.New(vm.Name + " bootstrap failed")
 			}
+			logger.Infoln("join")
 			result, err := vm.WorkerJoinForAddNode(&sshInfo, &workerJoinCmd)
 			if err != nil {
 				c <- err
 			}
 			if !result {
 				c <- errors.New(vm.Name + " join failed")
+			}
+
+			logger.Infoln("kilo annotation")
+			err = vm.KiloAnnotation(&sshInfo, vm.Role)
+			if err != nil {
+				logger.Warnf("%s kilo annotation failed", vm.Name)
 			}
 		}(vm)
 	}
