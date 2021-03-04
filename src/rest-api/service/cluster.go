@@ -319,6 +319,7 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 		}
 
 		if vm.Role == config.CONTROL_PLANE {
+			logger.Infoln("init")
 			var clusterConfig string
 			workerJoinCmd, clusterConfig, err = vm.ControlPlaneInit(&sshInfo, vm.PublicIP)
 			if err != nil {
@@ -328,6 +329,7 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 			}
 			cluster.ClusterConfig = clusterConfig
 		} else {
+			logger.Infoln("join")
 			joinResult, err := vm.WorkerJoin(&sshInfo, &workerJoinCmd)
 			if err != nil {
 				logger.Warnf("%s join error (cause=%v)", vm.Name, err)
@@ -339,6 +341,12 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 				cluster.Fail()
 				return nil, errors.New(vm.Name + " join failed")
 			}
+		}
+
+		logger.Infoln("kilo annotation")
+		err := vm.KiloAnnotation(&sshInfo, vm.Role)
+		if err != nil {
+			logger.Warnf("%s kilo annotation failed", vm.Name)
 		}
 	}
 	logger.Infoln("end k8s init & join")

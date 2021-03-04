@@ -129,3 +129,21 @@ func (self *VM) WorkerJoinForAddNode(sshInfo *ssh.SSHInfo, workerJoinCmd *string
 		return false, errors.New("worker node join failed")
 	}
 }
+
+func (self *VM) KiloAnnotation(sshInfo *ssh.SSHInfo, role string) error {
+	var conf string
+	if role == config.CONTROL_PLANE {
+		conf = "--kubeconfig=/etc/kubernetes/admin.conf"
+	} else {
+		conf = "--kubeconfig=/etc/kubernetes/kubelet.conf"
+	}
+	cmd := fmt.Sprintf(`sudo kubectl annotate node $(hostname) kilo.squat.ai/location="$(hostname)" %s;
+	sudo kubectl annotate node $(hostname) kilo.squat.ai/force-endpoint="$(dig +short myip.opendns.com @resolver1.opendns.com):51820" %s;
+	sudo kubectl annotate node $(hostname) kilo.squat.ai/persistent-keepalive=25 %s;`, conf, conf, conf)
+
+	_, err := ssh.SSHRun(*sshInfo, cmd)
+	if err != nil {
+		return errors.New("kilo annotation error")
+	}
+	return nil
+}
