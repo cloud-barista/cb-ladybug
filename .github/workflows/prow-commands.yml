@@ -4,10 +4,14 @@ name: "action by command-style comments"
 # Event on a comment (in issue and PR)
 on:
   issue_comment:
-    types: [created]
+    types: [ created, edited ]
+  pull_request_review_comment:
+    types: [ created, edited ]
 
 jobs:
   execute:
+    # Execute when author_association of the comment is OWNER or MEMBER
+    if: ${{ github.event.comment.author_association == 'OWNER' || github.event.comment.author_association == 'MEMBER' || github.event.comment.author_association == 'COLLABORATOR' }}
     runs-on: ubuntu-18.04
     # Execute action according to commands
     steps:
@@ -16,11 +20,11 @@ jobs:
         run: |
           echo event.comment.user.login is ${{ github.event.comment.user.login }}
           echo event.comment.author_association is ${{ github.event.comment.author_association }}
-          echo Hello, this workflow is allowed to OWNER and MEMBER.     
+          echo Hello, this workflow is allowed to OWNER, MEMBER, COLLABORATOR.     
+
       # Action according to command (by jpmcb/prow-github-actions)  
-      # Execute when author_association of the comment is OWNER or MEMBER
       - name: Action according to command
-        if: ${{ (github.event.comment.author_association == 'OWNER' || github.event.comment.author_association == 'MEMBER') && startsWith(github.event.comment.body, '/') }}
+        if: ${{ startsWith(github.event.comment.body, '/') }}
         uses: jpmcb/prow-github-actions@v1.1.2
         with:
           prow-commands: '/assign 
