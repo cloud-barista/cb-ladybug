@@ -15,7 +15,7 @@ RUN GOOS=linux CGO_ENABLED=0 go build -ldflags '-w -extldflags "-static"' -tags 
 #-------------------------------------------
 # STEP 2 : build a image
 #-------------------------------------------
-FROM scratch
+FROM scratch as prod
 
 COPY --from=builder /usr/src/app/conf/* /app/conf/
 COPY --from=builder /usr/src/app/cb-ladybug /app/
