@@ -79,6 +79,10 @@ $ export SECRET="<aws_secret_access_key>"
 $ export REGION="<region name>" 
 $ export ZONE="<zone name>"
 
+# 예: ap-northeast-2 (서울리전)
+$ export REGION="ap-northeast-2"
+$ export ZONE="ap-northeast-2a"
+
 # 예: ap-northeast-1 (일본리전)
 $ export REGION="ap-northeast-1"
 $ export ZONE="ap-northeast-1a"
