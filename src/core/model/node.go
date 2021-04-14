@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/cloud-barista/cb-ladybug/src/core/common"
+	"github.com/cloud-barista/cb-ladybug/src/utils/config"
 	"github.com/cloud-barista/cb-ladybug/src/utils/lang"
 )
 
@@ -13,11 +14,12 @@ type Node struct {
 	Model
 	namespace   string
 	clusterName string
-	Credential  string `json:"credential"`
-	PublicIP    string `json:"publicIp"`
-	UId         string `json:"uid"`
-	Role        string `json:"role"`
-	Spec        string `json:"spec"`
+	Credential  string     `json:"credential"`
+	PublicIP    string     `json:"publicIp"`
+	UId         string     `json:"uid"`
+	Role        string     `json:"role"`
+	Spec        string     `json:"spec"`
+	Csp         config.CSP `json:"csp"`
 }
 
 type NodeList struct {
@@ -25,12 +27,6 @@ type NodeList struct {
 	namespace   string
 	clusterName string
 	Items       []Node `json:"items"`
-}
-
-type NodeReq struct {
-	Config          string `json:"config"`
-	WorkerNodeSpec  string `json:"workerNodeSpec"`
-	WorkerNodeCount int    `json:"workerNodeCount"`
 }
 
 func NewNodeVM(namespace string, clusterName string, vm VM) *Node {
@@ -41,6 +37,7 @@ func NewNodeVM(namespace string, clusterName string, vm VM) *Node {
 		UId:         vm.UId,
 		Role:        vm.Role,
 		Spec:        vm.Spec,
+		Csp:         vm.Csp,
 		namespace:   namespace,
 		clusterName: clusterName,
 	}

@@ -395,6 +395,9 @@ var doc = `{
                 "clusterConfig": {
                     "type": "string"
                 },
+                "cpLeader": {
+                    "type": "string"
+                },
                 "kind": {
                     "type": "string"
                 },
@@ -405,6 +408,9 @@ var doc = `{
                     "type": "string"
                 },
                 "namespace": {
+                    "type": "string"
+                },
+                "networkCni": {
                     "type": "string"
                 },
                 "nodes": {
@@ -438,19 +444,49 @@ var doc = `{
         "model.ClusterReq": {
             "type": "object",
             "properties": {
-                "controlPlaneNodeCount": {
-                    "type": "integer"
+                "config": {
+                    "type": "object",
+                    "$ref": "#/definitions/model.Config"
                 },
-                "controlPlaneNodeSpec": {
-                    "type": "string"
+                "controlPlane": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.NodeConfig"
+                    }
                 },
                 "name": {
                     "type": "string"
                 },
-                "workerNodeCount": {
-                    "type": "integer"
+                "worker": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.NodeConfig"
+                    }
+                }
+            }
+        },
+        "model.Config": {
+            "type": "object",
+            "properties": {
+                "kubernetes": {
+                    "type": "object",
+                    "$ref": "#/definitions/model.Kubernetes"
+                }
+            }
+        },
+        "model.Kubernetes": {
+            "type": "object",
+            "properties": {
+                "networkCni": {
+                    "type": "string"
                 },
-                "workerNodeSpec": {
+                "podCidr": {
+                    "type": "string"
+                },
+                "serviceCidr": {
+                    "type": "string"
+                },
+                "serviceDnsDomain": {
                     "type": "string"
                 }
             }
@@ -459,6 +495,9 @@ var doc = `{
             "type": "object",
             "properties": {
                 "credential": {
+                    "type": "string"
+                },
+                "csp": {
                     "type": "string"
                 },
                 "kind": {
@@ -481,6 +520,20 @@ var doc = `{
                 }
             }
         },
+        "model.NodeConfig": {
+            "type": "object",
+            "properties": {
+                "connection": {
+                    "type": "string"
+                },
+                "count": {
+                    "type": "integer"
+                },
+                "spec": {
+                    "type": "string"
+                }
+            }
+        },
         "model.NodeList": {
             "type": "object",
             "properties": {
@@ -498,14 +551,17 @@ var doc = `{
         "model.NodeReq": {
             "type": "object",
             "properties": {
-                "config": {
-                    "type": "string"
+                "controlPlane": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.NodeConfig"
+                    }
                 },
-                "workerNodeCount": {
-                    "type": "integer"
-                },
-                "workerNodeSpec": {
-                    "type": "string"
+                "worker": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.NodeConfig"
+                    }
                 }
             }
         },

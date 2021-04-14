@@ -3,7 +3,7 @@ package lang
 import (
 	"fmt"
 	"math/rand"
-	"regexp"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -48,24 +48,6 @@ func GetStoreNodeKey(namespace string, clusterName string, nodeName string) stri
 	}
 }
 
-// for worker node join command
-func GetWorkerJoinCmd(cpInitResult string) string {
-	var join1, join2 string
-	joinRegex, _ := regexp.Compile("kubeadm\\sjoin\\s(.*?)\\s--token\\s(.*?)\\s")
-	joinRegex2, _ := regexp.Compile("--discovery-token-ca-cert-hash\\ssha256:(.*?)\\n")
-
-	if joinRegex.MatchString(cpInitResult) {
-		res := joinRegex.FindStringSubmatch(cpInitResult)
-		join1 = res[0]
-	}
-	if joinRegex2.MatchString(cpInitResult) {
-		res := joinRegex2.FindStringSubmatch(cpInitResult)
-		join2 = res[0]
-	}
-
-	return fmt.Sprintf("sudo %s %s", join1, join2)
-}
-
 // get uuid
 func GetUid() string {
 	return uuid.New().String()
@@ -89,6 +71,24 @@ func GetRandomString(n int) string {
 }
 
 // get node name
-func GetNodeName(clusterName string, role string) string {
-	return fmt.Sprintf("%s-%s-%s", clusterName, role[:1], GetRandomString(5))
+func GetNodeName(clusterName string, role string, idx int) string {
+	return fmt.Sprintf("%s-%s-%d-%s", clusterName, role[:1], idx, GetRandomString(5))
+}
+
+func GetIdxToInt(idx string) int {
+	i, err := strconv.Atoi(idx)
+	if err != nil {
+		i = 0
+	}
+	return i
+}
+
+func GetMaxNumber(arr []int) int {
+	max := 0
+	for _, val := range arr {
+		if val > max {
+			max = val
+		}
+	}
+	return max
 }

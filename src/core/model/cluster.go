@@ -24,6 +24,8 @@ type Cluster struct {
 	MCIS          string `json:"mcis"`
 	Namespace     string `json:"namespace"`
 	ClusterConfig string `json:"clusterConfig"`
+	CpLeader      string `json:"cpLeader"`
+	NetworkCni    string `json:"networkCni"`
 	Nodes         []Node `json:"nodes"`
 }
 
@@ -31,14 +33,6 @@ type ClusterList struct {
 	ListModel
 	namespace string
 	Items     []Cluster `json:"items"`
-}
-
-type ClusterReq struct {
-	Name                  string `json:"name"`
-	ControlPlaneNodeSpec  string `json:"controlPlaneNodeSpec"`
-	ControlPlaneNodeCount int    `json:"controlPlaneNodeCount"`
-	WorkerNodeSpec        string `json:"workerNodeSpec"`
-	WorkerNodeCount       int    `json:"workerNodeCount"`
 }
 
 func NewCluster(namespace string, name string) *Cluster {

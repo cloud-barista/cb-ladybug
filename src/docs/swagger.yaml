@@ -4,6 +4,8 @@ definitions:
     properties:
       clusterConfig:
         type: string
+      cpLeader:
+        type: string
       kind:
         type: string
       mcis:
@@ -11,6 +13,8 @@ definitions:
       name:
         type: string
       namespace:
+        type: string
+      networkCni:
         type: string
       nodes:
         items:
@@ -32,20 +36,42 @@ definitions:
     type: object
   model.ClusterReq:
     properties:
-      controlPlaneNodeCount:
-        type: integer
-      controlPlaneNodeSpec:
-        type: string
+      config:
+        $ref: '#/definitions/model.Config'
+        type: object
+      controlPlane:
+        items:
+          $ref: '#/definitions/model.NodeConfig'
+        type: array
       name:
         type: string
-      workerNodeCount:
-        type: integer
-      workerNodeSpec:
+      worker:
+        items:
+          $ref: '#/definitions/model.NodeConfig'
+        type: array
+    type: object
+  model.Config:
+    properties:
+      kubernetes:
+        $ref: '#/definitions/model.Kubernetes'
+        type: object
+    type: object
+  model.Kubernetes:
+    properties:
+      networkCni:
+        type: string
+      podCidr:
+        type: string
+      serviceCidr:
+        type: string
+      serviceDnsDomain:
         type: string
     type: object
   model.Node:
     properties:
       credential:
+        type: string
+      csp:
         type: string
       kind:
         type: string
@@ -60,6 +86,15 @@ definitions:
       uid:
         type: string
     type: object
+  model.NodeConfig:
+    properties:
+      connection:
+        type: string
+      count:
+        type: integer
+      spec:
+        type: string
+    type: object
   model.NodeList:
     properties:
       items:
@@ -71,12 +106,14 @@ definitions:
     type: object
   model.NodeReq:
     properties:
-      config:
-        type: string
-      workerNodeCount:
-        type: integer
-      workerNodeSpec:
-        type: string
+      controlPlane:
+        items:
+          $ref: '#/definitions/model.NodeConfig'
+        type: array
+      worker:
+        items:
+          $ref: '#/definitions/model.NodeConfig'
+        type: array
     type: object
   model.Status:
     properties:

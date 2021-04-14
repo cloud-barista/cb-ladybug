@@ -99,3 +99,26 @@ func GetVmImageId(csp config.CSP, configName string) (string, error) {
 	}
 
 }
+
+// get CSP Name
+func GetCSPName(providerName string) config.CSP {
+	switch providerName {
+	case "AWS":
+		return config.CSP_AWS
+	case "GCP":
+		return config.CSP_GCP
+	}
+	return ""
+}
+
+// get Region Name
+func GetRegionName(infoList []spider.KeyValue) string {
+	regionName := ""
+	for i := 0; i < len(infoList); i++ {
+		if infoList[i].Key == "Region" {
+			regionName = infoList[i].Value //get region name
+			break
+		}
+	}
+	return regionName
+}
