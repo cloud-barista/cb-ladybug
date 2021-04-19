@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/cloud-barista/cb-ladybug/src/core/model/spider"
 	"github.com/cloud-barista/cb-ladybug/src/utils/config"
@@ -101,14 +102,14 @@ func GetVmImageId(csp config.CSP, configName string) (string, error) {
 }
 
 // get CSP Name
-func GetCSPName(providerName string) config.CSP {
-	switch providerName {
-	case "AWS":
-		return config.CSP_AWS
-	case "GCP":
-		return config.CSP_GCP
+func GetCSPName(providerName string) (config.CSP, error) {
+	switch strings.ToLower(providerName) {
+	case "aws":
+		return config.CSP_AWS, nil
+	case "gcp":
+		return config.CSP_GCP, nil
 	}
-	return ""
+	return "", errors.New(providerName + "is not supported")
 }
 
 // get Region Name

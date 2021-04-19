@@ -29,7 +29,10 @@ func SetNodeConfigInfos(nodeConfigs []model.NodeConfig, role string) ([]NodeConf
 		if !exists {
 			return nil, errors.New(fmt.Sprintf("%s Connection does not exist (connectionName=%s)", role, nodeConfig.Connection))
 		}
-		csp := GetCSPName(conn.ProviderName)
+		csp, err := GetCSPName(conn.ProviderName)
+		if err != nil {
+			return nil, err
+		}
 
 		region := spider.NewRegion(conn.RegionName)
 		exists, err = region.GET()
