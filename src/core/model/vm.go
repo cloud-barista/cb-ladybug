@@ -110,11 +110,10 @@ func (self *VM) InstallHAProxy(sshInfo *ssh.SSHInfo, IPs []string) error {
 	cmd := `sudo add-apt-repository -y ppa:vbernat/haproxy-1.7;
 	sudo apt update;
 	sudo apt install -y haproxy;`
-	result, err := ssh.SSHRun(*sshInfo, cmd)
+	_, err := ssh.SSHRun(*sshInfo, cmd)
 	if err != nil {
 		return err
 	}
-	fmt.Printf(" result := %s", result)
 
 	var servers string
 	for i := 0; i < len(IPs); i++ {
@@ -148,7 +147,7 @@ EOF"
 # haproxy 재시작
 sudo systemctl restart haproxy`, servers)
 
-	result, err = ssh.SSHRun(*sshInfo, cmd)
+	_, err = ssh.SSHRun(*sshInfo, cmd)
 	if err != nil {
 		logger.Warnf("install haproxy error (name=%s, cause=%v)", self.Name, err)
 		return err
