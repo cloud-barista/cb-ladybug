@@ -18,7 +18,9 @@ frontend apiserver
   default_backend apiserver
 backend apiserver
   balance roundrobin
-SERVERS
+# {{SERVERS}} will be replaced to provisioned kubernetes api-servers' ip addresses as below:
+#   server  api1  111.222.333.444:6443  check
+{{SERVERS}}
 EOF"
 
 # haproxy 재시작

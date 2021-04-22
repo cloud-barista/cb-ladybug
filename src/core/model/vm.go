@@ -123,7 +123,7 @@ func (self *VM) InstallHAProxy(sshInfo *ssh.SSHInfo, IPs []string) error {
 			servers += "\\n"
 		}
 	}
-	cmd = fmt.Sprintf("sudo sed 's/SERVERS/%s/g' %s/%s", servers, remoteTargetPath, config.HA_PROXY_FILE)
+	cmd = fmt.Sprintf("sudo sed '23 s/{{SERVERS}}/%s/g' %s/%s", servers, remoteTargetPath, config.HA_PROXY_FILE)
 	result, err := ssh.SSHRun(*sshInfo, cmd)
 	if err != nil {
 		logger.Warnf("get haproxy command error (name=%s, cause=%v)", self.Name, err)
