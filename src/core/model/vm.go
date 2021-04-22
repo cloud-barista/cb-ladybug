@@ -51,6 +51,7 @@ func (self *VM) CopyScripts(sshInfo *ssh.SSHInfo, networkCni string) error {
 	sourceFile := []string{config.BOOTSTRAP_FILE}
 	if self.Role == config.CONTROL_PLANE && self.IsCPLeader {
 		sourceFile = append(sourceFile, config.INIT_FILE)
+		sourceFile = append(sourceFile, config.HA_PROXY_FILE)
 	}
 	if networkCni == config.NETWORKCNI_CANAL {
 		sourceFile = append(sourceFile, config.LADYBUG_BOOTSTRAP_CANAL_FILE)
@@ -116,38 +117,19 @@ func (self *VM) InstallHAProxy(sshInfo *ssh.SSHInfo, IPs []string) error {
 	}
 
 	var servers string
-	for i := 0; i < len(IPs); i++ {
-		servers += fmt.Sprintf("  server  api%d  %s:6443  check", i+1, IPs[i])
+	for i, ip := range IPs {
+		servers += fmt.Sprintf("  server  api%d  %s:6443  check", i+1, ip)
 		if i < len(IPs)-1 {
-			servers += "\n"
+			servers += "\\n"
 		}
 	}
-	cmd = fmt.Sprintf(`sudo bash -c "cat << EOF > /etc/haproxy/haproxy.cfg
-global
-  log 127.0.0.1 local0
-  maxconn 2000
-  uid 0
-  gid 0
-  daemon
-defaults
-  log global
-  mode tcp
-  option dontlognull
-  timeout connect 5000ms
-  timeout client 50000ms
-  timeout server 50000ms
-frontend apiserver
-  bind :9998
-  default_backend apiserver
-backend apiserver
-  balance roundrobin
-%s
-EOF"
-
-# haproxy 재시작
-sudo systemctl restart haproxy`, servers)
-
-	_, err = ssh.SSHRun(*sshInfo, cmd)
+	cmd = fmt.Sprintf("sudo sed 's/SERVERS/%s/g' %s/%s", servers, remoteTargetPath, config.HA_PROXY_FILE)
+	result, err := ssh.SSHRun(*sshInfo, cmd)
+	if err != nil {
+		logger.Warnf("get haproxy command error (name=%s, cause=%v)", self.Name, err)
+		return err
+	}
+	_, err = ssh.SSHRun(*sshInfo, result)
 	if err != nil {
 		logger.Warnf("install haproxy error (name=%s, cause=%v)", self.Name, err)
 		return err
@@ -242,7 +224,6 @@ func (self *VM) WorkerJoin(sshInfo *ssh.SSHInfo, workerJoinCmd *string) error {
 }
 
 func getJoinCmd(cpInitResult string) []string {
-	logger.Warnf(" cpInitResult := %s", cpInitResult)
 	var join1, join2, join3 string
 	joinRegex, _ := regexp.Compile("kubeadm\\sjoin\\s(.*?)\\s--token\\s(.*?)\\n")
 	joinRegex2, _ := regexp.Compile("--discovery-token-ca-cert-hash\\ssha256:(.*?)\\n")

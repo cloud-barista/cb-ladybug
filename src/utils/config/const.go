@@ -11,6 +11,7 @@ const (
 	LADYBUG_BOOTSTRAP_CANAL_FILE = "ladybug-bootstrap-canal.sh"
 	LADYBUG_BOOTSTRAP_KILO_FILE  = "ladybug-bootstrap-kilo.sh"
 	SYSTEMD_SERVICE_FILE         = "systemd-service.sh"
+	HA_PROXY_FILE                = "haproxy.sh"
 
 	GCP_IMAGE_ID = "https://www.googleapis.com/compute/v1/projects/ubuntu-os-cloud/global/images/ubuntu-1804-bionic-v20201014"
 
