@@ -108,14 +108,6 @@ func (self *VM) Bootstrap(sshInfo *ssh.SSHInfo) error {
 }
 
 func (self *VM) InstallHAProxy(sshInfo *ssh.SSHInfo, IPs []string) error {
-	cmd := `sudo add-apt-repository -y ppa:vbernat/haproxy-1.7;
-	sudo apt update;
-	sudo apt install -y haproxy;`
-	_, err := ssh.SSHRun(*sshInfo, cmd)
-	if err != nil {
-		return err
-	}
-
 	var servers string
 	for i, ip := range IPs {
 		servers += fmt.Sprintf("  server  api%d  %s:6443  check", i+1, ip)
@@ -123,7 +115,7 @@ func (self *VM) InstallHAProxy(sshInfo *ssh.SSHInfo, IPs []string) error {
 			servers += "\\n"
 		}
 	}
-	cmd = fmt.Sprintf("sudo sed 's/^{{SERVERS}}/%s/g' %s/%s", servers, remoteTargetPath, config.HA_PROXY_FILE)
+	cmd := fmt.Sprintf("sudo sed 's/^{{SERVERS}}/%s/g' %s/%s", servers, remoteTargetPath, config.HA_PROXY_FILE)
 	result, err := ssh.SSHRun(*sshInfo, cmd)
 	if err != nil {
 		logger.Warnf("get haproxy command error (name=%s, cause=%v)", self.Name, err)

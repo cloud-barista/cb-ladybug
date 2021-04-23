@@ -1,4 +1,8 @@
 #!/bin/bash
+sudo add-apt-repository -y ppa:vbernat/haproxy-1.7
+sudo apt update
+sudo apt install -y haproxy
+
 sudo bash -c "cat << EOF > /etc/haproxy/haproxy.cfg
 global
   log 127.0.0.1 local0
