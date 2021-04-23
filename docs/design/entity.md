@@ -15,6 +15,8 @@
     mcis: "",
     namespace: "",
     clusterConfig: "",
+    cpLeader: "",
+    networkCni: "",
     nodes: [
       {
         name: "",
@@ -23,6 +25,7 @@
         uid: "",
         role: "control-plane",
         spec: "",
+        csp: "",
       },
       {
         name: "",
@@ -31,6 +34,7 @@
         uid: "",
         role: "worker",
         spec: "",
+        csp: "",
       },
       ...
     ]
@@ -50,6 +54,8 @@
 |mcis           |MCIS 명            |string |                                      |
 |namespace      |MCIS 네임스페이스  |string |                                      |
 |clusterConfig  |클러스터 연결정보  |string |Kubernetes 인 경우 kubeconfig.yaml    |
+|cpLeader  |control plane leader 노드명  |string |    |
+|networkCni  |network CNI 정보  |string |    |
 
 
 ## Node
@@ -64,4 +70,4 @@
 |uid            |노드 uid           |string |uuid                       |
 |role           |역할               |string |control-plane/worker       |
 |spec           |spec               |string |                          |
-
+|csp           |csp 정보               |string |                          |

@@ -6,6 +6,8 @@ import (
 
 	"github.com/beego/beego/v2/core/validation"
 	"github.com/cloud-barista/cb-ladybug/src/core/model"
+	"github.com/cloud-barista/cb-ladybug/src/utils/config"
+	"github.com/cloud-barista/cb-ladybug/src/utils/lang"
 	"github.com/labstack/echo/v4"
 )
 
@@ -36,25 +38,31 @@ func Validate(c echo.Context, params []string) error {
 	return nil
 }
 
-func ClusterReqValidate(c echo.Context, req model.ClusterReq) error {
-	if req.ControlPlaneNodeCount != 1 {
-		return errors.New("control plane node count must be one")
-	}
-	if req.WorkerNodeCount < 1 {
-		return errors.New("worker node count must be at least one")
-	}
+func ClusterReqDef(clusterReq model.ClusterReq) {
+	clusterReq.Config.Kubernetes.NetworkCni = lang.NVL(clusterReq.Config.Kubernetes.NetworkCni, config.NETWORKCNI_KILO)
+	clusterReq.Config.Kubernetes.PodCidr = lang.NVL(clusterReq.Config.Kubernetes.PodCidr, config.POD_CIDR)
+	clusterReq.Config.Kubernetes.ServiceCidr = lang.NVL(clusterReq.Config.Kubernetes.ServiceCidr, config.SERVICE_CIDR)
+	clusterReq.Config.Kubernetes.ServiceDnsDomain = lang.NVL(clusterReq.Config.Kubernetes.ServiceDnsDomain, config.SERVICE_DOMAIN)
+}
 
+func ClusterReqValidate(req model.ClusterReq) error {
+	if len(req.ControlPlane) == 0 {
+		return errors.New("control plane node must be at least one")
+	}
+	if len(req.Worker) == 0 {
+		return errors.New("worker node must be at least one")
+	}
+	if !(req.Config.Kubernetes.NetworkCni == config.NETWORKCNI_CANAL || req.Config.Kubernetes.NetworkCni == config.NETWORKCNI_KILO) {
+		return errors.New("network cni allows only Kilo or Canal")
+	}
 	return nil
 }
 
-func NodeReqValidate(c echo.Context, req model.NodeReq) error {
-	if req.Config == "" {
-		return errors.New("config is required")
+func NodeReqValidate(req model.NodeReq) error {
+	if len(req.ControlPlane) > 0 {
+		return errors.New("control plane node not supported")
 	}
-	if req.WorkerNodeSpec == "" {
-		return errors.New("worker node spec is required")
-	}
-	if req.WorkerNodeCount < 1 {
+	if len(req.Worker) == 0 {
 		return errors.New("worker node count must be at least one")
 	}
 

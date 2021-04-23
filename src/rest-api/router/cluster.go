@@ -77,7 +77,9 @@ func CreateCluster(c echo.Context) error {
 		return app.SendMessage(c, http.StatusBadRequest, err.Error())
 	}
 
-	err := app.ClusterReqValidate(c, *clusterReq)
+	app.ClusterReqDef(*clusterReq)
+
+	err := app.ClusterReqValidate(*clusterReq)
 	if err != nil {
 		logger.Error(err)
 		return app.SendMessage(c, http.StatusBadRequest, err.Error())

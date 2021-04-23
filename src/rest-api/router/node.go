@@ -90,7 +90,7 @@ func AddNode(c echo.Context) error {
 		return app.SendMessage(c, http.StatusBadRequest, err.Error())
 	}
 
-	err := app.NodeReqValidate(c, *nodeReq)
+	err := app.NodeReqValidate(*nodeReq)
 	if err != nil {
 		logger.Error(err)
 		return app.SendMessage(c, http.StatusBadRequest, err.Error())

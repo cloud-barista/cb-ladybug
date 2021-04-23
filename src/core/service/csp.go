@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/cloud-barista/cb-ladybug/src/core/model/spider"
 	"github.com/cloud-barista/cb-ladybug/src/utils/config"
@@ -98,4 +99,27 @@ func GetVmImageId(csp config.CSP, configName string) (string, error) {
 		return "", errors.New(fmt.Sprintf("CSP '%s' is not supported (Not found \"vm-machine-image\")", csp))
 	}
 
+}
+
+// get CSP Name
+func GetCSPName(providerName string) (config.CSP, error) {
+	switch strings.ToLower(providerName) {
+	case "aws":
+		return config.CSP_AWS, nil
+	case "gcp":
+		return config.CSP_GCP, nil
+	}
+	return "", errors.New(providerName + "is not supported")
+}
+
+// get Region Name
+func GetRegionName(infoList []spider.KeyValue) string {
+	regionName := ""
+	for i := 0; i < len(infoList); i++ {
+		if infoList[i].Key == "Region" {
+			regionName = infoList[i].Value //get region name
+			break
+		}
+	}
+	return regionName
 }

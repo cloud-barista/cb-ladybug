@@ -10,6 +10,7 @@ import (
 	"github.com/cloud-barista/cb-ladybug/src/core/common"
 	"github.com/cloud-barista/cb-ladybug/src/core/model"
 	"github.com/cloud-barista/cb-ladybug/src/core/model/tumblebug"
+	"github.com/cloud-barista/cb-ladybug/src/core/service"
 	"github.com/cloud-barista/cb-ladybug/src/utils/config"
 	"github.com/cloud-barista/cb-ladybug/src/utils/lang"
 
@@ -39,24 +40,6 @@ func GetNode(namespace string, clusterName string, nodeName string) (*model.Node
 
 func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.NodeList, error) {
 
-	//TODO [update/hard-coding] connection config
-	csp := config.CSP_GCP
-	if strings.Contains(namespace, "aws") {
-		csp = config.CSP_AWS
-	}
-	//host user account
-	account := GetUserAccount(csp)
-
-	// get join command
-	cpNode, err := getCPNode(namespace, clusterName)
-	if err != nil {
-		return nil, errors.New("control-plane node not found")
-	}
-	workerJoinCmd, err := getWorkerJoinCmdForAddNode(account, cpNode)
-	if err != nil {
-		return nil, errors.New("get join command error")
-	}
-
 	mcisName := clusterName
 	mcis := tumblebug.NewMCIS(namespace, mcisName)
 
@@ -68,176 +51,139 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 		return nil, errors.New("MCIS not found")
 	}
 
-	vpcName := fmt.Sprintf("%s-vpc", clusterName)
-	firewallName := fmt.Sprintf("%s-allow-external", clusterName)
-	sshkeyName := fmt.Sprintf("%s-sshkey", clusterName)
-	imageName := fmt.Sprintf("%s-Ubuntu1804", req.Config)
-	specName := fmt.Sprintf("%s-spec", clusterName)
+	// get join command
+	workerJoinCmd, err := getWorkerJoinCmdForAddNode(namespace, clusterName)
+	if err != nil {
+		return nil, errors.New("join command cannot get")
+	}
+	networkCni := getClusterNetworkCNI(namespace, clusterName)
 
-	// vpc
-	logger.Infof("start create vpc (name=%s)", vpcName)
-	vpc := tumblebug.NewVPC(namespace, vpcName, req.Config)
-	exists, e := vpc.GET()
-	if e != nil {
-		return nil, e
+	var nodeConfigInfos []service.NodeConfigInfo
+	// worker
+	wk, err := service.SetNodeConfigInfos(req.Worker, config.WORKER)
+	if err != nil {
+		return nil, err
 	}
-	if exists {
-		logger.Infof("reuse vpc (name=%s, cause='already exists')", vpcName)
-	} else {
-		if e = vpc.POST(); e != nil {
-			return nil, e
-		}
-		logger.Infof("create vpc OK.. (name=%s)", vpcName)
-	}
+	nodeConfigInfos = append(nodeConfigInfos, wk...)
 
-	// firewall
-	logger.Infof("start create firewall (name=%s)", firewallName)
-	fw := tumblebug.NewFirewall(namespace, firewallName, req.Config)
-	fw.VPCId = vpcName
-	exists, e = fw.GET()
-	if e != nil {
-		return nil, e
-	}
-	if exists {
-		logger.Infof("reuse firewall (name=%s, cause='already exists')", firewallName)
-	} else {
-		if e = fw.POST(); e != nil {
-			return nil, e
-		}
-		logger.Infof("create firewall OK.. (name=%s)", firewallName)
-	}
+	cIdx := 0
+	wIdx := 0
+	maxCIdx, maxWIdx := getMaxIdx(namespace, clusterName)
+	var TVMs []tumblebug.TVM
 
-	// sshKey
-	logger.Infof("start create ssh key (name=%s)", sshkeyName)
-	sshKey := tumblebug.NewSSHKey(namespace, sshkeyName, req.Config)
-	sshKey.Username = "cb-cluster"
-	exists, e = sshKey.GET()
-	if e != nil {
-		return nil, e
-	}
-	if exists {
-		logger.Infof("reuse ssh key (name=%s, cause='already exists')", sshkeyName)
-	} else {
-		if e = sshKey.POST(); e != nil {
-			return nil, e
-		}
-		logger.Infof("create ssh key OK.. (name=%s)", sshkeyName)
-	}
-
-	// image
-	logger.Infof("start create image (name=%s)", imageName)
-	// get image id
-	imageId, e := GetVmImageId(csp, req.Config)
-	if e != nil {
-		return nil, e
-	}
-
-	image := tumblebug.NewImage(namespace, imageName, req.Config)
-	image.CspImageId = imageId
-	exists, e = image.GET()
-	if e != nil {
-		return nil, e
-	}
-	if exists {
-		logger.Infof("reuse image (name=%s, cause='already exists')", imageName)
-	} else {
-		if e = image.POST(); e != nil {
-			return nil, e
-		}
-		logger.Infof("create image OK.. (name=%s)", imageName)
-	}
-
-	// spec
-	logger.Infof("start create worker node spec (name=%s)", specName)
-	spec := tumblebug.NewSpec(namespace, specName, req.Config)
-	spec.CspSpecName = req.WorkerNodeSpec
-	spec.Role = config.WORKER
-	exists, e = spec.GET()
-	if e != nil {
-		return nil, e
-	}
-	if exists {
-		logger.Infof("reuse worker node spec (name=%s, cause='already exists')", specName)
-	} else {
-		if e = spec.POST(); e != nil {
-			return nil, e
-		}
-		logger.Infof("create worker node spec OK.. (name=%s)", specName)
-	}
-
-	// vm
-	var VMs []model.VM
-	for i := 0; i < req.WorkerNodeCount; i++ {
-		vm := tumblebug.NewTVm(namespace, mcisName)
-		vm.VM = model.VM{
-			Name:         lang.GetNodeName(clusterName, spec.Role),
-			Config:       req.Config,
-			VPC:          vpc.Name,
-			Subnet:       vpc.Subnets[0].Name,
-			Firewall:     []string{fw.Name},
-			SSHKey:       sshKey.Name,
-			Image:        image.Name,
-			Spec:         spec.Name,
-			UserAccount:  account,
-			UserPassword: "",
-			Description:  "",
-			Credential:   sshKey.PrivateKey,
-			Role:         spec.Role,
-		}
-
-		// vm 생성
-		logger.Infof("start create VM (mcisname=%s, nodename=%s)", mcisName, vm.VM.Name)
-		err := vm.POST()
+	for _, nodeConfigInfo := range nodeConfigInfos {
+		// MCIR - 존재하면 재활용 없다면 생성 기준
+		// 1. create vpc
+		vpc, err := nodeConfigInfo.CreateVPC(namespace, clusterName)
 		if err != nil {
-			logger.Warnf("create VM error (mcisname=%s, nodename=%s)", mcisName, vm.VM.Name)
 			return nil, err
 		}
-		VMs = append(VMs, vm.VM)
-		logger.Infof("create VM OK.. (mcisname=%s, nodename=%s)", mcisName, vm.VM.Name)
+
+		// 2. create firewall
+		fw, err := nodeConfigInfo.CreateFirewall(namespace, clusterName)
+		if err != nil {
+			return nil, err
+		}
+
+		// 3. create sshKey
+		sshKey, err := nodeConfigInfo.CreateSshKey(namespace, clusterName)
+		if err != nil {
+			return nil, err
+		}
+
+		// 4. create image
+		image, err := nodeConfigInfo.CreateImage(namespace, clusterName)
+		if err != nil {
+			return nil, err
+		}
+
+		// 5. create spec
+		spec, err := nodeConfigInfo.CreateSpec(namespace, clusterName)
+		if err != nil {
+			return nil, err
+		}
+
+		// 6. vm
+		for i := 0; i < nodeConfigInfo.Count; i++ {
+			if nodeConfigInfo.Role == config.CONTROL_PLANE {
+				cIdx++
+			} else {
+				wIdx++
+			}
+			tvm := tumblebug.NewTVm(namespace, mcisName)
+			tvm.VM = model.VM{
+				Config:       nodeConfigInfo.Connection,
+				VPC:          vpc.Name,
+				Subnet:       vpc.Subnets[0].Name,
+				Firewall:     []string{fw.Name},
+				SSHKey:       sshKey.Name,
+				Image:        image.Name,
+				Spec:         spec.Name,
+				UserAccount:  nodeConfigInfo.Account,
+				UserPassword: "",
+				Description:  "",
+				Credential:   sshKey.PrivateKey,
+				Role:         spec.Role,
+				Csp:          nodeConfigInfo.Csp,
+			}
+
+			if nodeConfigInfo.Role == config.CONTROL_PLANE {
+				tvm.VM.Name = lang.GetNodeName(clusterName, config.CONTROL_PLANE, maxCIdx+cIdx)
+			} else {
+				tvm.VM.Name = lang.GetNodeName(clusterName, config.WORKER, maxWIdx+wIdx)
+			}
+
+			// vm 생성
+			logger.Infof("start create VM (mcisname=%s, nodename=%s)", mcisName, tvm.VM.Name)
+			err := tvm.POST()
+			if err != nil {
+				logger.Warnf("create VM error (mcisname=%s, nodename=%s)", mcisName, tvm.VM.Name)
+				return nil, err
+			}
+			logger.Infof("create VM OK.. (mcisname=%s, nodename=%s)", mcisName, tvm.VM.Name)
+
+			TVMs = append(TVMs, *tvm)
+		}
 	}
 
 	var wg sync.WaitGroup
 	c := make(chan error)
-	wg.Add(len(VMs))
+	wg.Add(len(TVMs))
 
 	logger.Infoln("start connect VMs")
-	for _, vm := range VMs {
+	for _, tvm := range TVMs {
 		go func(vm model.VM) {
 			defer wg.Done()
 			sshInfo := ssh.SSHInfo{
-				UserName:   account,
+				UserName:   service.GetUserAccount(vm.Csp),
 				PrivateKey: []byte(vm.Credential),
 				ServerPort: fmt.Sprintf("%s:22", vm.PublicIP),
 			}
 
 			_ = vm.ConnectionTest(&sshInfo)
-			err := vm.CopyScripts(&sshInfo)
+			err := vm.CopyScripts(&sshInfo, networkCni)
 			if err != nil {
 				c <- err
-			}
-			logger.Infoln("bootstrap")
-			bootstrapResult, err := vm.Bootstrap(&sshInfo)
-			if err != nil {
-				c <- err
-			}
-			if !bootstrapResult {
-				c <- errors.New(vm.Name + " bootstrap failed")
-			}
-			logger.Infoln("join")
-			result, err := vm.WorkerJoinForAddNode(&sshInfo, &workerJoinCmd)
-			if err != nil {
-				c <- err
-			}
-			if !result {
-				c <- errors.New(vm.Name + " join failed")
 			}
 
-			logger.Infoln("kilo annotation")
-			err = vm.KiloAnnotation(&sshInfo, vm.Role)
+			logger.Infoln("set systemd service")
+			err = vm.SetSystemd(&sshInfo, networkCni)
 			if err != nil {
-				logger.Warnf("%s kilo annotation failed", vm.Name)
+				c <- err
 			}
-		}(vm)
+
+			logger.Infoln("bootstrap")
+			err = vm.Bootstrap(&sshInfo)
+			if err != nil {
+				c <- err
+			}
+
+			logger.Infoln("join")
+			err = vm.WorkerJoin(&sshInfo, &workerJoinCmd)
+			if err != nil {
+				c <- err
+			}
+		}(tvm.VM)
 	}
 
 	go func() {
@@ -255,8 +201,8 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 
 	// insert store
 	nodes := model.NewNodeList(namespace, clusterName)
-	for _, vm := range VMs {
-		node := model.NewNodeVM(namespace, clusterName, vm)
+	for _, vm := range TVMs {
+		node := model.NewNodeVM(namespace, clusterName, vm.VM)
 		err := node.Insert()
 		if err != nil {
 			return nil, err
@@ -271,28 +217,20 @@ func RemoveNode(namespace string, clusterName string, nodeName string) (*model.S
 	status := model.NewStatus()
 	status.Code = model.STATUS_UNKNOWN
 
-	cpNode, err := getCPNode(namespace, clusterName)
+	cpNode, err := getCPLeaderNode(namespace, clusterName)
 	if err != nil {
 		status.Message = "control-plane node not found"
 		return status, err
 	}
 
-	var userAccount string
-	var hostName string
-	if strings.Contains(namespace, "gcp") {
-		userAccount = "cb-user"
-		hostName = nodeName
-	} else {
-		userAccount = "ubuntu"
-
-		hostName, err = getAWSHostName(namespace, clusterName, nodeName, userAccount)
-		if err != nil {
-			status.Message = "get aws node name error"
-			return status, err
-		}
+	hostName, err := getHostName(namespace, clusterName, nodeName)
+	if err != nil {
+		status.Message = "get node name error"
+		return status, err
 	}
 
 	// drain node
+	userAccount := service.GetUserAccount(cpNode.Csp)
 	sshInfo := ssh.SSHInfo{
 		UserName:   userAccount,
 		PrivateKey: []byte(cpNode.Credential),
@@ -347,7 +285,28 @@ func RemoveNode(namespace string, clusterName string, nodeName string) (*model.S
 	return status, nil
 }
 
-func getCPNode(namespace string, clusterName string) (*model.Node, error) {
+func getCluster(namespace string, clusterName string) (*model.Cluster, error) {
+	key := lang.GetStoreClusterKey(namespace, clusterName)
+	keyValue, err := common.CBStore.Get(key)
+	if err != nil {
+		return nil, err
+	}
+	if keyValue == nil {
+		return nil, errors.New(fmt.Sprintf("%s not found", key))
+	}
+	cluster := &model.Cluster{}
+	json.Unmarshal([]byte(keyValue.Value), cluster)
+
+	return cluster, nil
+}
+
+func getCPLeaderNode(namespace string, clusterName string) (*model.Node, error) {
+	cluster, err := getCluster(namespace, clusterName)
+	if err != nil {
+		return nil, errors.New("cluster info not found")
+	}
+	CpLeader := cluster.CpLeader
+
 	key := lang.GetStoreNodeKey(namespace, clusterName, "")
 	keyValues, err := common.CBStore.GetList(key, true)
 	if err != nil {
@@ -360,7 +319,7 @@ func getCPNode(namespace string, clusterName string) (*model.Node, error) {
 	for _, keyValue := range keyValues {
 		node := &model.Node{}
 		json.Unmarshal([]byte(keyValue.Value), &node)
-		if node.Role == config.CONTROL_PLANE {
+		if node.Name == CpLeader {
 			cpNode = node
 			break
 		}
@@ -369,7 +328,16 @@ func getCPNode(namespace string, clusterName string) (*model.Node, error) {
 	return cpNode, nil
 }
 
-func getAWSHostName(namespace string, clusterName string, nodeName string, userAccount string) (string, error) {
+func getClusterNetworkCNI(namespace string, clusterName string) string {
+	cluster, err := getCluster(namespace, clusterName)
+	if err != nil {
+		return ""
+	}
+
+	return cluster.NetworkCni
+}
+
+func getHostName(namespace string, clusterName string, nodeName string) (string, error) {
 	key := lang.GetStoreNodeKey(namespace, clusterName, "")
 	keyValues, err := common.CBStore.GetList(key, true)
 	if err != nil {
@@ -378,31 +346,40 @@ func getAWSHostName(namespace string, clusterName string, nodeName string, userA
 	if keyValues == nil {
 		return "", errors.New(fmt.Sprintf("%s not found", key))
 	}
-	wNode := &model.Node{}
+	dNode := &model.Node{}
 	for _, keyValue := range keyValues {
 		node := &model.Node{}
 		json.Unmarshal([]byte(keyValue.Value), &node)
 		if node.Name == nodeName {
-			wNode = node
+			dNode = node
 			break
 		}
 	}
 
+	if dNode.Csp == config.CSP_GCP {
+		return nodeName, nil
+	}
+
+	userAccount := service.GetUserAccount(dNode.Csp)
 	sshInfo := ssh.SSHInfo{
 		UserName:   userAccount,
-		PrivateKey: []byte(wNode.Credential),
-		ServerPort: fmt.Sprintf("%s:22", wNode.PublicIP),
+		PrivateKey: []byte(dNode.Credential),
+		ServerPort: fmt.Sprintf("%s:22", dNode.PublicIP),
 	}
 	cmd := "/bin/hostname"
-	result, err := ssh.SSHRun(sshInfo, cmd)
+	hostName, err := ssh.SSHRun(sshInfo, cmd)
 	if err != nil {
 		return "", err
 	}
-
-	return result, nil
+	return hostName, nil
 }
 
-func getWorkerJoinCmdForAddNode(userAccount string, cpNode *model.Node) (string, error) {
+func getWorkerJoinCmdForAddNode(namespace string, clusterName string) (string, error) {
+	cpNode, err := getCPLeaderNode(namespace, clusterName)
+	if err != nil {
+		return "", errors.New("control-plane node not found")
+	}
+	userAccount := service.GetUserAccount(cpNode.Csp)
 	sshInfo := ssh.SSHInfo{
 		UserName:   userAccount,
 		PrivateKey: []byte(cpNode.Credential),
@@ -414,4 +391,32 @@ func getWorkerJoinCmdForAddNode(userAccount string, cpNode *model.Node) (string,
 		return "", err
 	}
 	return result, nil
+}
+
+func getMaxIdx(namespace string, clusterName string) (maxCpIdx int, maxWkIdx int) {
+	maxCpIdx = 0
+	maxWkIdx = 0
+
+	nodes := model.NewNodeList(namespace, clusterName)
+	err := nodes.SelectList()
+	if err != nil {
+		return
+	}
+
+	var arrCp, arrWk []int
+	for _, node := range nodes.Items {
+		slice := strings.Split(node.Name, "-")
+		role := len(slice) - 3
+		idx := len(slice) - 2
+
+		if slice[role] == "c" {
+			arrCp = append(arrCp, lang.GetIdxToInt(slice[idx]))
+		} else if slice[role] == "w" {
+			arrWk = append(arrWk, lang.GetIdxToInt(slice[idx]))
+		}
+	}
+	fmt.Println(maxCpIdx, maxWkIdx)
+	maxCpIdx = lang.GetMaxNumber(arrCp)
+	maxWkIdx = lang.GetMaxNumber(arrWk)
+	return
 }
