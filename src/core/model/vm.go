@@ -123,7 +123,7 @@ func (self *VM) InstallHAProxy(sshInfo *ssh.SSHInfo, IPs []string) error {
 			servers += "\\n"
 		}
 	}
-	cmd = fmt.Sprintf("sudo sed '23 s/{{SERVERS}}/%s/g' %s/%s", servers, remoteTargetPath, config.HA_PROXY_FILE)
+	cmd = fmt.Sprintf("sudo sed 's/^{{SERVERS}}/%s/g' %s/%s", servers, remoteTargetPath, config.HA_PROXY_FILE)
 	result, err := ssh.SSHRun(*sshInfo, cmd)
 	if err != nil {
 		logger.Warnf("get haproxy command error (name=%s, cause=%v)", self.Name, err)
@@ -188,7 +188,7 @@ func (self *VM) ControlPlaneJoin(sshInfo *ssh.SSHInfo, CPJoinCmd *string) error 
 		logger.Warnf("control-plane join error (name=%s, cause=%v)", self.Name, err)
 		return errors.New("control-plane node join error")
 	}
-	logger.Warnf(" result := %s", result)
+
 	if strings.Contains(result, "This node has joined the cluster") {
 		_, err = ssh.SSHRun(*sshInfo, "sudo systemctl restart ladybug-bootstrap")
 		if err != nil {

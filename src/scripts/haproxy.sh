@@ -20,6 +20,7 @@ backend apiserver
   balance roundrobin
 # {{SERVERS}} will be replaced to provisioned kubernetes api-servers' ip addresses as below:
 #   server  api1  111.222.333.444:6443  check
+# DO NOT EDIT {{SERVERS}}
 {{SERVERS}}
 EOF"
 
