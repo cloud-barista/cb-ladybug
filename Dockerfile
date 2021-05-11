@@ -25,6 +25,13 @@ ENV CBLOG_ROOT "/app"
 ENV CBSTORE_ROOT "/app"
 ENV APP_ROOT "/app"
 
+ENV SPIDER_URL http://cb-spider:1024/spider
+ENV TUMBLEBUG_URL http://cb-tumblebug:1323/tumblebug
+ENV BASE_PATH /ladybug
+
+ENV API_USERNAME default
+ENV API_PASSWORD default
+
 ENTRYPOINT [ "/app/cb-ladybug" ]
 
 EXPOSE 8080
