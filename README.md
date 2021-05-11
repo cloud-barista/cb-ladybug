@@ -81,4 +81,5 @@ $ swag init
 
 
 ## Contribution
-Learn how to start contribution on the [Contributing Guideline](https://github.com/cloud-barista/docs/tree/master/contributing)
+Learn how to start contribution on the [Contributing Guideline](https://github.com/cloud-barista/docs/tree/master/contributing) and [Style Guideline](https://github.com/cloud-barista/cb-ladybug/blob/master/STYLE_GUIDE.md)
+
