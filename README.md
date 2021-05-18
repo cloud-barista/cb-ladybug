@@ -1,8 +1,14 @@
 # CB-Ladybug :beetle:
 > Multi-Cloud Application Management Framework
 
-
-![Version](https://img.shields.io/github/release/cloud-barista/cb-ladybug) ![License](https://img.shields.io/github/license/cloud-barista/cb-ladybug) ![issues](https://img.shields.io/github/issues/cloud-barista/cb-ladybug) ![issues](https://img.shields.io/github/issues-closed/cloud-barista/cb-ladybug) ![pull requests](https://img.shields.io/github/issues-pr-closed/cloud-barista/cb-ladybug) ![workflow](https://img.shields.io/github/workflow/status/cloud-barista/cb-ladybug/Docker) ![code size](https://img.shields.io/github/languages/code-size/cloud-barista/cb-ladybug) 
+[![Go Report Card](https://goreportcard.com/badge/github.com/cloud-barista/cb-ladybug)](https://goreportcard.com/report/github.com/cloud-barista/cb-ladybug)
+[![Build](https://img.shields.io/github/workflow/status/cloud-barista/cb-ladybug/Build%20amd64%20container%20image)](https://github.com/cloud-barista/cb-ladybug/actions?query=workflow%3A%22Build+amd64+container+image%22)
+[![Top Language](https://img.shields.io/github/languages/top/cloud-barista/cb-ladybug)](https://github.com/cloud-barista/cb-ladybug/search?l=go)
+[![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/cloud-barista/cb-ladybug?label=go.mod)](https://github.com/cloud-barista/cb-ladybug/blob/master/go.mod)
+[![Repo Size](https://img.shields.io/github/repo-size/cloud-barista/cb-ladybug)](#)
+[![GoDoc](https://godoc.org/github.com/cloud-barista/cb-ladybug?status.svg)](https://pkg.go.dev/github.com/cloud-barista/cb-ladybug@master)
+[![Release Version](https://img.shields.io/github/v/release/cloud-barista/cb-ladybug?color=blue)](https://github.com/cloud-barista/cb-ladybug/releases/latest)
+[![License](https://img.shields.io/github/license/cloud-barista/cb-ladybug?color=blue)](https://github.com/cloud-barista/cb-ladybug/blob/master/LICENSE)
 
 ```
 [NOTE]
