@@ -23,7 +23,7 @@ If you have any difficulties in using CB-Ladybug, please let us know.
 
 ### Preparation
 
-* Golang 1.15.+ ([Download and install](https://golang.org/doc/install))
+* Golang 1.16.+ ([Download and install](https://golang.org/doc/install))
 
 ### Dependencies
 
