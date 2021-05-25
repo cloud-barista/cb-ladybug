@@ -10,7 +10,6 @@ import (
 	"github.com/cloud-barista/cb-ladybug/src/core/common"
 	"github.com/cloud-barista/cb-ladybug/src/core/model"
 	"github.com/cloud-barista/cb-ladybug/src/core/model/tumblebug"
-	"github.com/cloud-barista/cb-ladybug/src/core/service"
 	"github.com/cloud-barista/cb-ladybug/src/utils/config"
 	"github.com/cloud-barista/cb-ladybug/src/utils/lang"
 
@@ -58,9 +57,9 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 	}
 	networkCni := getClusterNetworkCNI(namespace, clusterName)
 
-	var nodeConfigInfos []service.NodeConfigInfo
+	var nodeConfigInfos []NodeConfigInfo
 	// worker
-	wk, err := service.SetNodeConfigInfos(req.Worker, config.WORKER)
+	wk, err := SetNodeConfigInfos(req.Worker, config.WORKER)
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +154,7 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 		go func(vm model.VM) {
 			defer wg.Done()
 			sshInfo := ssh.SSHInfo{
-				UserName:   service.GetUserAccount(vm.Csp),
+				UserName:   GetUserAccount(vm.Csp),
 				PrivateKey: []byte(vm.Credential),
 				ServerPort: fmt.Sprintf("%s:22", vm.PublicIP),
 			}
@@ -230,7 +229,7 @@ func RemoveNode(namespace string, clusterName string, nodeName string) (*model.S
 	}
 
 	// drain node
-	userAccount := service.GetUserAccount(cpNode.Csp)
+	userAccount := GetUserAccount(cpNode.Csp)
 	sshInfo := ssh.SSHInfo{
 		UserName:   userAccount,
 		PrivateKey: []byte(cpNode.Credential),
@@ -360,7 +359,7 @@ func getHostName(namespace string, clusterName string, nodeName string) (string,
 		return nodeName, nil
 	}
 
-	userAccount := service.GetUserAccount(dNode.Csp)
+	userAccount := GetUserAccount(dNode.Csp)
 	sshInfo := ssh.SSHInfo{
 		UserName:   userAccount,
 		PrivateKey: []byte(dNode.Credential),
@@ -379,7 +378,7 @@ func getWorkerJoinCmdForAddNode(namespace string, clusterName string) (string, e
 	if err != nil {
 		return "", errors.New("control-plane node not found")
 	}
-	userAccount := service.GetUserAccount(cpNode.Csp)
+	userAccount := GetUserAccount(cpNode.Csp)
 	sshInfo := ssh.SSHInfo{
 		UserName:   userAccount,
 		PrivateKey: []byte(cpNode.Credential),
