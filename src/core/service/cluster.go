@@ -7,7 +7,6 @@ import (
 
 	"github.com/cloud-barista/cb-ladybug/src/core/model"
 	"github.com/cloud-barista/cb-ladybug/src/core/model/tumblebug"
-	"github.com/cloud-barista/cb-ladybug/src/core/service"
 	"github.com/cloud-barista/cb-ladybug/src/utils/config"
 	"github.com/cloud-barista/cb-ladybug/src/utils/lang"
 	ssh "github.com/cloud-barista/cb-spider/cloud-control-manager/vm-ssh"
@@ -63,16 +62,16 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 		return cluster, errors.New("MCIS already exists")
 	}
 
-	var nodeConfigInfos []service.NodeConfigInfo
+	var nodeConfigInfos []NodeConfigInfo
 	// control plane
-	cp, err := service.SetNodeConfigInfos(req.ControlPlane, config.CONTROL_PLANE)
+	cp, err := SetNodeConfigInfos(req.ControlPlane, config.CONTROL_PLANE)
 	if err != nil {
 		return nil, err
 	}
 	nodeConfigInfos = append(nodeConfigInfos, cp...)
 
 	// worker
-	wk, err := service.SetNodeConfigInfos(req.Worker, config.WORKER)
+	wk, err := SetNodeConfigInfos(req.Worker, config.WORKER)
 	if err != nil {
 		return nil, err
 	}
@@ -193,7 +192,7 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 		go func(vm model.VM) {
 			defer wg.Done()
 			sshInfo := ssh.SSHInfo{
-				UserName:   service.GetUserAccount(vm.Csp),
+				UserName:   GetUserAccount(vm.Csp),
 				PrivateKey: []byte(vm.Credential),
 				ServerPort: fmt.Sprintf("%s:22", vm.PublicIP),
 			}
@@ -232,13 +231,13 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 
 	// init & join
 	var joinCmd []string
-	IPs := service.GetControlPlaneIPs(mcis.VMs)
+	IPs := GetControlPlaneIPs(mcis.VMs)
 
 	logger.Infoln("start k8s init")
 	for _, vm := range mcis.VMs {
 		if vm.Role == config.CONTROL_PLANE && vm.IsCPLeader {
 			sshInfo := ssh.SSHInfo{
-				UserName:   service.GetUserAccount(vm.Csp),
+				UserName:   GetUserAccount(vm.Csp),
 				PrivateKey: []byte(vm.Credential),
 				ServerPort: fmt.Sprintf("%s:22", vm.PublicIP),
 			}
@@ -272,7 +271,7 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 	logger.Infoln("start k8s join")
 	for _, vm := range mcis.VMs {
 		sshInfo := ssh.SSHInfo{
-			UserName:   service.GetUserAccount(vm.Csp),
+			UserName:   GetUserAccount(vm.Csp),
 			PrivateKey: []byte(vm.Credential),
 			ServerPort: fmt.Sprintf("%s:22", vm.PublicIP),
 		}

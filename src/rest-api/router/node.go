@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/cloud-barista/cb-ladybug/src/core/model"
-	"github.com/cloud-barista/cb-ladybug/src/rest-api/service"
+	"github.com/cloud-barista/cb-ladybug/src/core/service"
 	"github.com/cloud-barista/cb-ladybug/src/utils/app"
 
 	"github.com/labstack/echo/v4"
