@@ -24,12 +24,20 @@ type VM struct {
 	UserAccount  string     `json:"vmUserAccount"`
 	UserPassword string     `json:"vmUserPassword"`
 	Description  string     `json:"description"`
-	PublicIP     string     `json:"publicIP"` // output
+	PublicIP     string     `json:"publicIP"`  // output
+	PrivateIP    string     `json:"privateIP"` // output
 	Credential   string     // private
-	UId          string     `json:"uid"`
 	Role         string     `json:"role"`
 	Csp          config.CSP `json:"csp"`
 	IsCPLeader   bool       `json:"isCPLeader"`
+}
+
+type VMInfo struct {
+	Name       string     `json:"name"`
+	Credential string     // private
+	Role       string     `json:"role"`
+	Csp        config.CSP `json:"csp"`
+	IsCPLeader bool       `json:"isCPLeader"`
 }
 
 const (
@@ -68,6 +76,7 @@ func (self *VM) CopyScripts(sshInfo *ssh.SSHInfo, networkCni string) error {
 			return errors.New(fmt.Sprintf("copy scripts error (server=%s, cause=%s)", sshInfo.ServerPort, err))
 		}
 	}
+	logger.Infof("end script file copy (vm=%s, server=%s)\n", self.Name, sshInfo.ServerPort)
 	return nil
 }
 

@@ -38,13 +38,8 @@ var imageMap = map[string]string{
 	"sa-east-1":      "ami-0fd2c3d373788b726", //남아메리카 (상파울루)
 }
 
-// TODO [update/hard-coding] host user account
+// get vm user account
 func GetUserAccount(csp config.CSP) string {
-
-	if csp == config.CSP_AWS {
-		return "ubuntu"
-	}
-
 	return "cb-user"
 }
 
