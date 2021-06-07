@@ -8,8 +8,8 @@ import (
 	logger "github.com/sirupsen/logrus"
 )
 
-func (nodeConfigInfo *NodeConfigInfo) CreateVPC(namespace string, clusterName string) (*tumblebug.VPC, error) {
-	vpcName := fmt.Sprintf("%s-%s-vpc", clusterName, nodeConfigInfo.Csp)
+func (nodeConfigInfo *NodeConfigInfo) CreateVPC(namespace string) (*tumblebug.VPC, error) {
+	vpcName := fmt.Sprintf("%s-vpc", getConfigName(nodeConfigInfo.Connection))
 	logger.Infof("start create vpc (name=%s)", vpcName)
 	vpc := tumblebug.NewVPC(namespace, vpcName, nodeConfigInfo.Connection)
 	exists, e := vpc.GET()
@@ -27,9 +27,9 @@ func (nodeConfigInfo *NodeConfigInfo) CreateVPC(namespace string, clusterName st
 	return vpc, nil
 }
 
-func (nodeConfigInfo *NodeConfigInfo) CreateFirewall(namespace string, clusterName string) (*tumblebug.Firewall, error) {
-	firewallName := fmt.Sprintf("%s-%s-allow-external", clusterName, nodeConfigInfo.Csp)
-	vpcName := fmt.Sprintf("%s-%s-vpc", clusterName, nodeConfigInfo.Csp)
+func (nodeConfigInfo *NodeConfigInfo) CreateFirewall(namespace string) (*tumblebug.Firewall, error) {
+	firewallName := fmt.Sprintf("%s-sg", getConfigName(nodeConfigInfo.Connection))
+	vpcName := fmt.Sprintf("%s-vpc", getConfigName(nodeConfigInfo.Connection))
 	logger.Infof("start create firewall (name=%s)", firewallName)
 	fw := tumblebug.NewFirewall(namespace, firewallName, nodeConfigInfo.Connection)
 	fw.VPCId = vpcName
@@ -48,8 +48,8 @@ func (nodeConfigInfo *NodeConfigInfo) CreateFirewall(namespace string, clusterNa
 	return fw, nil
 }
 
-func (nodeConfigInfo *NodeConfigInfo) CreateSshKey(namespace string, clusterName string) (*tumblebug.SSHKey, error) {
-	sshkeyName := fmt.Sprintf("%s-%s-sshkey", clusterName, nodeConfigInfo.Csp)
+func (nodeConfigInfo *NodeConfigInfo) CreateSshKey(namespace string) (*tumblebug.SSHKey, error) {
+	sshkeyName := fmt.Sprintf("%s-sshkey", getConfigName(nodeConfigInfo.Connection))
 	logger.Infof("start create ssh key (name=%s)", sshkeyName)
 	sshKey := tumblebug.NewSSHKey(namespace, sshkeyName, nodeConfigInfo.Connection)
 	sshKey.Username = nodeConfigInfo.Account
@@ -68,13 +68,13 @@ func (nodeConfigInfo *NodeConfigInfo) CreateSshKey(namespace string, clusterName
 	return sshKey, nil
 }
 
-func (nodeConfigInfo *NodeConfigInfo) CreateImage(namespace string, clusterName string) (*tumblebug.Image, error) {
+func (nodeConfigInfo *NodeConfigInfo) CreateImage(namespace string) (*tumblebug.Image, error) {
 	imageId, e := GetVmImageId(nodeConfigInfo.Csp, nodeConfigInfo.Connection)
 	if e != nil {
 		return nil, e
 	}
 
-	imageName := fmt.Sprintf("%s-%s-Ubuntu1804", nodeConfigInfo.Connection, nodeConfigInfo.Region)
+	imageName := fmt.Sprintf("%s-ubuntu1804", getConfigName(nodeConfigInfo.Connection))
 	logger.Infof("start create image (name=%s)", imageName)
 	image := tumblebug.NewImage(namespace, imageName, nodeConfigInfo.Connection)
 	image.CspImageId = imageId
@@ -93,12 +93,11 @@ func (nodeConfigInfo *NodeConfigInfo) CreateImage(namespace string, clusterName 
 	return image, nil
 }
 
-func (nodeConfigInfo *NodeConfigInfo) CreateSpec(namespace string, clusterName string) (*tumblebug.Spec, error) {
-	specName := fmt.Sprintf("%s-spec", strings.ReplaceAll(nodeConfigInfo.Spec, ".", "-"))
+func (nodeConfigInfo *NodeConfigInfo) CreateSpec(namespace string) (*tumblebug.Spec, error) {
+	specName := fmt.Sprintf("%s-%s-spec", getConfigName(nodeConfigInfo.Connection), strings.ReplaceAll(nodeConfigInfo.Spec, ".", "-"))
 	logger.Infof("start create spec (name=%s)", specName)
 	spec := tumblebug.NewSpec(namespace, specName, nodeConfigInfo.Connection)
 	spec.CspSpecName = nodeConfigInfo.Spec
-	spec.Role = nodeConfigInfo.Role
 	exists, e := spec.GET()
 	if e != nil {
 		return nil, e
@@ -112,4 +111,8 @@ func (nodeConfigInfo *NodeConfigInfo) CreateSpec(namespace string, clusterName s
 		logger.Infof("create spec OK.. (name=%s)", specName)
 	}
 	return spec, nil
+}
+
+func getConfigName(name string) string {
+	return strings.ReplaceAll(name, "config-", "")
 }

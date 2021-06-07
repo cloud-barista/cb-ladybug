@@ -14,7 +14,6 @@ type Spec struct {
 	Model
 	Config      string `json:"connectionName"`
 	CspSpecName string `json:"cspSpecName"`
-	Role        string `json:"role"`
 }
 
 func NewSpec(ns string, name string, conf string) *Spec {

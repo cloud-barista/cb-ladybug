@@ -34,7 +34,6 @@ func NewNodeVM(namespace string, clusterName string, vm VM) *Node {
 		Model:       Model{Kind: KIND_NODE, Name: vm.Name},
 		Credential:  vm.Credential,
 		PublicIP:    vm.PublicIP,
-		UId:         vm.UId,
 		Role:        vm.Role,
 		Spec:        vm.Spec,
 		Csp:         vm.Csp,

@@ -63,7 +63,7 @@ func GetControlPlaneIPs(VMs []model.VM) []string {
 	var IPs []string
 	for _, vm := range VMs {
 		if vm.Role == config.CONTROL_PLANE {
-			IPs = append(IPs, vm.PublicIP)
+			IPs = append(IPs, vm.PrivateIP)
 		}
 	}
 	return IPs
