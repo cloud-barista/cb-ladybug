@@ -94,7 +94,7 @@ func (nodeConfigInfo *NodeConfigInfo) CreateImage(namespace string) (*tumblebug.
 }
 
 func (nodeConfigInfo *NodeConfigInfo) CreateSpec(namespace string) (*tumblebug.Spec, error) {
-	specName := fmt.Sprintf("%s-%s-spec", getConfigName(nodeConfigInfo.Connection), strings.ReplaceAll(nodeConfigInfo.Spec, ".", "-"))
+	specName := fmt.Sprintf("%s-%s-spec", getConfigName(nodeConfigInfo.Connection), getSpecName(nodeConfigInfo.Spec))
 	logger.Infof("start create spec (name=%s)", specName)
 	spec := tumblebug.NewSpec(namespace, specName, nodeConfigInfo.Connection)
 	spec.CspSpecName = nodeConfigInfo.Spec
@@ -115,4 +115,12 @@ func (nodeConfigInfo *NodeConfigInfo) CreateSpec(namespace string) (*tumblebug.S
 
 func getConfigName(name string) string {
 	return strings.ReplaceAll(name, "config-", "")
+}
+
+func getSpecName(name string) string {
+	specName := strings.ReplaceAll(name, ".", "-")
+	specName = strings.ReplaceAll(specName, "_", "-")
+	specName = strings.ReplaceAll(specName, " ", "-")
+	specName = strings.ToLower(specName)
+	return specName
 }
