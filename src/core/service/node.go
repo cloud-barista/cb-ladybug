@@ -356,10 +356,6 @@ func getHostName(namespace string, clusterName string, nodeName string) (string,
 		}
 	}
 
-	if dNode.Csp == config.CSP_GCP || dNode.Csp == config.CSP_AZURE {
-		return nodeName, nil
-	}
-
 	userAccount := GetUserAccount(dNode.Csp)
 	sshInfo := ssh.SSHInfo{
 		UserName:   userAccount,
