@@ -378,7 +378,6 @@ func DeleteCluster(namespace string, clusterName string) (*model.Status, error) 
 		}
 
 		logger.Infof("delete MCIS OK.. (name=%s)", mcisName)
-		status.Code = model.STATUS_SUCCESS
 		status.Message = fmt.Sprintf("cluster %s has been deleted", mcisName)
 
 		if err := cluster.Delete(); err != nil {
@@ -386,8 +385,13 @@ func DeleteCluster(namespace string, clusterName string) (*model.Status, error) 
 			return status, nil
 		}
 	} else {
-		status.Code = model.STATUS_NOT_EXIST
 		logger.Infof("delete Cluster skip (MCIS cannot find).. (name=%s)", mcisName)
+		status.Message = fmt.Sprintf("cluster %s not found", mcisName)
+
+		if err := cluster.Delete(); err != nil {
+			status.Message = fmt.Sprintf("cluster %s not found and cannot delete from the store", mcisName)
+			return status, nil
+		}
 	}
 
 	status.Code = model.STATUS_SUCCESS
