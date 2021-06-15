@@ -445,7 +445,6 @@ var doc = `{
             "type": "object",
             "properties": {
                 "config": {
-                    "type": "object",
                     "$ref": "#/definitions/model.Config"
                 },
                 "controlPlane": {
@@ -469,7 +468,6 @@ var doc = `{
             "type": "object",
             "properties": {
                 "kubernetes": {
-                    "type": "object",
                     "$ref": "#/definitions/model.Kubernetes"
                 }
             }
@@ -593,7 +591,7 @@ type swaggerInfo struct {
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = swaggerInfo{
-	Version:     "0.3.0-espresso",
+	Version:     "0.3.5",
 	Host:        "localhost:8080",
 	BasePath:    "/ladybug",
 	Schemes:     []string{},
