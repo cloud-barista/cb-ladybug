@@ -13,7 +13,7 @@
             "name": "Apache 2.0",
             "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
         },
-        "version": "0.3.0-espresso"
+        "version": "0.3.5"
     },
     "host": "localhost:8080",
     "basePath": "/ladybug",
@@ -430,7 +430,6 @@
             "type": "object",
             "properties": {
                 "config": {
-                    "type": "object",
                     "$ref": "#/definitions/model.Config"
                 },
                 "controlPlane": {
@@ -454,7 +453,6 @@
             "type": "object",
             "properties": {
                 "kubernetes": {
-                    "type": "object",
                     "$ref": "#/definitions/model.Kubernetes"
                 }
             }
