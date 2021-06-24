@@ -2,8 +2,8 @@
 # -----------------------------------------------------------------
 # usage
 if [ "$#" -lt 1 ]; then 
-	echo "./node-add.sh <namespace> <clsuter name>"
-	echo "./node-add.sh cb-ladybug-ns cluster-01"
+	echo "./cluster-get.sh <namespace> <clsuter name>"
+	echo "./cluster-get.sh cb-ladybug-ns cluster-01"
 	exit 0; 
 fi
 
@@ -39,26 +39,14 @@ c_URL_LADYBUG_NS="${c_URL_LADYBUG}/ns/${v_NAMESPACE}"
 # print info.
 echo ""
 echo "[INFO]"
-echo "- Namespace                  is '${v_NAMESPACE}'"
+echo "- Namespace			             is '${v_NAMESPACE}'"
 echo "- Cuseter name               is '${v_CLUSTER_NAME}'"
 
 
 # ------------------------------------------------------------------------------
-# Add Node
-create() {
-
-	resp=$(curl -sX POST ${c_URL_LADYBUG_NS}/clusters/${v_CLUSTER_NAME}/nodes -H "${c_CT}" -d @- <<EOF
-	{
-		"worker": [
-			{
-				"connection": "config-azure-koreacentral",
-				"count": 1,
-				"spec": "Standard_B2s"
-			}
-		]
-	}
-EOF
-	); echo ${resp} | jq
+# get a cluster
+get() {
+	curl -sX GET ${c_URL_LADYBUG_NS}/clusters/${v_CLUSTER_NAME} -H "${c_CT}" | jq;
 }
 
 
@@ -66,5 +54,5 @@ EOF
 if [ "$1" != "-h" ]; then 
 	echo ""
 	echo "------------------------------------------------------------------------------"
-	create;
+	get;
 fi

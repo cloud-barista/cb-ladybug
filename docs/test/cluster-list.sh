@@ -2,8 +2,8 @@
 # -----------------------------------------------------------------
 # usage
 if [ "$#" -lt 1 ]; then 
-	echo "./node-add.sh <namespace> <clsuter name>"
-	echo "./node-add.sh cb-ladybug-ns cluster-01"
+	echo "./cluster-list.sh <namespace>"
+	echo "./cluster-list.sh cb-ladybug-ns"
 	exit 0; 
 fi
 
@@ -24,14 +24,6 @@ if [ "${v_NAMESPACE}" == "" ]; then
 fi
 if [ "${v_NAMESPACE}" == "" ]; then echo "[ERROR] missing <namespace>"; exit -1; fi
 
-# 2. Cluster Name
-if [ "$#" -gt 1 ]; then v_CLUSTER_NAME="$2"; else	v_CLUSTER_NAME="${CLUSTER_NAME}"; fi
-if [ "${v_CLUSTER_NAME}" == "" ]; then 
-	read -e -p "Cluster name  ? : "  v_CLUSTER_NAME
-fi
-if [ "${v_CLUSTER_NAME}" == "" ]; then echo "[ERROR] missing <cluster name>"; exit -1; fi
-
-
 c_URL_LADYBUG_NS="${c_URL_LADYBUG}/ns/${v_NAMESPACE}"
 
 
@@ -39,26 +31,13 @@ c_URL_LADYBUG_NS="${c_URL_LADYBUG}/ns/${v_NAMESPACE}"
 # print info.
 echo ""
 echo "[INFO]"
-echo "- Namespace                  is '${v_NAMESPACE}'"
-echo "- Cuseter name               is '${v_CLUSTER_NAME}'"
+echo "- Namespace			             is '${v_NAMESPACE}'"
 
 
 # ------------------------------------------------------------------------------
-# Add Node
-create() {
-
-	resp=$(curl -sX POST ${c_URL_LADYBUG_NS}/clusters/${v_CLUSTER_NAME}/nodes -H "${c_CT}" -d @- <<EOF
-	{
-		"worker": [
-			{
-				"connection": "config-azure-koreacentral",
-				"count": 1,
-				"spec": "Standard_B2s"
-			}
-		]
-	}
-EOF
-	); echo ${resp} | jq
+# list
+list() {
+	curl -sX GET ${c_URL_LADYBUG_NS}/clusters -H "${c_CT}" | jq;
 }
 
 
@@ -66,5 +45,5 @@ EOF
 if [ "$1" != "-h" ]; then 
 	echo ""
 	echo "------------------------------------------------------------------------------"
-	create;
+	list;
 fi

@@ -2,8 +2,8 @@
 # ------------------------------------------------------------------------------
 # usage
 if [ "$1" == "-h" ]; then 
-	echo "./cluster-kubeconfig.sh [GCP/AWS] <cluster name>"
-	echo "./cluster-kubeconfig.sh AWS cb-cluster"
+	echo "./cluster-kubeconfig.sh <namespace> <cluster name>"
+	echo "./cluster-kubeconfig.sh cb-ladybug-ns cluster-01"
 	exit 0
 fi
 
@@ -17,46 +17,29 @@ c_CT="Content-Type: application/json"
 # ------------------------------------------------------------------------------
 # paramter
 
-# 1. CSP
-if [ "$#" -gt 0 ]; then v_CSP="$1"; else	v_CSP="${CSP}"; fi
-if [ "${v_CSP}" == "" ]; then 
-	read -e -p "Cloud ? [AWS(default) or GCP] : "  v_CSP
+# 1. namespace
+if [ "$#" -gt 0 ]; then v_NAMESPACE="$1"; else	v_NAMESPACE="${NAMESPACE}"; fi
+if [ "${v_NAMESPACE}" == "" ]; then 
+	read -e -p "Namespace ? : " v_NAMESPACE
 fi
+if [ "${v_NAMESPACE}" == "" ]; then echo "[ERROR] missing <namespace>"; exit -1; fi
 
-if [ "${v_CSP}" == "" ]; then v_CSP="AWS"; fi
-if [ "${v_CSP}" != "GCP" ] && [ "${v_CSP}" != "AWS" ]; then echo "[ERROR] missing <cloud>"; exit -1;fi
-
-# PREFIX
-if [ "${v_CSP}" == "GCP" ]; then 
-	v_PREFIX="cb-gcp"
-else
-	v_PREFIX="cb-aws"
+# 2. Cluster Name
+if [ "$#" -gt 1 ]; then v_CLUSTER_NAME="$2"; else	v_CLUSTER_NAME="${CLUSTER_NAME}"; fi
+if [ "${v_CLUSTER_NAME}" == "" ]; then 
+	read -e -p "Cluster name  ? : "  v_CLUSTER_NAME
 fi
-
-# # 1. PREFIX
-# if [ "$#" -gt 0 ]; then v_PREFIX="$1"; else	v_PREFIX="${PREFIX}"; fi
-
-# if [ "${v_PREFIX}" == "" ]; then 
-# 	read -e -p "Name prefix ? : "  v_PREFIX
-# fi
-# if [ "${v_PREFIX}" == "" ]; then echo "[ERROR] missing <prefix>"; exit -1; fi
-
-# 3. Cluster Name
-v_CLUSTER="$2"
-if [ "${v_CLUSTER}" == "" ]; then read -e -p "Cluster name  ? : "  v_CLUSTER;	fi
-if [ "${v_CLUSTER}" == "" ]; then echo "[ERROR] missing <cluster name>"; exit -1; fi
+if [ "${v_CLUSTER_NAME}" == "" ]; then echo "[ERROR] missing <cluster name>"; exit -1; fi
 
 
-# variable - name
-NM_NAMESPACE="${v_PREFIX}-namespace"
-c_URL_LADYBUG_NS="${c_URL_LADYBUG}/ns/${NM_NAMESPACE}"
+c_URL_LADYBUG_NS="${c_URL_LADYBUG}/ns/${v_NAMESPACE}"
 
 # ------------------------------------------------------------------------------
 # print info.
+echo ""
 echo "[INFO]"
-echo "- Prefix                     is '${v_PREFIX}'"
-echo "- Namespace                  is '${NM_NAMESPACE}'"
-echo "- (Name of cluster)          is '${v_CLUSTER}'"
+echo "- Namespace                  is '${v_NAMESPACE}'"
+echo "- Cuseter name               is '${v_CLUSTER_NAME}'"
 
 
 # ------------------------------------------------------------------------------
@@ -64,11 +47,11 @@ echo "- (Name of cluster)          is '${v_CLUSTER}'"
 get() {
 
 	rm -f "kubeconfig.yaml"
-	# curl -sX GET ${c_URL_LADYBUG_NS}/clusters/${v_CLUSTER} -H "${c_CT}"
-	curl -sX GET ${c_URL_LADYBUG_NS}/clusters/${v_CLUSTER} -H "${c_CT}" | jq -r ".clusterConfig" > kubeconfig.yaml
-	echo "kubectl get nodes --kubeconfig=./kubeconfig.yaml --insecure-skip-tls-verify=true"
-#	chmod 400 ${v_CLUSTER_NAME}.pem
-#	cat ${v_CLUSTER_NAME}.pem
+	curl -sX GET ${c_URL_LADYBUG_NS}/clusters/${v_CLUSTER_NAME} -H "${c_CT}" | jq -r ".clusterConfig" > kubeconfig.yaml
+
+	echo "export KUBECONFIG=$(pwd)/kubeconfig.yaml"
+	echo "kubectl get nodes"	
+	
 }
 
 

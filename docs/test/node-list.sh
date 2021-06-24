@@ -2,8 +2,8 @@
 # -----------------------------------------------------------------
 # usage
 if [ "$#" -lt 1 ]; then 
-	echo "./node-add.sh <namespace> <clsuter name>"
-	echo "./node-add.sh cb-ladybug-ns cluster-01"
+	echo "./node-list.sh <namespace> <clsuter name>"
+	echo "./node-list.sh cb-ladybug-ns cluster-01"
 	exit 0; 
 fi
 
@@ -44,21 +44,9 @@ echo "- Cuseter name               is '${v_CLUSTER_NAME}'"
 
 
 # ------------------------------------------------------------------------------
-# Add Node
-create() {
-
-	resp=$(curl -sX POST ${c_URL_LADYBUG_NS}/clusters/${v_CLUSTER_NAME}/nodes -H "${c_CT}" -d @- <<EOF
-	{
-		"worker": [
-			{
-				"connection": "config-azure-koreacentral",
-				"count": 1,
-				"spec": "Standard_B2s"
-			}
-		]
-	}
-EOF
-	); echo ${resp} | jq
+# List Node
+list() {
+	curl -sX GET ${c_URL_LADYBUG_NS}/clusters/${v_CLUSTER_NAME}/nodes -H "${c_CT}" | jq;
 }
 
 
@@ -66,5 +54,5 @@ EOF
 if [ "$1" != "-h" ]; then 
 	echo ""
 	echo "------------------------------------------------------------------------------"
-	create;
+	list;
 fi
