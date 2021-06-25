@@ -167,7 +167,8 @@ func (self *VM) InstallNetworkCNI(sshInfo *ssh.SSHInfo, networkCni string) error
 	if networkCni == config.NETWORKCNI_CANAL {
 		cmd = "sudo kubectl apply -f https://docs.projectcalico.org/manifests/canal.yaml --kubeconfig=/etc/kubernetes/admin.conf"
 	} else {
-		cmd = `sudo kubectl apply -f https://raw.githubusercontent.com/squat/kilo/master/manifests/kilo-kubeadm-flannel.yaml --kubeconfig=/etc/kubernetes/admin.conf;
+		cmd = `sudo kubectl apply -f https://raw.githubusercontent.com/squat/kilo/main/manifests/crds.yaml --kubeconfig=/etc/kubernetes/admin.conf;
+		sudo kubectl apply -f https://raw.githubusercontent.com/squat/kilo/master/manifests/kilo-kubeadm-flannel.yaml --kubeconfig=/etc/kubernetes/admin.conf;
 		sudo kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml --kubeconfig=/etc/kubernetes/admin.conf;`
 	}
 
