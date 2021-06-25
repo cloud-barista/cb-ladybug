@@ -46,16 +46,14 @@ c_URL_LADYBUG_NS="${c_URL_LADYBUG}/ns/${v_NAMESPACE}"
 echo ""
 echo "[INFO]"
 echo "- Namespace                  is '${v_NAMESPACE}'"
-echo "- Cuseter name               is '${v_CLUSTER_NAME}'"
-echo "- Node name               	 is '${v_NODE_NAME}'"
+echo "- Cluster name               is '${v_CLUSTER_NAME}'"
+echo "- Node name                  is '${v_NODE_NAME}'"
 
 
 # ------------------------------------------------------------------------------
-# Delete a cluster
+# remove node
 delete() {
-
 	curl -sX DELETE ${c_URL_LADYBUG_NS}/clusters/${v_CLUSTER_NAME}/nodes/${v_NODE_NAME}    -H "${c_CT}" | jq;
-
 }
 
 # ------------------------------------------------------------------------------

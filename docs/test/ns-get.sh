@@ -1,15 +1,14 @@
 #!/bin/bash
 # ------------------------------------------------------------------------------
 # usage
-if [ "$1" == "-h" ]; then 
-	echo "./init.ns.sh <namespace>"
-	echo "./init.ns.sh cb-ladybug-ns "
+if [ "$#" -lt 1 ]; then 
+	echo "./ns-get.sh <namespace>"
+	echo "./ns-get.sh cb-ladybug-ns "
 	exit 0
 fi
 
 # ------------------------------------------------------------------------------
 # const
-
 c_URL_TUMBLEBUG="http://localhost:1323/tumblebug"
 c_CT="Content-Type: application/json"
 c_AUTH="Authorization: Basic $(echo -n default:default | base64)"
@@ -30,30 +29,14 @@ echo "- (Name of namespace)        is '${v_NAMESPACE}'"
 
 
 # ------------------------------------------------------------------------------
-# Configuration Thumblebug
-init() {
-
-	# namespace
-	curl -sX DELETE ${c_URL_TUMBLEBUG}/ns -H "${c_AUTH}" -H "${c_CT}" -o /dev/null -w "NAMESPACE.delete():%{http_code}\n"
-	curl -sX POST   ${c_URL_TUMBLEBUG}/ns -H "${c_AUTH}" -H "${c_CT}" -o /dev/null -w "NAMESPACE.regist():%{http_code}\n" -d @- <<EOF
-	{
-	"name"        : "${v_NAMESPACE}",
-	"description" : ""
-	}
-EOF
-
-}
-
-
-# ------------------------------------------------------------------------------
-# show init result
-show() {
-	echo "NAMESPACE";  curl -sX GET ${c_URL_TUMBLEBUG}/ns/${v_NAMESPACE}          -H "${c_AUTH}" -H "${c_CT}" | jq
+# get
+get() {
+	curl -sX GET ${c_URL_TUMBLEBUG}/ns/${v_NAMESPACE}          -H "${c_AUTH}" -H "${c_CT}" | jq
 }
 
 # ------------------------------------------------------------------------------
 if [ "$1" != "-h" ]; then 
 	echo ""
 	echo "------------------------------------------------------------------------------"
-	init;	show;
+	get;
 fi

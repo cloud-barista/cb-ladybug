@@ -16,8 +16,8 @@ $ sudo apt-get install jq   # linux
 ### CB-Spider, CB-Tumblebug 실행
 
 ```
-$ docker run -d -p 1024:1024 --name cb-spider cloudbaristaorg/cb-spider:v0.x.x
-$ docker run -d -p 1323:1323 --name cb-tumblebug --link cb-spider:cb-spider cloudbaristaorg/cb-tumblebug:v0.x.x
+$ docker run -d -p 1024:1024 --name cb-spider cloudbaristaorg/cb-spider:v0.x.y
+$ docker run -d -p 1323:1323 --name cb-tumblebug --link cb-spider:cb-spider cloudbaristaorg/cb-tumblebug:v0.x.y
 ```
 * 각 컨테이너 이미지의 최신 tag는 다음을 참조
   * https://hub.docker.com/r/cloudbaristaorg/cb-spider/tags
@@ -55,10 +55,7 @@ $ export ZONE="asia-northeast3-a"
 * Cloud Connection Info. 등록
 
 ```
-$ ./init.sh GCP
-
-# 예
-$ ./init.sh GCP
+$ ./connectioninfo-create.sh GCP
 ```
 
 #### AWS
@@ -88,10 +85,7 @@ $ export ZONE="ap-northeast-1a"
 * Cloud Connection Info. 등록
 
 ```
-$ ./init.sh AWS
-
-# 예
-$ ./init.sh AWS
+$ ./connectioninfo-create.sh AWS
 ```
 
 #### AZURE
@@ -119,10 +113,7 @@ $ export RESOURCE_GROUP="cb-ladybugRG"
 * Cloud Connection Info. 등록
 
 ```
-$ ./init.sh AZURE
-
-# 예
-$ ./init.sh AZURE
+$ ./connectioninfo-create.sh AZURE
 ```
 
 #### Cloud Connection Info 추가
@@ -136,26 +127,26 @@ $ export ZONE="<zone name>"
 $ export REGION="<region name>"
 $ export RESOURCE_GROUP="<resource group>"
 
-$ ./connectionconfig-add.sh [AWS/GCP/AZURE]
+$ ./connectioninfo-create.sh [AWS/GCP/AZURE] add
+```
+
+#### 결과 확인
+
+```
+$ ./connectioninfo-list.sh all
 ```
 
 #### namespace 등록
 
 ```
-$ ./init.ns.sh <namespace>
+$ ./ns-create.sh <namespace>
 
 # 예
-$ ./init.ns.sh cb-ladybug-ns
-```
+$ ./ns-create.sh cb-ladybug-ns
 
-#### 결과 확인
+# 결과 확인
+$ ./ns-get.sh cb-ladybug-ns
 ```
-$ ./list.sh <namespace> <query>
-
-# 예
-$ ./list.sh cb-ladybug-ns config,ns
-```
-
 
 
 ## Test 
@@ -255,12 +246,12 @@ $ ./node-list.sh cb-ladybug-ns cluster-01
 
 * `kubeconfig.yaml` 파일이 생성됩니다.
 ```
-$ ./cluster-kubeconfig.sh <namespace> <cluster name>
+$ ./cluster-get-kubeconfig.sh <namespace> <cluster name>
 ```
 
 * 예
 ```
-$ ./cluster-kubeconfig.sh cb-ladybug-ns cluster-01
+$ ./cluster-get-kubeconfig.sh cb-ladybug-ns cluster-01
 ```
 
 ### kubectl 사용하기
@@ -275,12 +266,12 @@ $ kubectl get nodes
 ### SSH key 파일 저장
 
 ```
-$ ./savekey.sh <namespace> <connection info>
+$ ./save-sshkey.sh <namespace> <connection info>
 ```
 
 * 예
 ```
-$ ./savekey.sh cb-ladybug-ns config-asia-northeast3
+$ ./save-sshkey.sh cb-ladybug-ns config-asia-northeast3
 $ cat *.pem
 ```
 
