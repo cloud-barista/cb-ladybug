@@ -1,8 +1,8 @@
 @@startuml
 
-header **Cloud-Barista Ladybug** (CafeMocha version)
+header **Cloud-Barista Ladybug** (v0.4.0-cafemocha)
 title Create a cluster
-hide footbox
+
 
 participant	"Webtool"		as webtool		#d1e0ff
 

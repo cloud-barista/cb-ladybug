@@ -1,6 +1,6 @@
 @@startuml
 
-header **Cloud-Barista Ladybug** (CafeMocha version)
+header **Cloud-Barista Ladybug** (v0.4.0-cafemocha)
 title Remove a node
 hide footbox
 
@@ -8,7 +8,7 @@ participant	"Webtool"		as webtool		#d1e0ff
 participant	"Ladybug"		as provider
 database	"Ladybug data"	as db
 participant	"Tumblebug"		as tumblebug	#d1e0ff
-participant	"Control plane"	as mNodes		#eeeeee
+participant	"Worker nodes"	as wNodes		#eeeeee
 
 
 activate webtool
@@ -19,9 +19,9 @@ activate webtool
 		provider	-->o	db			: select {control-plane}
 		provider	->	webtool			: [if there is an error]\nerror
 
-		provider 	->o	mNodes		: drain node (ssh)
+		provider 	->o	wNodes		: drain node (ssh)
 		provider	->	webtool		: [if there is an error]\nerror
-		provider 	->o	mNodes		: delete node (ssh)
+		provider 	->o	wNodes		: delete node (ssh)
 		provider	->	webtool		: [if there is an error]\nerror
 
 		provider	->	tumblebug	: DELETE\n/ns/:ns/mcis/:mcis/vm/:vm
