@@ -6,7 +6,7 @@ import (
 )
 
 // @title CB-Ladybug REST API
-// @version 0.3.5
+// @version 0.3.6
 // @description CB-Ladybug REST API
 // @termsOfService http://swagger.io/terms/
 
