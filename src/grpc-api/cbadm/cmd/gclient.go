@@ -52,7 +52,7 @@ func SetupAndRun(cmd *cobra.Command, args []string) {
 		}
 	}()
 
-	if cmd.Parent().Name() == "cluster" || cmd.Parent().Name() == "node" || cmd.Parent().Name() == "healthy" {
+	if cmd.Parent().Name() == "cluster" || cmd.Parent().Name() == "node" || cmd.Name() == "healthy" {
 		// LB API 설정
 		mcar = lb_api.NewMCARManager()
 		err = mcar.SetConfigPath(configFile)
