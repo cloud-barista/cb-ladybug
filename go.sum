@@ -120,6 +120,7 @@ github.com/cloud-barista/cb-spider v0.3.19 h1:slpUEEeuXePXQHT8IlsWpflQUMhMV/HNSV
 github.com/cloud-barista/cb-spider v0.3.19/go.mod h1:2szXRAGtU+RzubfxPFY8kizaBRXqCtlFS3RYhDV/pQE=
 github.com/cloud-barista/cb-store v0.3.14 h1:sZvZNesTLzTalZPKH+fOjgOq+RHOMO9/74Yqu0QCy/Y=
 github.com/cloud-barista/cb-store v0.3.14/go.mod h1:d3mwxDF2gC4lc7a+DFc2eo1OqqS9sHygLGUrU94hhj0=
+github.com/cloud-barista/cb-store v0.3.15 h1:oOORJxQJkklwDJxeenJAFWABY4nll3tIgdYCIaIXkQ4=
 github.com/cloud-barista/cb-store v0.3.15/go.mod h1:d3mwxDF2gC4lc7a+DFc2eo1OqqS9sHygLGUrU94hhj0=
 github.com/cloudflare/golz4 v0.0.0-20150217214814-ef862a3cdc58/go.mod h1:EOBUe0h4xcZ5GoxqC5SDxFQ8gwyZPKQoEzownBlhI80=
 github.com/cockroachdb/datadriven v0.0.0-20190809214429-80d97fb3cbaa/go.mod h1:zn76sxSg3SzpJ0PPJaLDCu+Bu0Lg3sKTORVIj19EIF8=
