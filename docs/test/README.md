@@ -299,3 +299,23 @@ $ cat ${HOME}/.aws/credentials
 aws_secret_access_key = y7Ganz6A.................................
 aws_access_key_id = AKIA2Z........................
 ```
+
+### clean up
+
+* MCIR (vpc, securityGroup, sshKey, spec, image) 확인
+
+```
+$ ./mcir-list.sh <namespace> [all/image/spec/ssh/sg/vpc]
+
+# 예
+$ ./mcir-list.sh cb-ladybug-ns all
+```
+
+* MCIR (vpc, securityGroup, sshKey, spec, image) 삭제
+
+```
+$ ./mcir-delete.sh <namespace> [all/image/spec/ssh/sg/vpc]
+
+# 예
+$ ./mcir-delete.sh cb-ladybug-ns all
+```
