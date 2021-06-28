@@ -11,8 +11,8 @@ replace (
 require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/beego/beego/v2 v2.0.1
-	github.com/cloud-barista/cb-spider v0.3.13
-	github.com/cloud-barista/cb-store v0.3.14
+	github.com/cloud-barista/cb-spider v0.3.19
+	github.com/cloud-barista/cb-store v0.3.15
 	github.com/go-resty/resty/v2 v2.6.0
 	github.com/google/uuid v1.2.0
 	github.com/labstack/echo/v4 v4.3.0
