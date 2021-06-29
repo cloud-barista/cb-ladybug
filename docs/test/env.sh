@@ -30,7 +30,7 @@ if [ "${v_FILE}" = "" ]; then echo "[ERROR] missing <credential file>"; exit -1;
 if [ "${v_CSP}" = "GCP" ]; then
 
 	export PROJECT=$(cat ${v_FILE} | jq -r ".project_id")
-	export PKEY=$(cat ${v_FILE} | jq -r ".private_key" | while read line; do	if [[ "$line" != "" ]]; then	echo -n "$line\n";	fi; done )
+	export PKEY=$(cat ${v_FILE} | jq -r ".private_key" | while read line; do	if [ "$line" != "" ]; then	echo -n "$line\n";	fi; done )
 	export SA=$(cat ${v_FILE} | jq -r ".client_email")
 
 fi
