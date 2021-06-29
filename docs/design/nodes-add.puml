@@ -1,4 +1,4 @@
-@@startuml
+@startuml
 
 header **Cloud-Barista Ladybug** (v0.4.0-cafemocha)
 title Add nodes
@@ -88,4 +88,4 @@ activate webtool
 
 deactivate webtool
 
-@@enduml
+@enduml

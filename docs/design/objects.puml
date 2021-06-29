@@ -1,4 +1,4 @@
-@@startuml
+@startuml
 
 header Cloud-Barista
 title objects
@@ -104,6 +104,16 @@ object node  {
 	+uid
 	cluster-uid
 }
+object controlPlane  {
+	role = "control-plane"
+}
+object workerNode  {
+	role = "worker"
+}
+
+controlPlane	--|>	node
+workerNode		--|>	node
+
 
 object clusterConfig  {
 }
@@ -143,4 +153,4 @@ kubeConfig		--|>	clusterConfig
 'nodeSet				*-->	node
 'nodeSet				..		clusterDeployment
 
-@@enduml
+@enduml
