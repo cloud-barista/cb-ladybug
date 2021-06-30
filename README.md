@@ -12,7 +12,7 @@
 
 ```
 [NOTE]
-CB-Ladybug is currently under development. (the latest release is 0.3.0 espresso)
+CB-Ladybug is currently under development. (the latest release is v0.4.0)
 So, we do not recommend using the current release in production.
 Please note that the functionalities of CB-Ladybug are not stable and secure yet.
 If you have any difficulties in using CB-Ladybug, please let us know.
@@ -27,8 +27,8 @@ If you have any difficulties in using CB-Ladybug, please let us know.
 
 ### Dependencies
 
-* CB-Spider [v0.3.0-espresso](https://github.com/cloud-barista/cb-tumblebug/releases/tag/v0.3.0-espresso)
-* CB-Tumbluebug [v0.3.0-espresso](https://github.com/cloud-barista/cb-spider/releases/tag/v0.3.0-espresso)
+* CB-Tumblebug [v0.4.0](https://github.com/cloud-barista/cb-tumblebug/releases/tag/v0.4.0)
+* CB-Spider [v0.4.0](https://github.com/cloud-barista/cb-spider/releases/tag/v0.4.0)
 
 
 ### Clone
@@ -68,22 +68,22 @@ code:200
 ```
 
 
-### API documentation (swagger)
+### API documentation
 
 * Execute or Run
-* Open http://localhost:8080/swagger/index.html in your web browser 
-
-#### How to generate an updated swagger.yaml
+* Generate an updated swagger.yaml
 ```
 $ go get -u github.com/swaggo/swag/cmd/swag
 
 # in src/ folder
 $ swag init
 ```
+* Open http://localhost:8080/swagger/index.html in your web browser 
 
-## Documentation
+## Documents
 
 * [Design](./docs/design)
+* REST API [latest](https://cloud-barista.github.io/cb-ladybug-api-web/?url=https://raw.githubusercontent.com/cloud-barista/cb-ladybug/master/src/docs/v0.4.0.yaml)
 
 
 ## Contribution
