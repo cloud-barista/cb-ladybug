@@ -1,10 +1,10 @@
 #!/bin/bash
-# -----------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # usage
 if [ "$#" -lt 1 ]; then 
-	echo "./node-get.sh <namespace> <clsuter name> <node name>"
-	echo "./node-get.sh cb-ladybug-ns cluster-01 cluster-01-w-1-asdflk"
-	exit 0; 
+	echo "./cluster-get-kubeconfig.sh <namespace> <cluster name>"
+	echo "./cluster-get-kubeconfig.sh cb-ladybug-ns cluster-01"
+	exit 0
 fi
 
 
@@ -14,8 +14,8 @@ c_URL_LADYBUG="http://localhost:8080/ladybug"
 c_CT="Content-Type: application/json"
 
 
-# -----------------------------------------------------------------
-# parameter
+# ------------------------------------------------------------------------------
+# paramter
 
 # 1. namespace
 if [ "$#" -gt 0 ]; then v_NAMESPACE="$1"; else	v_NAMESPACE="${NAMESPACE}"; fi
@@ -31,15 +31,8 @@ if [ "${v_CLUSTER_NAME}" == "" ]; then
 fi
 if [ "${v_CLUSTER_NAME}" == "" ]; then echo "[ERROR] missing <cluster name>"; exit -1; fi
 
-# 3. Node Name
-if [ "$#" -gt 2 ]; then v_NODE_NAME="$3"; else	v_NODE_NAME="${NODE_NAME}"; fi
-if [ "${v_NODE_NAME}" == "" ]; then 
-	read -e -p "Node name  ? : "  v_NODE_NAME
-fi
-if [ "${v_NODE_NAME}" == "" ]; then echo "[ERROR] missing <node name>"; exit -1; fi
 
 c_URL_LADYBUG_NS="${c_URL_LADYBUG}/ns/${v_NAMESPACE}"
-
 
 # ------------------------------------------------------------------------------
 # print info.
@@ -47,13 +40,18 @@ echo ""
 echo "[INFO]"
 echo "- Namespace                  is '${v_NAMESPACE}'"
 echo "- Cluster name               is '${v_CLUSTER_NAME}'"
-echo "- Node name                  is '${v_NODE_NAME}'"
 
 
 # ------------------------------------------------------------------------------
-# get Node
+# get Infrastructure
 get() {
-	$APP_ROOT/src/grpc-api/cbadm/cbadm node get --config $APP_ROOT/src/grpc-api/cbadm/grpc_conf.yaml -o json --ns ${v_NAMESPACE} --cluster ${v_CLUSTER_NAME} --node ${v_NODE_NAME}	
+
+	rm -f "kubeconfig.yaml"
+	$APP_ROOT/src/grpc-api/cbadm/cbadm cluster get --config $APP_ROOT/src/grpc-api/cbadm/grpc_conf.yaml -o json --ns ${v_NAMESPACE} --cluster ${v_CLUSTER_NAME} | jq -r ".clusterConfig" > kubeconfig.yaml
+
+	echo "export KUBECONFIG=$(pwd)/kubeconfig.yaml"
+	echo "kubectl get nodes"	
+	
 }
 
 
