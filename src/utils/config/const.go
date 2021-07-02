@@ -13,10 +13,9 @@ const (
 	SYSTEMD_SERVICE_FILE         = "systemd-service.sh"
 	HA_PROXY_FILE                = "haproxy.sh"
 
-	GCP_IMAGE_ID = "https://www.googleapis.com/compute/v1/projects/ubuntu-os-cloud/global/images/ubuntu-1804-bionic-v20201014"
-
-	CSP_AWS CSP = "aws"
-	CSP_GCP CSP = "gcp"
+	CSP_AWS   CSP = "aws"
+	CSP_GCP   CSP = "gcp"
+	CSP_AZURE CSP = "azure"
 
 	NETWORKCNI_KILO  = "kilo"
 	NETWORKCNI_CANAL = "canal"

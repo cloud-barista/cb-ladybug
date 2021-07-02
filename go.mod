@@ -11,9 +11,9 @@ replace (
 require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/beego/beego/v2 v2.0.1
-	github.com/cloud-barista/cb-log v0.3.1
-	github.com/cloud-barista/cb-spider v0.3.13
-	github.com/cloud-barista/cb-store v0.3.14
+	github.com/cloud-barista/cb-log v0.4.0
+	github.com/cloud-barista/cb-spider v0.4.0
+	github.com/cloud-barista/cb-store v0.4.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-resty/resty/v2 v2.6.0
 	github.com/gogo/protobuf v1.3.2

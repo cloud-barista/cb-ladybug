@@ -11,7 +11,8 @@ import (
 )
 
 const (
-	GCP_IMAGE_ID = "https://www.googleapis.com/compute/v1/projects/ubuntu-os-cloud/global/images/ubuntu-1804-bionic-v20201014"
+	GCP_IMAGE_ID   = "https://www.googleapis.com/compute/v1/projects/ubuntu-os-cloud/global/images/ubuntu-1804-bionic-v20201014"
+	AZURE_IMAGE_ID = "Canonical:UbuntuServer:18.04-LTS:latest"
 )
 
 // region별 AMI :  (AMI 이름 : ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-20200908, 소유자:099720109477 )
@@ -38,13 +39,8 @@ var imageMap = map[string]string{
 	"sa-east-1":      "ami-0fd2c3d373788b726", //남아메리카 (상파울루)
 }
 
-// TODO [update/hard-coding] host user account
+// get vm user account
 func GetUserAccount(csp config.CSP) string {
-
-	if csp == config.CSP_AWS {
-		return "ubuntu"
-	}
-
 	return "cb-user"
 }
 
@@ -53,6 +49,8 @@ func GetVmImageId(csp config.CSP, configName string) (string, error) {
 
 	if csp == config.CSP_GCP {
 		return GCP_IMAGE_ID, nil
+	} else if csp == config.CSP_AZURE {
+		return AZURE_IMAGE_ID, nil
 	} else if csp == config.CSP_AWS {
 		// AWS : 리전별 AMI 가져오기
 		conn := spider.NewConnection(configName)
@@ -108,6 +106,8 @@ func GetCSPName(providerName string) (config.CSP, error) {
 		return config.CSP_AWS, nil
 	case "gcp":
 		return config.CSP_GCP, nil
+	case "azure":
+		return config.CSP_AZURE, nil
 	}
 	return "", errors.New(providerName + "is not supported")
 }
@@ -116,7 +116,7 @@ func GetCSPName(providerName string) (config.CSP, error) {
 func GetRegionName(infoList []spider.KeyValue) string {
 	regionName := ""
 	for i := 0; i < len(infoList); i++ {
-		if infoList[i].Key == "Region" {
+		if infoList[i].Key == "Region" || infoList[i].Key == "location" {
 			regionName = infoList[i].Value //get region name
 			break
 		}
