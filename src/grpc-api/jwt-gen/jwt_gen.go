@@ -12,7 +12,7 @@ import (
 var (
 	jwtKey   = flag.String("jwt-key", "", "The JWT Signing Key")
 	userName = flag.String("user", "HongGilDong", "The User Name")
-	orgName  = flag.String("org", "ETRI", "The Organization Name")
+	orgName  = flag.String("org", "Cloud-Barista", "The Organization Name")
 	clientIP = flag.String("client-ip", "127.0.0.1", "The Client IP Address")
 	expire   = flag.Int("expire", 3650, "The Expire Days")
 )

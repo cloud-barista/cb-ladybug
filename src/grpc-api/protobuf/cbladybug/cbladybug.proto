@@ -43,7 +43,7 @@ service MCAR {
 }
 
 //////////////////////////////////
-// ClUSTER 메시지 정의
+// CLUSTER 메시지 정의
 //////////////////////////////////
 
 message ClusterInfoResponse {

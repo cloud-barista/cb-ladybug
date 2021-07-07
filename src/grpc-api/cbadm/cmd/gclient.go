@@ -34,7 +34,7 @@ func readInDataFromFile() {
 
 // ===== [ Public Functions ] =====
 
-// SetupAndRun - SPIDER GRPC CLI 구동
+// SetupAndRun - Ladybug GRPC CLI 구동
 func SetupAndRun(cmd *cobra.Command, args []string) {
 	logger := logger.NewLogger()
 

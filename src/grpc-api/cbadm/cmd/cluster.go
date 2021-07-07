@@ -16,13 +16,13 @@ import (
 
 // ===== [ Public Functions ] =====
 
-// NewClusterCmd - Cloud Cluster 관리 기능을 수행하는 Cobra Command 생성
+// NewClusterCmd - Cluster 관리 기능을 수행하는 Cobra Command 생성
 func NewClusterCmd() *cobra.Command {
 
 	clusterCmd := &cobra.Command{
 		Use:   "cluster",
-		Short: "This is a manageable command for cloud cluster",
-		Long:  "This is a manageable command for cloud cluster",
+		Short: "This is a manageable command for cluster",
+		Long:  "This is a manageable command for cluster",
 	}
 
 	//  Adds the commands for application.
@@ -34,13 +34,13 @@ func NewClusterCmd() *cobra.Command {
 	return clusterCmd
 }
 
-// NewClusterCreateCmd - Cloud Cluster 생성 기능을 수행하는 Cobra Command 생성
+// NewClusterCreateCmd - Cluster 생성 기능을 수행하는 Cobra Command 생성
 func NewClusterCreateCmd() *cobra.Command {
 
 	createCmd := &cobra.Command{
 		Use:   "create",
-		Short: "This is create command for cloud cluster",
-		Long:  "This is create command for cloud cluster",
+		Short: "This is create command for cluster",
+		Long:  "This is create command for cluster",
 		Run: func(cmd *cobra.Command, args []string) {
 			logger := logger.NewLogger()
 			readInDataFromFile()
@@ -61,13 +61,13 @@ func NewClusterCreateCmd() *cobra.Command {
 	return createCmd
 }
 
-// NewClusterListCmd - Cloud Cluster 목록 기능을 수행하는 Cobra Command 생성
+// NewClusterListCmd - Cluster 목록 기능을 수행하는 Cobra Command 생성
 func NewClusterListCmd() *cobra.Command {
 
 	listCmd := &cobra.Command{
 		Use:   "list",
-		Short: "This is list command for cloud cluster",
-		Long:  "This is list command for cloud cluster",
+		Short: "This is list command for cluster",
+		Long:  "This is list command for cluster",
 		Run: func(cmd *cobra.Command, args []string) {
 			logger := logger.NewLogger()
 			if nameSpaceID == "" {
@@ -85,13 +85,13 @@ func NewClusterListCmd() *cobra.Command {
 	return listCmd
 }
 
-// NewClusterGetCmd - Cloud Cluster 조회 기능을 수행하는 Cobra Command 생성
+// NewClusterGetCmd - Cluster 조회 기능을 수행하는 Cobra Command 생성
 func NewClusterGetCmd() *cobra.Command {
 
 	getCmd := &cobra.Command{
 		Use:   "get",
-		Short: "This is get command for cloud cluster",
-		Long:  "This is get command for cloud cluster",
+		Short: "This is get command for cluster",
+		Long:  "This is get command for cluster",
 		Run: func(cmd *cobra.Command, args []string) {
 			logger := logger.NewLogger()
 			if nameSpaceID == "" {
@@ -115,13 +115,13 @@ func NewClusterGetCmd() *cobra.Command {
 	return getCmd
 }
 
-// NewClusterDeleteCmd - Cloud Cluster 삭제 기능을 수행하는 Cobra Command 생성
+// NewClusterDeleteCmd - Cluster 삭제 기능을 수행하는 Cobra Command 생성
 func NewClusterDeleteCmd() *cobra.Command {
 
 	deleteCmd := &cobra.Command{
 		Use:   "delete",
-		Short: "This is delete command for cloud cluster",
-		Long:  "This is delete command for cloud cluster",
+		Short: "This is delete command for cluster",
+		Long:  "This is delete command for cluster",
 		Run: func(cmd *cobra.Command, args []string) {
 			logger := logger.NewLogger()
 			if nameSpaceID == "" {

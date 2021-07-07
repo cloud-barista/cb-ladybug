@@ -16,13 +16,13 @@ import (
 
 // ===== [ Public Functions ] =====
 
-// NewNodeCmd - Cloud Node 관리 기능을 수행하는 Cobra Command 생성
+// NewNodeCmd - Node 관리 기능을 수행하는 Cobra Command 생성
 func NewNodeCmd() *cobra.Command {
 
 	nodeCmd := &cobra.Command{
 		Use:   "node",
-		Short: "This is a manageable command for cloud node",
-		Long:  "This is a manageable command for cloud node",
+		Short: "This is a manageable command for node",
+		Long:  "This is a manageable command for node",
 	}
 
 	//  Adds the commands for application.
@@ -34,13 +34,13 @@ func NewNodeCmd() *cobra.Command {
 	return nodeCmd
 }
 
-// NewNodeAddCmd - Cloud Node 생성 기능을 수행하는 Cobra Command 생성
+// NewNodeAddCmd - Node 생성 기능을 수행하는 Cobra Command 생성
 func NewNodeAddCmd() *cobra.Command {
 
 	addCmd := &cobra.Command{
 		Use:   "add",
-		Short: "This is add command for cloud node",
-		Long:  "This is add command for cloud node",
+		Short: "This is add command for node",
+		Long:  "This is add command for node",
 		Run: func(cmd *cobra.Command, args []string) {
 			logger := logger.NewLogger()
 			readInDataFromFile()
@@ -61,13 +61,13 @@ func NewNodeAddCmd() *cobra.Command {
 	return addCmd
 }
 
-// NewNodeListCmd - Cloud Node 목록 기능을 수행하는 Cobra Command 생성
+// NewNodeListCmd - Node 목록 기능을 수행하는 Cobra Command 생성
 func NewNodeListCmd() *cobra.Command {
 
 	listCmd := &cobra.Command{
 		Use:   "list",
-		Short: "This is list command for cloud node",
-		Long:  "This is list command for cloud node",
+		Short: "This is list command for node",
+		Long:  "This is list command for node",
 		Run: func(cmd *cobra.Command, args []string) {
 			logger := logger.NewLogger()
 			if nameSpaceID == "" {
@@ -92,13 +92,13 @@ func NewNodeListCmd() *cobra.Command {
 	return listCmd
 }
 
-// NewNodeGetCmd - Cloud Node 조회 기능을 수행하는 Cobra Command 생성
+// NewNodeGetCmd - Node 조회 기능을 수행하는 Cobra Command 생성
 func NewNodeGetCmd() *cobra.Command {
 
 	getCmd := &cobra.Command{
 		Use:   "get",
-		Short: "This is get command for cloud node",
-		Long:  "This is get command for cloud node",
+		Short: "This is get command for node",
+		Long:  "This is get command for node",
 		Run: func(cmd *cobra.Command, args []string) {
 			logger := logger.NewLogger()
 			if nameSpaceID == "" {
@@ -128,13 +128,13 @@ func NewNodeGetCmd() *cobra.Command {
 	return getCmd
 }
 
-// NewNodeRemoveCmd - Cloud Node 삭제 기능을 수행하는 Cobra Command 생성
+// NewNodeRemoveCmd - Node 삭제 기능을 수행하는 Cobra Command 생성
 func NewNodeRemoveCmd() *cobra.Command {
 
 	removeCmd := &cobra.Command{
 		Use:   "remove",
-		Short: "This is remove command for cloud node",
-		Long:  "This is remove command for cloud node",
+		Short: "This is remove command for node",
+		Long:  "This is remove command for node",
 		Run: func(cmd *cobra.Command, args []string) {
 			logger := logger.NewLogger()
 			if nameSpaceID == "" {
