@@ -3,7 +3,9 @@ package service
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"sync"
+	"time"
 
 	"github.com/cloud-barista/cb-ladybug/src/core/model"
 	"github.com/cloud-barista/cb-ladybug/src/core/model/tumblebug"
@@ -80,35 +82,36 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 	cIdx := 0
 	wIdx := 0
 	var nodes []model.Node
+	var vmInfos []model.VMInfo
 
 	for _, nodeConfigInfo := range nodeConfigInfos {
 		// MCIR - 존재하면 재활용 없다면 생성 기준
 		// 1. create vpc
-		vpc, err := nodeConfigInfo.CreateVPC(namespace, clusterName)
+		vpc, err := nodeConfigInfo.CreateVPC(namespace)
 		if err != nil {
 			return nil, err
 		}
 
 		// 2. create firewall
-		fw, err := nodeConfigInfo.CreateFirewall(namespace, clusterName)
+		fw, err := nodeConfigInfo.CreateFirewall(namespace)
 		if err != nil {
 			return nil, err
 		}
 
 		// 3. create sshKey
-		sshKey, err := nodeConfigInfo.CreateSshKey(namespace, clusterName)
+		sshKey, err := nodeConfigInfo.CreateSshKey(namespace)
 		if err != nil {
 			return nil, err
 		}
 
 		// 4. create image
-		image, err := nodeConfigInfo.CreateImage(namespace, clusterName)
+		image, err := nodeConfigInfo.CreateImage(namespace)
 		if err != nil {
 			return nil, err
 		}
 
 		// 5. create spec
-		spec, err := nodeConfigInfo.CreateSpec(namespace, clusterName)
+		spec, err := nodeConfigInfo.CreateSpec(namespace)
 		if err != nil {
 			return nil, err
 		}
@@ -132,22 +135,27 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 				UserAccount:  nodeConfigInfo.Account,
 				UserPassword: "",
 				Description:  "",
-				Credential:   sshKey.PrivateKey,
-				Role:         nodeConfigInfo.Role,
-				Csp:          nodeConfigInfo.Csp,
+			}
+
+			vmInfo := model.VMInfo{
+				Credential: sshKey.PrivateKey,
+				Role:       nodeConfigInfo.Role,
+				Csp:        nodeConfigInfo.Csp,
 			}
 
 			if nodeConfigInfo.Role == config.CONTROL_PLANE {
 				vm.Name = lang.GetNodeName(clusterName, config.CONTROL_PLANE, cIdx)
 				if cIdx == 1 {
-					vm.IsCPLeader = true
+					vmInfo.IsCPLeader = true
 					cluster.CpLeader = vm.Name
 				}
 			} else {
 				vm.Name = lang.GetNodeName(clusterName, config.WORKER, wIdx)
 			}
+			vmInfo.Name = vm.Name
 
 			mcis.VMs = append(mcis.VMs, vm)
+			vmInfos = append(vmInfos, vmInfo)
 		}
 	}
 
@@ -158,9 +166,22 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 	}
 	logger.Infof("create MCIS OK.. (name=%s)", mcisName)
 
+	cpMcis := tumblebug.MCIS{}
 	// 결과값 저장
 	cluster.MCIS = mcisName
 	for _, vm := range mcis.VMs {
+		for _, vmInfo := range vmInfos {
+			if vm.Name == vmInfo.Name {
+				vm.Credential = vmInfo.Credential
+				vm.Role = vmInfo.Role
+				vm.Csp = vmInfo.Csp
+				vm.IsCPLeader = vmInfo.IsCPLeader
+
+				cpMcis.VMs = append(cpMcis.VMs, vm)
+				break
+			}
+		}
+
 		node := model.NewNodeVM(namespace, cluster.Name, vm)
 		node.UId = lang.GetUid()
 
@@ -179,16 +200,19 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 
 	var wg sync.WaitGroup
 	c := make(chan error)
-	wg.Add(len(mcis.VMs))
+	wg.Add(len(cpMcis.VMs))
 
 	// bootstrap
 	logger.Infoln("start k8s bootstrap")
-	for _, vm := range mcis.VMs {
-		err = cluster.Update()
-		if err != nil {
-			return nil, err
-		}
 
+	time.Sleep(2 * time.Second)
+
+	err = cluster.Update()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, vm := range cpMcis.VMs {
 		go func(vm model.VM) {
 			defer wg.Done()
 			sshInfo := ssh.SSHInfo{
@@ -196,7 +220,12 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 				PrivateKey: []byte(vm.Credential),
 				ServerPort: fmt.Sprintf("%s:22", vm.PublicIP),
 			}
-			_ = vm.ConnectionTest(&sshInfo)
+			err = vm.ConnectionTest(&sshInfo)
+			// retry
+			if err != nil {
+				vm.ConnectionTest(&sshInfo)
+			}
+
 			err := vm.CopyScripts(&sshInfo, cluster.NetworkCni)
 			if err != nil {
 				cluster.Fail()
@@ -231,10 +260,10 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 
 	// init & join
 	var joinCmd []string
-	IPs := GetControlPlaneIPs(mcis.VMs)
+	IPs := GetControlPlaneIPs(cpMcis.VMs)
 
 	logger.Infoln("start k8s init")
-	for _, vm := range mcis.VMs {
+	for _, vm := range cpMcis.VMs {
 		if vm.Role == config.CONTROL_PLANE && vm.IsCPLeader {
 			sshInfo := ssh.SSHInfo{
 				UserName:   GetUserAccount(vm.Csp),
@@ -242,7 +271,7 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 				ServerPort: fmt.Sprintf("%s:22", vm.PublicIP),
 			}
 
-			logger.Infoln("install HAProxy")
+			logger.Infof("install HAProxy (vm=%s)", vm.Name)
 			err := vm.InstallHAProxy(&sshInfo, IPs)
 			if err != nil {
 				cluster.Fail()
@@ -269,24 +298,30 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 	logger.Infoln("end k8s init")
 
 	logger.Infoln("start k8s join")
-	for _, vm := range mcis.VMs {
-		sshInfo := ssh.SSHInfo{
-			UserName:   GetUserAccount(vm.Csp),
-			PrivateKey: []byte(vm.Credential),
-			ServerPort: fmt.Sprintf("%s:22", vm.PublicIP),
-		}
-
-		if vm.Role == config.CONTROL_PLANE {
-			if !vm.IsCPLeader {
-				logger.Infoln("control plane join")
-				err := vm.ControlPlaneJoin(&sshInfo, &joinCmd[0])
-				if err != nil {
-					cluster.Fail()
-					return nil, err
-				}
+	for _, vm := range cpMcis.VMs {
+		if vm.Role == config.CONTROL_PLANE && !vm.IsCPLeader {
+			sshInfo := ssh.SSHInfo{
+				UserName:   GetUserAccount(vm.Csp),
+				PrivateKey: []byte(vm.Credential),
+				ServerPort: fmt.Sprintf("%s:22", vm.PublicIP),
 			}
-		} else {
-			logger.Infoln("worker join")
+			logger.Infof("control plane join (vm=%s)", vm.Name)
+			err := vm.ControlPlaneJoin(&sshInfo, &joinCmd[0])
+			if err != nil {
+				cluster.Fail()
+				return nil, err
+			}
+		}
+	}
+
+	for _, vm := range cpMcis.VMs {
+		if vm.Role == config.WORKER {
+			sshInfo := ssh.SSHInfo{
+				UserName:   GetUserAccount(vm.Csp),
+				PrivateKey: []byte(vm.Credential),
+				ServerPort: fmt.Sprintf("%s:22", vm.PublicIP),
+			}
+			logger.Infof("worker join (vm=%s)", vm.Name)
 			err := vm.WorkerJoin(&sshInfo, &joinCmd[1])
 			if err != nil {
 				cluster.Fail()
@@ -303,36 +338,62 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 }
 
 func DeleteCluster(namespace string, clusterName string) (*model.Status, error) {
-	mcisName := clusterName //cluster 이름과 동일하게 (임시)
+	mcisName := clusterName
 
 	status := model.NewStatus()
 	status.Code = model.STATUS_UNKNOWN
 
-	// 1. delete mcis
-	logger.Infof("start delete MCIS (name=%s)", mcisName)
+	logger.Infof("start delete Cluster (name=%s)", mcisName)
 	mcis := tumblebug.NewMCIS(namespace, mcisName)
+	cluster := model.NewCluster(namespace, clusterName)
 	exist, err := mcis.GET()
 	if err != nil {
 		return status, err
 	}
 	if exist {
-		if err = mcis.DELETE(); err != nil {
+		logger.Infof("terminate MCIS (name=%s)", mcisName)
+		if err = mcis.TERMINATE(); err != nil {
+			logger.Errorf("terminate mcis error : %v", err)
 			return status, err
 		}
-		// sleep 이후 확인하는 로직 추가 필요
-		logger.Infof("delete MCIS OK.. (name=%s)", mcisName)
-		status.Code = model.STATUS_SUCCESS
-		status.Message = "success"
+		time.Sleep(5 * time.Second)
 
-		cluster := model.NewCluster(namespace, clusterName)
+		logger.Infof("delete MCIS (name=%s)", mcisName)
+		if err = mcis.DELETE(); err != nil {
+			if strings.Contains(err.Error(), "Deletion is not allowed") {
+				logger.Infof("refine mcis (name=%s)", mcisName)
+				if err = mcis.REFINE(); err != nil {
+					logger.Errorf("refine MCIS error : %v", err)
+					return status, err
+				}
+				logger.Infof("delete MCIS (name=%s)", mcisName)
+				if err = mcis.DELETE(); err != nil {
+					logger.Errorf("delete MCIS error : %v", err)
+					return status, err
+				}
+			} else {
+				logger.Errorf("delete MCIS error : %v", err)
+				return status, err
+			}
+		}
+
+		logger.Infof("delete MCIS OK.. (name=%s)", mcisName)
+		status.Message = fmt.Sprintf("cluster %s has been deleted", mcisName)
+
 		if err := cluster.Delete(); err != nil {
-			status.Message = "delete success but cannot delete from the store"
+			status.Message = fmt.Sprintf("cluster %s has been deleted but cannot delete from the store", mcisName)
 			return status, nil
 		}
 	} else {
-		status.Code = model.STATUS_NOT_EXIST
-		logger.Infof("delete MCIS skip (cannot find).. (name=%s)", mcisName)
+		logger.Infof("delete Cluster skip (MCIS cannot find).. (name=%s)", mcisName)
+		status.Message = fmt.Sprintf("cluster %s not found", mcisName)
+
+		if err := cluster.Delete(); err != nil {
+			status.Message = fmt.Sprintf("cluster %s not found and cannot delete from the store", mcisName)
+			return status, nil
+		}
 	}
 
+	status.Code = model.STATUS_SUCCESS
 	return status, nil
 }

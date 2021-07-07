@@ -17,9 +17,9 @@ RUN GOOS=linux CGO_ENABLED=0 go build -ldflags '-w -extldflags "-static"' -tags 
 #-------------------------------------------
 FROM scratch as prod
 
-COPY --from=builder /usr/src/app/conf/* /app/conf/
+COPY --from=builder /usr/src/app/conf/ /app/conf/
 COPY --from=builder /usr/src/app/cb-ladybug /app/
-COPY --from=builder /usr/src/app/src/scripts/* /app/src/scripts/
+COPY --from=builder /usr/src/app/src/scripts/ /app/src/scripts/
 
 ENV CBLOG_ROOT "/app"
 ENV CBSTORE_ROOT "/app"

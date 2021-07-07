@@ -1,8 +1,10 @@
 package lang
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -91,4 +93,24 @@ func GetMaxNumber(arr []int) int {
 		}
 	}
 	return max
+}
+
+func CheckName(name string) error {
+	reg, _ := regexp.Compile("[a-z]([-a-z0-9]*[a-z0-9])?")
+	filtered := reg.FindString(name)
+
+	if filtered != name {
+		return errors.New(name + ": The first character of name must be a lowercase letter, and all following characters must be a dash, lowercase letter, or digit, except the last character, which cannot be a dash.")
+	}
+	return nil
+}
+
+func CheckIpCidr(name string, val string) error {
+	reg, _ := regexp.Compile("^((?:\\d{1,3}.){3}\\d{1,3})\\/(\\d{1,2})$")
+	filtered := reg.FindString(val)
+
+	if filtered != val {
+		return errors.New(fmt.Sprintf("%s %s : Type mismatch ex)10.244.0.0/16", name, val))
+	}
+	return nil
 }

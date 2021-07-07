@@ -73,31 +73,31 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 	for _, nodeConfigInfo := range nodeConfigInfos {
 		// MCIR - 존재하면 재활용 없다면 생성 기준
 		// 1. create vpc
-		vpc, err := nodeConfigInfo.CreateVPC(namespace, clusterName)
+		vpc, err := nodeConfigInfo.CreateVPC(namespace)
 		if err != nil {
 			return nil, err
 		}
 
 		// 2. create firewall
-		fw, err := nodeConfigInfo.CreateFirewall(namespace, clusterName)
+		fw, err := nodeConfigInfo.CreateFirewall(namespace)
 		if err != nil {
 			return nil, err
 		}
 
 		// 3. create sshKey
-		sshKey, err := nodeConfigInfo.CreateSshKey(namespace, clusterName)
+		sshKey, err := nodeConfigInfo.CreateSshKey(namespace)
 		if err != nil {
 			return nil, err
 		}
 
 		// 4. create image
-		image, err := nodeConfigInfo.CreateImage(namespace, clusterName)
+		image, err := nodeConfigInfo.CreateImage(namespace)
 		if err != nil {
 			return nil, err
 		}
 
 		// 5. create spec
-		spec, err := nodeConfigInfo.CreateSpec(namespace, clusterName)
+		spec, err := nodeConfigInfo.CreateSpec(namespace)
 		if err != nil {
 			return nil, err
 		}
@@ -122,7 +122,7 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 				UserPassword: "",
 				Description:  "",
 				Credential:   sshKey.PrivateKey,
-				Role:         spec.Role,
+				Role:         nodeConfigInfo.Role,
 				Csp:          nodeConfigInfo.Csp,
 			}
 
@@ -165,19 +165,19 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 				c <- err
 			}
 
-			logger.Infoln("set systemd service")
+			logger.Infof("set systemd service (vm=%s)", vm.Name)
 			err = vm.SetSystemd(&sshInfo, networkCni)
 			if err != nil {
 				c <- err
 			}
 
-			logger.Infoln("bootstrap")
+			logger.Infof("bootstrap (vm=%s)", vm.Name)
 			err = vm.Bootstrap(&sshInfo)
 			if err != nil {
 				c <- err
 			}
 
-			logger.Infoln("join")
+			logger.Infof("join (vm=%s)", vm.Name)
 			err = vm.WorkerJoin(&sshInfo, &workerJoinCmd)
 			if err != nil {
 				c <- err
@@ -202,6 +202,7 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 	nodes := model.NewNodeList(namespace, clusterName)
 	for _, vm := range TVMs {
 		node := model.NewNodeVM(namespace, clusterName, vm.VM)
+		node.UId = lang.GetUid()
 		err := node.Insert()
 		if err != nil {
 			return nil, err
@@ -235,7 +236,7 @@ func RemoveNode(namespace string, clusterName string, nodeName string) (*model.S
 		PrivateKey: []byte(cpNode.Credential),
 		ServerPort: fmt.Sprintf("%s:22", cpNode.PublicIP),
 	}
-	cmd := fmt.Sprintf("sudo kubectl drain %s --kubeconfig=/etc/kubernetes/admin.conf --ignore-daemonsets", hostName)
+	cmd := fmt.Sprintf("sudo kubectl drain %s --kubeconfig=/etc/kubernetes/admin.conf --ignore-daemonsets --force --delete-local-data", hostName)
 	result, err := ssh.SSHRun(sshInfo, cmd)
 	if err != nil {
 		status.Message = "kubectl drain failed"
@@ -353,10 +354,6 @@ func getHostName(namespace string, clusterName string, nodeName string) (string,
 			dNode = node
 			break
 		}
-	}
-
-	if dNode.Csp == config.CSP_GCP {
-		return nodeName, nil
 	}
 
 	userAccount := GetUserAccount(dNode.Csp)

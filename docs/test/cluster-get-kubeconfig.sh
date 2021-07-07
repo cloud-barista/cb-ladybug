@@ -1,10 +1,10 @@
 #!/bin/bash
-# -----------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # usage
 if [ "$#" -lt 1 ]; then 
-	echo "./node-add.sh <namespace> <clsuter name>"
-	echo "./node-add.sh cb-ladybug-ns cluster-01"
-	exit 0; 
+	echo "./cluster-get-kubeconfig.sh <namespace> <cluster name>"
+	echo "./cluster-get-kubeconfig.sh cb-ladybug-ns cluster-01"
+	exit 0
 fi
 
 
@@ -14,8 +14,8 @@ c_URL_LADYBUG="http://localhost:8080/ladybug"
 c_CT="Content-Type: application/json"
 
 
-# -----------------------------------------------------------------
-# parameter
+# ------------------------------------------------------------------------------
+# paramter
 
 # 1. namespace
 if [ "$#" -gt 0 ]; then v_NAMESPACE="$1"; else	v_NAMESPACE="${NAMESPACE}"; fi
@@ -34,7 +34,6 @@ if [ "${v_CLUSTER_NAME}" == "" ]; then echo "[ERROR] missing <cluster name>"; ex
 
 c_URL_LADYBUG_NS="${c_URL_LADYBUG}/ns/${v_NAMESPACE}"
 
-
 # ------------------------------------------------------------------------------
 # print info.
 echo ""
@@ -44,21 +43,15 @@ echo "- Cluster name               is '${v_CLUSTER_NAME}'"
 
 
 # ------------------------------------------------------------------------------
-# Add Node
-create() {
+# get Infrastructure
+get() {
 
-	resp=$(curl -sX POST ${c_URL_LADYBUG_NS}/clusters/${v_CLUSTER_NAME}/nodes -H "${c_CT}" -d @- <<EOF
-	{
-		"worker": [
-			{
-				"connection": "config-azure-koreacentral",
-				"count": 1,
-				"spec": "Standard_B2s"
-			}
-		]
-	}
-EOF
-	); echo ${resp} | jq
+	rm -f "kubeconfig.yaml"
+	curl -sX GET ${c_URL_LADYBUG_NS}/clusters/${v_CLUSTER_NAME} -H "${c_CT}" | jq -r ".clusterConfig" > kubeconfig.yaml
+
+	echo "export KUBECONFIG=$(pwd)/kubeconfig.yaml"
+	echo "kubectl get nodes"	
+	
 }
 
 
@@ -66,5 +59,5 @@ EOF
 if [ "$1" != "-h" ]; then 
 	echo ""
 	echo "------------------------------------------------------------------------------"
-	create;
+	get;
 fi

@@ -24,12 +24,20 @@ type VM struct {
 	UserAccount  string     `json:"vmUserAccount"`
 	UserPassword string     `json:"vmUserPassword"`
 	Description  string     `json:"description"`
-	PublicIP     string     `json:"publicIP"` // output
+	PublicIP     string     `json:"publicIP"`  // output
+	PrivateIP    string     `json:"privateIP"` // output
 	Credential   string     // private
-	UId          string     `json:"uid"`
 	Role         string     `json:"role"`
 	Csp          config.CSP `json:"csp"`
 	IsCPLeader   bool       `json:"isCPLeader"`
+}
+
+type VMInfo struct {
+	Name       string     `json:"name"`
+	Credential string     // private
+	Role       string     `json:"role"`
+	Csp        config.CSP `json:"csp"`
+	IsCPLeader bool       `json:"isCPLeader"`
 }
 
 const (
@@ -68,6 +76,7 @@ func (self *VM) CopyScripts(sshInfo *ssh.SSHInfo, networkCni string) error {
 			return errors.New(fmt.Sprintf("copy scripts error (server=%s, cause=%s)", sshInfo.ServerPort, err))
 		}
 	}
+	logger.Infof("end script file copy (vm=%s, server=%s)\n", self.Name, sshInfo.ServerPort)
 	return nil
 }
 
@@ -158,7 +167,8 @@ func (self *VM) InstallNetworkCNI(sshInfo *ssh.SSHInfo, networkCni string) error
 	if networkCni == config.NETWORKCNI_CANAL {
 		cmd = "sudo kubectl apply -f https://docs.projectcalico.org/manifests/canal.yaml --kubeconfig=/etc/kubernetes/admin.conf"
 	} else {
-		cmd = `sudo kubectl apply -f https://raw.githubusercontent.com/squat/kilo/master/manifests/kilo-kubeadm-flannel.yaml --kubeconfig=/etc/kubernetes/admin.conf;
+		cmd = `sudo kubectl apply -f https://raw.githubusercontent.com/squat/kilo/main/manifests/crds.yaml --kubeconfig=/etc/kubernetes/admin.conf;
+		sudo kubectl apply -f https://raw.githubusercontent.com/squat/kilo/master/manifests/kilo-kubeadm-flannel.yaml --kubeconfig=/etc/kubernetes/admin.conf;
 		sudo kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml --kubeconfig=/etc/kubernetes/admin.conf;`
 	}
 
