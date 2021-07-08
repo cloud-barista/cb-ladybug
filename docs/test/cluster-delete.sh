@@ -47,6 +47,8 @@ echo "- Cluster name               is '${v_CLUSTER_NAME}'"
 # Delete a cluster
 delete() {
 
+	source ./conf.env
+
 	if [ "$CB_CALL_METHOD" == "REST" ]; then
 		
 		curl -sX DELETE ${c_URL_LADYBUG_NS}/clusters/${v_CLUSTER_NAME}    -H "${c_CT}" | jq;

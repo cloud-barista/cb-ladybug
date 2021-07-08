@@ -47,6 +47,8 @@ echo "- Cluster name               is '${v_CLUSTER_NAME}'"
 # Add Node
 create() {
 
+	source ./conf.env
+
 	if [ "$CB_CALL_METHOD" == "REST" ]; then
 
 		resp=$(curl -sX POST ${c_URL_LADYBUG_NS}/clusters/${v_CLUSTER_NAME}/nodes -H "${c_CT}" -d @- <<EOF

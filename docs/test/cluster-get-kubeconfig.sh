@@ -46,6 +46,8 @@ echo "- Cluster name               is '${v_CLUSTER_NAME}'"
 # get Infrastructure
 get() {
 
+	source ./conf.env
+
 	if [ "$CB_CALL_METHOD" == "REST" ]; then
 		
 		rm -f "kubeconfig.yaml"

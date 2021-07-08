@@ -54,6 +54,8 @@ echo "- Node name                  is '${v_NODE_NAME}'"
 # get Node
 get() {
 
+	source ./conf.env
+	
 	if [ "$CB_CALL_METHOD" == "REST" ]; then
 		
 		curl -sX GET ${c_URL_LADYBUG_NS}/clusters/${v_CLUSTER_NAME}/nodes/${v_NODE_NAME} -H "${c_CT}" | jq;
