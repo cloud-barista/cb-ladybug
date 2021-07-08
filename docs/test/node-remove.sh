@@ -7,6 +7,7 @@ if [ "$#" -lt 1 ]; then
 	exit 0; 
 fi
 
+source ./conf.env
 
 # ------------------------------------------------------------------------------
 # const
@@ -54,8 +55,6 @@ echo "- Node name                  is '${v_NODE_NAME}'"
 # remove node
 delete() {
 
-	source ./conf.env
-	
 	if [ "$CB_CALL_METHOD" == "REST" ]; then
 		
 		curl -sX DELETE ${c_URL_LADYBUG_NS}/clusters/${v_CLUSTER_NAME}/nodes/${v_NODE_NAME}    -H "${c_CT}" | jq;

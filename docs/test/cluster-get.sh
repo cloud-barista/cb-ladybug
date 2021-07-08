@@ -7,6 +7,7 @@ if [ "$#" -lt 1 ]; then
 	exit 0; 
 fi
 
+source ./conf.env
 
 # ------------------------------------------------------------------------------
 # const
@@ -47,8 +48,6 @@ echo "- Cluster name               is '${v_CLUSTER_NAME}'"
 # get a cluster
 get() {
 
-	source ./conf.env
-	
 	if [ "$CB_CALL_METHOD" == "REST" ]; then
 		
 		curl -sX GET ${c_URL_LADYBUG_NS}/clusters/${v_CLUSTER_NAME} -H "${c_CT}" | jq;

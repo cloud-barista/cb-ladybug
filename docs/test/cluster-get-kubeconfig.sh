@@ -7,6 +7,7 @@ if [ "$#" -lt 1 ]; then
 	exit 0
 fi
 
+source ./conf.env
 
 # ------------------------------------------------------------------------------
 # const
@@ -45,8 +46,6 @@ echo "- Cluster name               is '${v_CLUSTER_NAME}'"
 # ------------------------------------------------------------------------------
 # get Infrastructure
 get() {
-
-	source ./conf.env
 
 	if [ "$CB_CALL_METHOD" == "REST" ]; then
 		
