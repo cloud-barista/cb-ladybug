@@ -46,7 +46,19 @@ echo "- Cluster name               is '${v_CLUSTER_NAME}'"
 # ------------------------------------------------------------------------------
 # get a cluster
 get() {
-	curl -sX GET ${c_URL_LADYBUG_NS}/clusters/${v_CLUSTER_NAME} -H "${c_CT}" | jq;
+
+	if [ "$CB_CALL_METHOD" == "REST" ]; then
+		
+		curl -sX GET ${c_URL_LADYBUG_NS}/clusters/${v_CLUSTER_NAME} -H "${c_CT}" | jq;
+
+	elif [ "$CB_CALL_METHOD" == "GRPC" ]; then
+
+		$APP_ROOT/src/grpc-api/cbadm/cbadm cluster get --config $APP_ROOT/src/grpc-api/cbadm/grpc_conf.yaml -o json --ns ${v_NAMESPACE} --cluster ${v_CLUSTER_NAME}
+		
+	else
+		echo "[ERROR] missing CB_CALL_METHOD"; exit -1;
+	fi
+	
 }
 
 

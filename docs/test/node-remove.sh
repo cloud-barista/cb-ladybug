@@ -53,7 +53,19 @@ echo "- Node name                  is '${v_NODE_NAME}'"
 # ------------------------------------------------------------------------------
 # remove node
 delete() {
-	curl -sX DELETE ${c_URL_LADYBUG_NS}/clusters/${v_CLUSTER_NAME}/nodes/${v_NODE_NAME}    -H "${c_CT}" | jq;
+
+	if [ "$CB_CALL_METHOD" == "REST" ]; then
+		
+		curl -sX DELETE ${c_URL_LADYBUG_NS}/clusters/${v_CLUSTER_NAME}/nodes/${v_NODE_NAME}    -H "${c_CT}" | jq;
+
+	elif [ "$CB_CALL_METHOD" == "GRPC" ]; then
+
+		$APP_ROOT/src/grpc-api/cbadm/cbadm node remove --config $APP_ROOT/src/grpc-api/cbadm/grpc_conf.yaml -o json --ns ${v_NAMESPACE} --cluster ${v_CLUSTER_NAME} --node ${v_NODE_NAME}
+		
+	else
+		echo "[ERROR] missing CB_CALL_METHOD"; exit -1;
+	fi
+	
 }
 
 # ------------------------------------------------------------------------------

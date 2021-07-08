@@ -47,34 +47,73 @@ echo "- Cluster name               is '${v_CLUSTER_NAME}'"
 # Create a cluster
 create() {
 
-	resp=$(curl -sX POST ${c_URL_LADYBUG_NS}/clusters -H "${c_CT}" -d @- <<EOF
-	{
-		"name": "${v_CLUSTER_NAME}",
-		"config": {
-			"kubernetes": {
-				"networkCni": "kilo",
-				"podCidr": "10.244.0.0/16",
-				"serviceCidr": "10.96.0.0/12",
-				"serviceDnsDomain": "cluster.local"
-			}
-		},
-		"controlPlane": [
-			{
-				"connection": "config-aws-ap-northeast-1",
-				"count": 1,
-				"spec": "t2.medium"
-			}
-		],
-		"worker": [
-			{
-				"connection": "config-gcp-asia-northeast3",
-				"count": 1,
-				"spec": "n1-standard-2"
-			}
-		]
-	}
+	if [ "$CB_CALL_METHOD" == "REST" ]; then
+
+		resp=$(curl -sX POST ${c_URL_LADYBUG_NS}/clusters -H "${c_CT}" -d @- <<EOF
+		{
+			"name": "${v_CLUSTER_NAME}",
+			"config": {
+				"kubernetes": {
+					"networkCni": "kilo",
+					"podCidr": "10.244.0.0/16",
+					"serviceCidr": "10.96.0.0/12",
+					"serviceDnsDomain": "cluster.local"
+				}
+			},
+			"controlPlane": [
+				{
+					"connection": "config-aws-ap-northeast-1",
+					"count": 1,
+					"spec": "t2.medium"
+				}
+			],
+			"worker": [
+				{
+					"connection": "config-gcp-asia-northeast3",
+					"count": 1,
+					"spec": "n1-standard-2"
+				}
+			]
+		}
 EOF
-	); echo ${resp} | jq
+		); echo ${resp} | jq
+
+	elif [ "$CB_CALL_METHOD" == "GRPC" ]; then
+
+		$APP_ROOT/src/grpc-api/cbadm/cbadm cluster create --config $APP_ROOT/src/grpc-api/cbadm/grpc_conf.yaml -i json -o json -d \
+		'{
+			"namespace":  "'${v_NAMESPACE}'",
+			"ReqInfo": {
+					"name": "'${v_CLUSTER_NAME}'",
+					"config": {
+						"kubernetes": {
+							"networkCni": "kilo",
+							"podCidr": "10.244.0.0/16",
+							"serviceCidr": "10.96.0.0/12",
+							"serviceDnsDomain": "cluster.local"
+						}
+					},
+					"controlPlane": [
+						{
+							"connection": "config-aws-ap-northeast-1",
+							"count": 1,
+							"spec": "t2.medium"
+						}
+					],
+					"worker": [
+						{
+							"connection": "config-gcp-asia-northeast3",
+							"count": 1,
+							"spec": "n1-standard-2"
+						}
+					]
+				}
+		}'	
+
+	else
+		echo "[ERROR] missing CB_CALL_METHOD"; exit -1;
+	fi
+	
 }
 
 
