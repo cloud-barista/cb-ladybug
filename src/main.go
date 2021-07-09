@@ -1,6 +1,9 @@
 package main
 
 import (
+	"sync"
+
+	grpcserver "github.com/cloud-barista/cb-ladybug/src/grpc-api/server"
 	restapi "github.com/cloud-barista/cb-ladybug/src/rest-api"
 	"github.com/cloud-barista/cb-ladybug/src/utils/config"
 )
@@ -22,6 +25,21 @@ import (
 func main() {
 
 	config.Setup()
-	restapi.Server()
+
+	wg := new(sync.WaitGroup)
+
+	wg.Add(2)
+
+	go func() {
+		restapi.Server()
+		wg.Done()
+	}()
+
+	go func() {
+		grpcserver.RunServer()
+		wg.Done()
+	}()
+
+	wg.Wait()
 
 }

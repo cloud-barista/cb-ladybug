@@ -7,6 +7,7 @@ if [ "$#" -lt 1 ]; then
 	exit 0; 
 fi
 
+source ./conf.env
 
 # ------------------------------------------------------------------------------
 # const
@@ -47,18 +48,42 @@ echo "- Cluster name               is '${v_CLUSTER_NAME}'"
 # Add Node
 create() {
 
-	resp=$(curl -sX POST ${c_URL_LADYBUG_NS}/clusters/${v_CLUSTER_NAME}/nodes -H "${c_CT}" -d @- <<EOF
-	{
-		"worker": [
-			{
-				"connection": "config-azure-koreacentral",
-				"count": 1,
-				"spec": "Standard_B2s"
-			}
-		]
-	}
+	if [ "$CB_CALL_METHOD" == "REST" ]; then
+
+		resp=$(curl -sX POST ${c_URL_LADYBUG_NS}/clusters/${v_CLUSTER_NAME}/nodes -H "${c_CT}" -d @- <<EOF
+		{
+			"worker": [
+				{
+					"connection": "config-azure-koreacentral",
+					"count": 1,
+					"spec": "Standard_B2s"
+				}
+			]
+		}
 EOF
-	); echo ${resp} | jq
+		); echo ${resp} | jq
+
+	elif [ "$CB_CALL_METHOD" == "GRPC" ]; then
+
+		$APP_ROOT/src/grpc-api/cbadm/cbadm node add --config $APP_ROOT/src/grpc-api/cbadm/grpc_conf.yaml -i json -o json -d \
+		'{
+			"namespace":  "'${v_NAMESPACE}'",
+			"cluster":  "'${v_CLUSTER_NAME}'",
+			"ReqInfo": {
+					"worker": [
+						{
+							"connection": "config-azure-koreacentral",
+							"count": 1,
+							"spec": "Standard_B2s"
+						}
+					]
+			}
+		}'
+		
+	else
+		echo "[ERROR] missing CB_CALL_METHOD"; exit -1;
+	fi
+	
 }
 
 

@@ -7,6 +7,7 @@ if [ "$#" -lt 1 ]; then
 	exit 0
 fi
 
+source ./conf.env
 
 # ------------------------------------------------------------------------------
 # const
@@ -46,11 +47,25 @@ echo "- Cluster name               is '${v_CLUSTER_NAME}'"
 # get Infrastructure
 get() {
 
-	rm -f "kubeconfig.yaml"
-	curl -sX GET ${c_URL_LADYBUG_NS}/clusters/${v_CLUSTER_NAME} -H "${c_CT}" | jq -r ".clusterConfig" > kubeconfig.yaml
+	if [ "$CB_CALL_METHOD" == "REST" ]; then
+		
+		rm -f "kubeconfig.yaml"
+		curl -sX GET ${c_URL_LADYBUG_NS}/clusters/${v_CLUSTER_NAME} -H "${c_CT}" | jq -r ".clusterConfig" > kubeconfig.yaml
 
-	echo "export KUBECONFIG=$(pwd)/kubeconfig.yaml"
-	echo "kubectl get nodes"	
+		echo "export KUBECONFIG=$(pwd)/kubeconfig.yaml"
+		echo "kubectl get nodes"	
+
+	elif [ "$CB_CALL_METHOD" == "GRPC" ]; then
+
+		rm -f "kubeconfig.yaml"
+		$APP_ROOT/src/grpc-api/cbadm/cbadm cluster get --config $APP_ROOT/src/grpc-api/cbadm/grpc_conf.yaml -o json --ns ${v_NAMESPACE} --cluster ${v_CLUSTER_NAME} | jq -r ".clusterConfig" > kubeconfig.yaml
+
+		echo "export KUBECONFIG=$(pwd)/kubeconfig.yaml"
+		echo "kubectl get nodes"	
+		
+	else
+		echo "[ERROR] missing CB_CALL_METHOD"; exit -1;
+	fi
 	
 }
 

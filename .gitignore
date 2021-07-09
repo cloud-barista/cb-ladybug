@@ -24,3 +24,6 @@
 
 # DB
 meta_db/
+
+# Binaries
+src/grpc-api/cbadm/cbadm
