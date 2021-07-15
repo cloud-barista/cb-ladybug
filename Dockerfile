@@ -35,3 +35,4 @@ ENV API_PASSWORD default
 ENTRYPOINT [ "/app/cb-ladybug" ]
 
 EXPOSE 8080
+EXPOSE 50254
