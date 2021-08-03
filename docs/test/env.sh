@@ -29,17 +29,17 @@ if [ "${v_FILE}" = "" ]; then echo "[ERROR] missing <credential file>"; exit -1;
 # credential (gcp)
 if [ "${v_CSP}" = "GCP" ]; then
 
-	export PROJECT=$(cat ${v_FILE} | jq -r ".project_id")
-	export PKEY=$(cat ${v_FILE} | jq -r ".private_key" | while read line; do	if [ "$line" != "" ]; then	echo -n "$line\n";	fi; done )
-	export SA=$(cat ${v_FILE} | jq -r ".client_email")
+	export GCP_PROJECT=$(cat ${v_FILE} | jq -r ".project_id")
+	export GCP_PKEY=$(cat ${v_FILE} | jq -r ".private_key" | while read line; do	if [ "$line" != "" ]; then	echo -n "$line\n";	fi; done )
+	export GCP_SA=$(cat ${v_FILE} | jq -r ".client_email")
 
 fi
 
 # credential (aws)
 if [ "${v_CSP}" = "AWS" ]; then
 
-	export KEY="$(head -n 2 ${v_FILE} | tail -n 1 | sed  '/^$/d; s/\r//; s/aws_access_key_id = //g')"
-	export SECRET="$(head -n 3 ${v_FILE} | tail -n 1 | sed  '/^$/d; s/\r//; s/aws_secret_access_key = //g')"
+	export AWS_KEY="$(head -n 2 ${v_FILE} | tail -n 1 | sed  '/^$/d; s/\r//; s/aws_access_key_id = //g')"
+	export AWS_SECRET="$(head -n 3 ${v_FILE} | tail -n 1 | sed  '/^$/d; s/\r//; s/aws_secret_access_key = //g')"
 
 fi
 
@@ -49,9 +49,9 @@ fi
 echo ""
 echo "[Env.]"
 echo "GCP"
-echo "- PROJECT is '${PROJECT}'"
-echo "- PKEY    is '${PKEY}'"
-echo "- SA      is '${SA}'"
+echo "- PROJECT is '${GCP_PROJECT}'"
+echo "- PKEY    is '${GCP_PKEY}'"
+echo "- SA      is '${GCP_SA}'"
 echo "AWS"
-echo "- KEY     is '${KEY}'"
-echo "- SECRET  is '${SECRET}'"
+echo "- KEY     is '${AWS_KEY}'"
+echo "- SECRET  is '${AWS_SECRET}'"

@@ -36,20 +36,20 @@ $ docker run -d -p 1323:1323 --name cb-tumblebug --link cb-spider:cb-spider clou
 * 환경변수 : 클라우드별 연결정보
 
 ```
-$ export PROJECT="<project name>"
-$ export PKEY="<private key>"
-$ export SA="<service account email>"
+$ export GCP_PROJECT="<project name>"
+$ export GCP_PKEY="<private key>"
+$ export GCP_SA="<service account email>"
 ```
 
-* 환경변수 : REGION, ZONE
+* 환경변수 : GCP_REGION, GCP_ZONE
 
 ```
-$ export REGION="<region name>" 
-$ export ZONE="<zone name>"
+$ export GCP_REGION="<region name>" 
+$ export GCP_ZONE="<zone name>"
 
 # 예 : asia-northeast3 (서울리전)
-$ export REGION="asia-northeast3" 
-$ export ZONE="asia-northeast3-a"
+$ export GCP_REGION="asia-northeast3" 
+$ export GCP_ZONE="asia-northeast3-a"
 ```
 
 * Cloud Connection Info. 등록
@@ -63,23 +63,23 @@ $ ./connectioninfo-create.sh GCP
 * 환경변수 : 클라우드별 연결정보
 
 ```
-$ export KEY="<aws_access_key_id>"
-$ export SECRET="<aws_secret_access_key>"
+$ export AWS_KEY="<aws_access_key_id>"
+$ export AWS_SECRET="<aws_secret_access_key>"
 ```
 
-* 환경변수 : REGION, ZONE
+* 환경변수 : AWS_REGION, AWS_ZONE
 
 ```
-$ export REGION="<region name>" 
-$ export ZONE="<zone name>"
+$ export AWS_REGION="<region name>" 
+$ export AWS_ZONE="<zone name>"
 
 # 예: ap-northeast-2 (서울리전)
-$ export REGION="ap-northeast-2"
-$ export ZONE="ap-northeast-2a"
+$ export AWS_REGION="ap-northeast-2"
+$ export AWS_ZONE="ap-northeast-2a"
 
 # 예: ap-northeast-1 (일본리전)
-$ export REGION="ap-northeast-1"
-$ export ZONE="ap-northeast-1a"
+$ export AWS_REGION="ap-northeast-1"
+$ export AWS_ZONE="ap-northeast-1a"
 ```
 
 * Cloud Connection Info. 등록
@@ -93,21 +93,21 @@ $ ./connectioninfo-create.sh AWS
 * 환경변수 : 클라우드별 연결정보
 
 ```
-$ export CLIENT_ID="<azure_client_id>"
-$ export CLIENT_SECRET="<azure_client_secret>"
-$ export TENANT_ID="<azure_tenant_id>"
-$ export SUBSCRIPTION_ID="<azure_subscription_id>"
+$ export AZURE_CLIENT_ID="<azure_client_id>"
+$ export AZURE_CLIENT_SECRET="<azure_client_secret>"
+$ export AZURE_TENANT_ID="<azure_tenant_id>"
+$ export AZURE_SUBSCRIPTION_ID="<azure_subscription_id>"
 ```
 
-* 환경변수 : REGION, RESOURCE_GROUP
+* 환경변수 : AZURE_REGION, AZURE_RESOURCE_GROUP
 
 ```
-$ export REGION="<region name>" 
-$ export RESOURCE_GROUP="<resource group>"
+$ export AZURE_REGION="<region name>" 
+$ export AZURE_RESOURCE_GROUP="<resource group>"
 
 # 예: koreacentral (한국 중부)
-$ export REGION="koreacentral"
-$ export RESOURCE_GROUP="cb-ladybugRG"
+$ export AZURE_REGION="koreacentral"
+$ export AZURE_RESOURCE_GROUP="cb-ladybugRG"
 ```
 
 * Cloud Connection Info. 등록
@@ -120,12 +120,12 @@ $ ./connectioninfo-create.sh AZURE
 
 ```
 # AWS/GCP
-$ export REGION="<region name>"
-$ export ZONE="<zone name>"
+$ export [AWS/GCP]_REGION="<region name>"
+$ export [AWS/GCP]_ZONE="<zone name>"
 
 # AZURE
-$ export REGION="<region name>"
-$ export RESOURCE_GROUP="<resource group>"
+$ export AZURE_REGION="<region name>"
+$ export AZURE_RESOURCE_GROUP="<resource group>"
 
 $ ./connectioninfo-create.sh [AWS/GCP/AZURE] add
 ```
