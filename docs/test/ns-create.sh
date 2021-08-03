@@ -7,12 +7,10 @@ if [ "$#" -lt 1 ]; then
 	exit 0
 fi
 
+source ./conf.env
 
 # ------------------------------------------------------------------------------
 # const
-c_URL_TUMBLEBUG="http://localhost:1323/tumblebug"
-c_CT="Content-Type: application/json"
-c_AUTH="Authorization: Basic $(echo -n default:default | base64)"
 
 
 # -----------------------------------------------------------------
