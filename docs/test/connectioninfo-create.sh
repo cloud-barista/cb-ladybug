@@ -8,13 +8,11 @@ if [ "$#" -lt 1 ]; then
 	exit 0
 fi
 
+source ./conf.env
+
 # ------------------------------------------------------------------------------
 # const
-c_URL_SPIDER="http://localhost:1024/spider"
-c_CT="Content-Type: application/json"
-c_AWS_DRIVER="aws-driver-v1.0"
-c_GCP_DRIVER="gcp-driver-v1.0"
-c_AZURE_DRIVER="azure-driver-v1.0"
+
 
 
 # ------------------------------------------------------------------------------
