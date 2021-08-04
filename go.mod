@@ -15,9 +15,9 @@ require (
 	github.com/cloud-barista/cb-spider v0.4.5
 	github.com/cloud-barista/cb-store v0.4.1
 	github.com/cloud-barista/cb-tumblebug v0.4.0
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-resty/resty/v2 v2.6.0
 	github.com/gogo/protobuf v1.3.2
+	github.com/golang-jwt/jwt/v4 v4.0.0
 	github.com/golang/protobuf v1.5.2
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
