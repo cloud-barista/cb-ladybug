@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# GCP
+export GCP_PROJECT="your-gcp-project-id"
+export GCP_PKEY="-----BEGIN PRIVATE KEY-----\nyour-key=\n-----END PRIVATE KEY-----\n"
+export GCP_SA="1111-compute@developer.gserviceaccount.com"
+
+export GCP_REGION="asia-northeast3"
+export GCP_ZONE="asia-northeast3-a"
+
+./connectioninfo-create.sh GCP
+
+
+
+# AWS
+export AWS_KEY="xxxxxxxx"
+export AWS_SECRET="yyyyyyyy/zzzzzzzz"
+
+export AWS_REGION="ap-northeast-1"
+export AWS_ZONE="ap-northeast-1a"
+
+./connectioninfo-create.sh AWS
+
+
+
+# Azure
+export AZURE_CLIENT_ID="uuid"
+export AZURE_CLIENT_SECRET="uuid"
+export AZURE_TENANT_ID="uuid"
+export AZURE_SUBSCRIPTION_ID="uuid"
+
+export AZURE_REGION="japaneast" 
+export AZURE_RESOURCE_GROUP="ladybug-test"
+
+./connectioninfo-create.sh AZURE
