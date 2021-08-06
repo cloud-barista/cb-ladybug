@@ -5,7 +5,7 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-func ExecutHTTP(method string, url string, body interface{}, result interface{}) (*resty.Response, error) {
+func ExecuteHTTP(method string, url string, body interface{}, result interface{}) (*resty.Response, error) {
 
 	conf := config.Config
 

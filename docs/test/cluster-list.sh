@@ -37,16 +37,16 @@ echo "- Namespace			             is '${v_NAMESPACE}'"
 # list
 list() {
 
-	if [ "$CB_CALL_METHOD" == "REST" ]; then
+	if [ "$LADYBUG_CALL_METHOD" == "REST" ]; then
 		
 		curl -sX GET ${c_URL_LADYBUG_NS}/clusters -H "${c_CT}" | jq;
 
-	elif [ "$CB_CALL_METHOD" == "GRPC" ]; then
+	elif [ "$LADYBUG_CALL_METHOD" == "GRPC" ]; then
 
 		$APP_ROOT/src/grpc-api/cbadm/cbadm cluster list --config $APP_ROOT/src/grpc-api/cbadm/grpc_conf.yaml -o json --ns ${v_NAMESPACE}
 		
 	else
-		echo "[ERROR] missing CB_CALL_METHOD"; exit -1;
+		echo "[ERROR] missing LADYBUG_CALL_METHOD"; exit -1;
 	fi
 	
 }

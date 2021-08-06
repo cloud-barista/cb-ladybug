@@ -30,7 +30,7 @@ func NewConnection(name string) *Connection {
 func (self *Connection) GET() (bool, error) {
 
 	url := fmt.Sprintf("%s/connectionconfig/%s", *config.Config.SpiderUrl, self.ConfigName)
-	resp, err := app.ExecutHTTP(http.MethodGet, url, nil, &self)
+	resp, err := app.ExecuteHTTP(http.MethodGet, url, nil, &self)
 	if err != nil {
 		return false, err
 	}

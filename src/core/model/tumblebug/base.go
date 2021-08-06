@@ -32,7 +32,7 @@ func (self *Model) execute(method string, url string, body interface{}, result i
 		return false, err
 	}
 
-	resp, err := app.ExecutHTTP(method, *config.Config.TumblebugUrl+url, body, result)
+	resp, err := app.ExecuteHTTP(method, *config.Config.TumblebugUrl+url, body, result)
 	if err != nil {
 		return false, err
 	}

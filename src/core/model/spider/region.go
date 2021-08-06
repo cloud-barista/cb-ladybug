@@ -32,7 +32,7 @@ func NewRegion(name string) *Region {
 func (self *Region) GET() (bool, error) {
 
 	url := fmt.Sprintf("%s/region/%s", *config.Config.SpiderUrl, self.RegionName)
-	resp, err := app.ExecutHTTP(http.MethodGet, url, nil, &self)
+	resp, err := app.ExecuteHTTP(http.MethodGet, url, nil, &self)
 	if err != nil {
 		return false, err
 	}

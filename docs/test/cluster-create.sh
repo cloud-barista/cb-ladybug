@@ -46,7 +46,7 @@ echo "- Cluster name               is '${v_CLUSTER_NAME}'"
 # Create a cluster
 create() {
 
-	if [ "$CB_CALL_METHOD" == "REST" ]; then
+	if [ "$LADYBUG_CALL_METHOD" == "REST" ]; then
 
 		resp=$(curl -sX POST ${c_URL_LADYBUG_NS}/clusters -H "${c_CT}" -d @- <<EOF
 		{
@@ -77,7 +77,7 @@ create() {
 EOF
 		); echo ${resp} | jq
 
-	elif [ "$CB_CALL_METHOD" == "GRPC" ]; then
+	elif [ "$LADYBUG_CALL_METHOD" == "GRPC" ]; then
 
 		$APP_ROOT/src/grpc-api/cbadm/cbadm cluster create --config $APP_ROOT/src/grpc-api/cbadm/grpc_conf.yaml -i json -o json -d \
 		'{
@@ -110,7 +110,7 @@ EOF
 		}'	
 
 	else
-		echo "[ERROR] missing CB_CALL_METHOD"; exit -1;
+		echo "[ERROR] missing LADYBUG_CALL_METHOD"; exit -1;
 	fi
 	
 }
