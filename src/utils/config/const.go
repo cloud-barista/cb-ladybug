@@ -14,9 +14,10 @@ const (
 	SYSTEMD_SERVICE_FILE         = "systemd-service.sh"
 	HA_PROXY_FILE                = "haproxy.sh"
 
-	CSP_AWS   CSP = "aws"
-	CSP_GCP   CSP = "gcp"
-	CSP_AZURE CSP = "azure"
+	CSP_AWS     CSP = "aws"
+	CSP_GCP     CSP = "gcp"
+	CSP_AZURE   CSP = "azure"
+	CSP_ALIBABA CSP = "alibaba"
 
 	NETWORKCNI_KILO  = "kilo"
 	NETWORKCNI_CANAL = "canal"

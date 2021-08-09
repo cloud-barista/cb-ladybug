@@ -16,8 +16,8 @@ $ sudo apt-get install jq   # linux
 ### CB-Spider, CB-Tumblebug 실행
 
 ```
-$ docker run -d -p 1024:1024 --name cb-spider cloudbaristaorg/cb-spider:v0.x.y
-$ docker run -d -p 1323:1323 --name cb-tumblebug --link cb-spider:cb-spider cloudbaristaorg/cb-tumblebug:v0.x.y
+$ docker run -d -p 1024:1024 --name cb-spider cloudbaristaorg/cb-spider:0.x.y
+$ docker run -d -p 1323:1323 --name cb-tumblebug --link cb-spider:cb-spider cloudbaristaorg/cb-tumblebug:0.x.y
 ```
 * 각 컨테이너 이미지의 최신 tag는 다음을 참조
   * https://hub.docker.com/r/cloudbaristaorg/cb-spider/tags
@@ -25,8 +25,8 @@ $ docker run -d -p 1323:1323 --name cb-tumblebug --link cb-spider:cb-spider clou
 
 * 예
 ```
-$ docker run -d -p 1024:1024 --name cb-spider cloudbaristaorg/cb-spider:v0.3.0-espresso
-$ docker run -d -p 1323:1323 --name cb-tumblebug --link cb-spider:cb-spider cloudbaristaorg/cb-tumblebug:v0.3.0-espresso
+$ docker run -d -p 1024:1024 --name cb-spider cloudbaristaorg/cb-spider:0.4.0
+$ docker run -d -p 1323:1323 --name cb-tumblebug --link cb-spider:cb-spider cloudbaristaorg/cb-tumblebug:0.4.0
 ```
 
 ### Cloud Connection Info. 등록
@@ -116,18 +116,44 @@ $ export AZURE_RESOURCE_GROUP="cb-ladybugRG"
 $ ./connectioninfo-create.sh AZURE
 ```
 
+#### ALIBABA
+
+* 환경변수 : 클라우드별 연결정보
+
+```
+$ export ALIBABA_KEY="<alibaba_access_key_id>"
+$ export ALIBABA_SECRET="<alibaba_access_key_secret>"
+```
+
+* 환경변수 : ALIBABA_REGION, ALIBABA_ZONE
+
+```
+$ export ALIBABA_REGION="<region name>" 
+$ export ALIBABA_ZONE="<zone name>"
+
+# 예: ap-northeast-1 (도쿄리전)
+$ export ALIBABA_REGION="ap-northeast-1"
+$ export ALIBABA_ZONE="ap-northeast-1a"
+```
+
+* Cloud Connection Info. 등록
+
+```
+$ ./connectioninfo-create.sh ALIBABA
+```
+
 #### Cloud Connection Info 추가
 
 ```
-# AWS/GCP
-$ export [AWS/GCP]_REGION="<region name>"
-$ export [AWS/GCP]_ZONE="<zone name>"
+# AWS/GCP/ALIBABA
+$ export [AWS/GCP/ALIBABA]_REGION="<region name>"
+$ export [AWS/GCP/ALIBABA]_ZONE="<zone name>"
 
 # AZURE
 $ export AZURE_REGION="<region name>"
 $ export AZURE_RESOURCE_GROUP="<resource group>"
 
-$ ./connectioninfo-create.sh [AWS/GCP/AZURE] add
+$ ./connectioninfo-create.sh [AWS/GCP/AZURE/ALIBABA] add
 ```
 
 #### 결과 확인
@@ -277,6 +303,10 @@ $ cat *.pem
 
 ### 파일에서 클라우드별 연결정보 얻기
 
+> 참고 : CSP 별 credential 생성 가이드 
+> 
+> https://github.com/cloud-barista/cb-coffeehouse/wiki/A-step-by-step-guide-to-creating-credentials-of-each-cloud-service-provider
+
 * GCP ( [jq](https://stedolan.github.io/jq/) 설치 필요)
 
 ```
@@ -298,6 +328,22 @@ $ cat ${HOME}/.aws/credentials
 [default]
 aws_secret_access_key = y7Ganz6A.................................
 aws_access_key_id = AKIA2Z........................
+```
+
+* AZURE
+```
+$ source ./env.sh AZURE "<credentials file path>"
+
+# 예
+$ source ./env.sh AZURE "${HOME}/.azure/credentials"
+```
+
+* ALIBABA
+```
+$ source ./env.sh ALIBABA "<credentials file path>"
+
+# 예
+$ source ./env.sh ALIBABA "${HOME}/.ssh/AccessKey.csv"
 ```
 
 ### clean up

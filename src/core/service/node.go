@@ -375,6 +375,7 @@ func getHostName(namespace string, clusterName string, nodeName string) (string,
 	if err != nil {
 		return "", err
 	}
+	hostName = strings.ToLower(hostName)
 	return hostName, nil
 }
 

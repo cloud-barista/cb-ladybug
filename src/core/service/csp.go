@@ -11,8 +11,9 @@ import (
 )
 
 const (
-	GCP_IMAGE_ID   = "https://www.googleapis.com/compute/v1/projects/ubuntu-os-cloud/global/images/ubuntu-1804-bionic-v20201014"
-	AZURE_IMAGE_ID = "Canonical:UbuntuServer:18.04-LTS:latest"
+	GCP_IMAGE_ID     = "https://www.googleapis.com/compute/v1/projects/ubuntu-os-cloud/global/images/ubuntu-1804-bionic-v20201014"
+	AZURE_IMAGE_ID   = "Canonical:UbuntuServer:18.04-LTS:latest"
+	ALIBABA_IMAGE_ID = "ubuntu_18_04_x64_20G_alibase_20210521.vhd"
 )
 
 // region별 AMI :  (AMI 이름 : ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-20200908, 소유자:099720109477 )
@@ -51,6 +52,8 @@ func GetVmImageId(csp config.CSP, configName string) (string, error) {
 		return GCP_IMAGE_ID, nil
 	} else if csp == config.CSP_AZURE {
 		return AZURE_IMAGE_ID, nil
+	} else if csp == config.CSP_ALIBABA {
+		return ALIBABA_IMAGE_ID, nil
 	} else if csp == config.CSP_AWS {
 		// AWS : 리전별 AMI 가져오기
 		conn := spider.NewConnection(configName)
@@ -108,6 +111,8 @@ func GetCSPName(providerName string) (config.CSP, error) {
 		return config.CSP_GCP, nil
 	case "azure":
 		return config.CSP_AZURE, nil
+	case "alibaba":
+		return config.CSP_ALIBABA, nil
 	}
 	return "", errors.New(providerName + "is not supported")
 }
