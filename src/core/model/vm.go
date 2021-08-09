@@ -3,8 +3,10 @@ package model
 import (
 	"errors"
 	"fmt"
+	"net"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/cloud-barista/cb-ladybug/src/utils/config"
 	ssh "github.com/cloud-barista/cb-spider/cloud-control-manager/vm-ssh"
@@ -13,23 +15,25 @@ import (
 )
 
 type VM struct {
-	Name         string     `json:"name"`
-	Config       string     `json:"connectionName"`
-	VPC          string     `json:"vNetId"`
-	Subnet       string     `json:"subnetId"`
-	Firewall     []string   `json:"securityGroupIds"`
-	SSHKey       string     `json:"sshKeyId"`
-	Image        string     `json:"imageId"`
-	Spec         string     `json:"specId"`
-	UserAccount  string     `json:"vmUserAccount"`
-	UserPassword string     `json:"vmUserPassword"`
-	Description  string     `json:"description"`
-	PublicIP     string     `json:"publicIP"`  // output
-	PrivateIP    string     `json:"privateIP"` // output
-	Credential   string     // private
-	Role         string     `json:"role"`
-	Csp          config.CSP `json:"csp"`
-	IsCPLeader   bool       `json:"isCPLeader"`
+	Name          string          `json:"name"`
+	Config        string          `json:"connectionName"`
+	VPC           string          `json:"vNetId"`
+	Subnet        string          `json:"subnetId"`
+	Firewall      []string        `json:"securityGroupIds"`
+	SSHKey        string          `json:"sshKeyId"`
+	Image         string          `json:"imageId"`
+	Spec          string          `json:"specId"`
+	UserAccount   string          `json:"vmUserAccount"`
+	UserPassword  string          `json:"vmUserPassword"`
+	Description   string          `json:"description"`
+	PublicIP      string          `json:"publicIP"`      // output
+	PrivateIP     string          `json:"privateIP"`     // output
+	Status        config.VMStatus `json:"status"`        // output
+	SystemMessage string          `json:"systemMessage"` // output
+	Credential    string          // private
+	Role          string          `json:"role"`
+	Csp           config.CSP      `json:"csp"`
+	IsCPLeader    bool            `json:"isCPLeader"`
 }
 
 type VMInfo struct {
@@ -44,12 +48,40 @@ const (
 	remoteTargetPath = "/tmp"
 )
 
+func (self *VM) CheckConnectivity(sshInfo *ssh.SSHInfo) error {
+	deadline := 10
+	timeout := time.Second * time.Duration(deadline)
+	conn, err := net.DialTimeout("tcp", sshInfo.ServerPort, timeout)
+	if err != nil {
+		logger.Warnf(fmt.Sprintf("check connectivity error (name=%s, server=%s, cause=%v)", self.Name, sshInfo.ServerPort, err))
+		return err
+	}
+	if conn != nil {
+		defer conn.Close()
+		return nil
+	}
+
+	return errors.New(fmt.Sprintf("Conn is nil (name=%s, server=%s)", self.Name, sshInfo.ServerPort))
+}
+
 func (self *VM) ConnectionTest(sshInfo *ssh.SSHInfo) error {
+	retryCheck := 10
+	for i := 0; i < retryCheck; i++ {
+		err := self.CheckConnectivity(sshInfo)
+		if err == nil {
+			logger.Infof(fmt.Sprintf("check connectivity passed (name=%s, server=%s)", self.Name, sshInfo.ServerPort))
+			break
+		}
+		if i == retryCheck-1 {
+			return errors.New(fmt.Sprintf("Cannot do ssh, the port is not opened (name=%s, server=%s)", self.Name, sshInfo.ServerPort))
+		}
+		time.Sleep(2 * time.Second)
+	}
+
 	cmd := "/bin/hostname"
 	_, err := ssh.SSHRun(*sshInfo, cmd)
 	if err != nil {
-		logger.Warnf("connection test error (server=%s, cause=%s)", sshInfo.ServerPort, err)
-		return err
+		return errors.New(fmt.Sprintf("ssh connection error (server=%s, cause=%s)", sshInfo.ServerPort, err))
 	}
 	return nil
 }
