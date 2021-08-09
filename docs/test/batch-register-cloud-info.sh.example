@@ -33,3 +33,15 @@ export AZURE_REGION="japaneast"
 export AZURE_RESOURCE_GROUP="ladybug-test"
 
 ./connectioninfo-create.sh AZURE
+
+
+
+# Alibaba
+export ALIBABA_KEY="key_id"
+export ALIBABA_SECRET="key_secret"
+
+export ALIBABA_REGION="ap-northeast-1"
+export ALIBABA_ZONE="ap-northeast-1a"
+
+
+./connectioninfo-create.sh ALIBABA

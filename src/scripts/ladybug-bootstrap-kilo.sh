@@ -5,9 +5,9 @@ ifconfig $(ip route get 8.8.8.8 | awk \047{ print $5; exit }\047):1 $(dig +short
 echo "KUBELET_EXTRA_ARGS=-\"-node-ip=$(dig +short myip.opendns.com @resolver1.opendns.com)\"" > /etc/default/kubelet
 if [ -f "/etc/kubernetes/kubelet.conf" ]; then
   systemctl restart kubelet
-  kubectl --kubeconfig=/etc/kubernetes/kubelet.conf annotate node $(hostname) kilo.squat.ai/location=$(hostname) --overwrite
-  kubectl --kubeconfig=/etc/kubernetes/kubelet.conf annotate node $(hostname) kilo.squat.ai/force-endpoint=$(dig +short myip.opendns.com @resolver1.opendns.com):51820 --overwrite
-  kubectl --kubeconfig=/etc/kubernetes/kubelet.conf annotate node $(hostname) kilo.squat.ai/persistent-keepalive=25 --overwrite
+  kubectl --kubeconfig=/etc/kubernetes/kubelet.conf annotate node $(hostname | awk \047{print tolower($0)}\047) kilo.squat.ai/location=$(hostname | awk \047{print tolower($0)}\047) --overwrite
+  kubectl --kubeconfig=/etc/kubernetes/kubelet.conf annotate node $(hostname | awk \047{print tolower($0)}\047) kilo.squat.ai/force-endpoint=$(dig +short myip.opendns.com @resolver1.opendns.com):51820 --overwrite
+  kubectl --kubeconfig=/etc/kubernetes/kubelet.conf annotate node $(hostname | awk \047{print tolower($0)}\047) kilo.squat.ai/persistent-keepalive=25 --overwrite
 fi
 exit 0
 fi' | sudo tee /lib/systemd/system/ladybug-bootstrap > /dev/null
