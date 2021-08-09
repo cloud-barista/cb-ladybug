@@ -215,18 +215,24 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 	for _, vm := range cpMcis.VMs {
 		go func(vm model.VM) {
 			defer wg.Done()
+
+			if vm.Status != config.Running || vm.PublicIP == "" {
+				cluster.Fail()
+				c <- errors.New(fmt.Sprintf("Cannot do ssh, VM IP is not Running (name=%s, ip=%s, systemMessage=%s)", vm.Name, vm.PublicIP, vm.SystemMessage))
+			}
+
 			sshInfo := ssh.SSHInfo{
 				UserName:   GetUserAccount(vm.Csp),
 				PrivateKey: []byte(vm.Credential),
 				ServerPort: fmt.Sprintf("%s:22", vm.PublicIP),
 			}
-			err = vm.ConnectionTest(&sshInfo)
-			// retry
+			err := vm.ConnectionTest(&sshInfo)
 			if err != nil {
-				vm.ConnectionTest(&sshInfo)
+				cluster.Fail()
+				c <- err
 			}
 
-			err := vm.CopyScripts(&sshInfo, cluster.NetworkCni)
+			err = vm.CopyScripts(&sshInfo, cluster.NetworkCni)
 			if err != nil {
 				cluster.Fail()
 				c <- err

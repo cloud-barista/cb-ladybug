@@ -159,8 +159,16 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 				ServerPort: fmt.Sprintf("%s:22", vm.PublicIP),
 			}
 
-			_ = vm.ConnectionTest(&sshInfo)
-			err := vm.CopyScripts(&sshInfo, networkCni)
+			if vm.Status != config.Running || vm.PublicIP == "" {
+				c <- errors.New(fmt.Sprintf("Cannot do ssh, VM IP is not Running (name=%s, ip=%s, systemMessage=%s)", vm.Name, vm.PublicIP, vm.SystemMessage))
+			}
+
+			err := vm.ConnectionTest(&sshInfo)
+			if err != nil {
+				c <- err
+			}
+
+			err = vm.CopyScripts(&sshInfo, networkCni)
 			if err != nil {
 				c <- err
 			}
