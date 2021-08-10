@@ -46,16 +46,16 @@ echo "- Cluster name               is '${v_CLUSTER_NAME}'"
 # Delete a cluster
 delete() {
 
-	if [ "$CB_CALL_METHOD" == "REST" ]; then
+	if [ "$LADYBUG_CALL_METHOD" == "REST" ]; then
 		
 		curl -sX DELETE ${c_URL_LADYBUG_NS}/clusters/${v_CLUSTER_NAME}    -H "${c_CT}" | jq;
 
-	elif [ "$CB_CALL_METHOD" == "GRPC" ]; then
+	elif [ "$LADYBUG_CALL_METHOD" == "GRPC" ]; then
 
 		$APP_ROOT/src/grpc-api/cbadm/cbadm cluster delete --config $APP_ROOT/src/grpc-api/cbadm/grpc_conf.yaml -o json --ns ${v_NAMESPACE} --cluster ${v_CLUSTER_NAME}
 		
 	else
-		echo "[ERROR] missing CB_CALL_METHOD"; exit -1;
+		echo "[ERROR] missing LADYBUG_CALL_METHOD"; exit -1;
 	fi
 
 }

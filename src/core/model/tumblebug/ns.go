@@ -23,7 +23,7 @@ func NewNS(ns string) *NS {
 
 func (self *NS) GET() (bool, error) {
 
-	resp, err := app.ExecutHTTP(http.MethodGet, fmt.Sprintf("%s/ns/%s", *config.Config.TumblebugUrl, self.Name), nil, &self)
+	resp, err := app.ExecuteHTTP(http.MethodGet, fmt.Sprintf("%s/ns/%s", *config.Config.TumblebugUrl, self.Name), nil, &self)
 	if err != nil {
 		return false, err
 	}

@@ -10,14 +10,16 @@ import (
 )
 
 type conf struct {
-	RunMode      *string
-	SpiderUrl    *string
-	TumblebugUrl *string
-	RootURL      *string
-	Username     *string
-	Password     *string
-	AppRootPath  *string
-	LoglevelHTTP *bool
+	RunMode             *string
+	SpiderCallMethod    *string
+	TumblebugCallMethod *string
+	SpiderUrl           *string
+	TumblebugUrl        *string
+	RootURL             *string
+	Username            *string
+	Password            *string
+	AppRootPath         *string
+	LoglevelHTTP        *bool
 }
 
 var Config = &conf{}
@@ -28,6 +30,8 @@ func Setup() {
 
 	Config.AppRootPath = flag.String("app-root", lang.NVL(os.Getenv("APP_ROOT"), ""), "application root path")
 	Config.RootURL = flag.String("root-url", lang.NVL(os.Getenv("BASE_URL"), "/ladybug"), "root url")
+	Config.SpiderCallMethod = flag.String("spider-call-method", lang.NVL(os.Getenv("SPIDER_CALL_METHOD"), "REST"), "Method of calling CB-Spider (REST/gRPC)")
+	Config.TumblebugCallMethod = flag.String("tumblebug-call-method", lang.NVL(os.Getenv("TUMBLEBUG_CALL_METHOD"), "REST"), "Method of calling CB-Tumblebug (REST/gRPC)")
 	Config.SpiderUrl = flag.String("spider-url", lang.NVL(os.Getenv("SPIDER_URL"), "http://localhost:1024/spider"), "cb-spider service end-point url")
 	Config.TumblebugUrl = flag.String("tumblebug-url", lang.NVL(os.Getenv("TUMBLEBUG_URL"), "http://localhost:1323/tumblebug"), "cb-tumblebug service end-point url")
 	Config.Username = flag.String("basic-auth-username", lang.NVL(os.Getenv("BASIC_AUTH_USERNAME"), "default"), "rest-api basic auth usernmae")
