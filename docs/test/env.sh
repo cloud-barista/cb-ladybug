@@ -29,9 +29,9 @@ if [ "${v_FILE}" = "" ]; then echo "[ERROR] missing <credential file>"; exit -1;
 # credential (gcp)
 if [ "${v_CSP}" = "GCP" ]; then
 
-	export GCP_PROJECT=$(cat ${v_FILE} | jq -r ".project_id")
-	export GCP_PKEY=$(cat ${v_FILE} | jq -r ".private_key" | while read line; do	if [ "$line" != "" ]; then	echo -n "$line\n";	fi; done )
-	export GCP_SA=$(cat ${v_FILE} | jq -r ".client_email")
+	export GCP_PROJECT=$(cat ${v_FILE} | jq ".project_id" | tr -d '"')
+	export GCP_PKEY=$(cat ${v_FILE} | jq ".private_key" | tr -d '"')
+	export GCP_SA=$(cat ${v_FILE} | jq ".client_email" | tr -d '"')
 
 fi
 
@@ -67,17 +67,17 @@ fi
 echo ""
 echo "[Env.]"
 echo "GCP"
-echo "- PROJECT is '${GCP_PROJECT}'"
-echo "- PKEY    is '${GCP_PKEY}'"
-echo "- SA      is '${GCP_SA}'"
+echo -E "- PROJECT is '${GCP_PROJECT}'"
+echo -E "- PKEY    is '${GCP_PKEY}'"
+echo -E "- SA      is '${GCP_SA}'"
 echo "AWS"
-echo "- KEY     is '${AWS_KEY}'"
-echo "- SECRET  is '${AWS_SECRET}'"
+echo -E "- KEY     is '${AWS_KEY}'"
+echo -E "- SECRET  is '${AWS_SECRET}'"
 echo "AZURE"
-echo "- CLIENT_ID       is '${AZURE_CLIENT_ID}'"
-echo "- CLIENT_SECRET   is '${AZURE_CLIENT_SECRET}'"
-echo "- TENANT_ID       is '${AZURE_TENANT_ID}'"
-echo "- SUBSCRIPTION_ID is '${AZURE_SUBSCRIPTION_ID}'"
+echo -E "- CLIENT_ID       is '${AZURE_CLIENT_ID}'"
+echo -E "- CLIENT_SECRET   is '${AZURE_CLIENT_SECRET}'"
+echo -E "- TENANT_ID       is '${AZURE_TENANT_ID}'"
+echo -E "- SUBSCRIPTION_ID is '${AZURE_SUBSCRIPTION_ID}'"
 echo "ALIBABA"
-echo "- KEY     is '${ALIBABA_KEY}'"
-echo "- SECRET  is '${ALIBABA_SECRET}'"
+echo -E "- KEY     is '${ALIBABA_KEY}'"
+echo -E "- SECRET  is '${ALIBABA_SECRET}'"
