@@ -31,12 +31,23 @@ $ docker run -d -p 1323:1323 --name cb-tumblebug --link cb-spider:cb-spider clou
 
 ### Cloud Connection Info. 등록
 
+#### `batch-register-cloud-info.sh` 활용
+다음의 단계를 수행합니다.
+- `cb-ladybug/docs/test/` 에 있는 `batch-register-cloud-info.sh.example` 파일을 `batch-register-cloud-info.sh` 로 복사
+- `batch-register-cloud-info.sh` 파일을 텍스트 에디터로 오픈
+- 자신이 발급받은 클라우드 별 연결정보를 각 환경변수에 입력
+- `batch-register-cloud-info.sh` 파일을 실행
+
+아래에 소개되는 각 CSP별 가이드는
+- `batch-register-cloud-info.sh` 의 각 환경변수에 대한 설명이며, 또한
+- `batch-register-cloud-info.sh` 를 사용하지 않고 수동으로 등록하는 경우를 위한 매뉴얼로도 활용될 수 있습니다.
+
 ####  GCP
 
 * 환경변수 : 클라우드별 연결정보
 
 ```
-$ export GCP_PROJECT="<project name>"
+$ export GCP_PROJECT="<project ID>"
 $ export GCP_PKEY="<private key>"
 $ export GCP_SA="<service account email>"
 ```
