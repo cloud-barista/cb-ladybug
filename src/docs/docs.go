@@ -421,9 +421,6 @@ var doc = `{
                 },
                 "status": {
                     "type": "string"
-                },
-                "uid": {
-                    "type": "string"
                 }
             }
         },
@@ -445,6 +442,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "config": {
+                    "type": "object",
                     "$ref": "#/definitions/model.Config"
                 },
                 "controlPlane": {
@@ -468,6 +466,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "kubernetes": {
+                    "type": "object",
                     "$ref": "#/definitions/model.Kubernetes"
                 }
             }
@@ -511,9 +510,6 @@ var doc = `{
                     "type": "string"
                 },
                 "spec": {
-                    "type": "string"
-                },
-                "uid": {
                     "type": "string"
                 }
             }

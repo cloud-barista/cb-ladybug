@@ -20,7 +20,6 @@ const (
 type Cluster struct {
 	Model
 	Status        string `json:"status"`
-	UId           string `json:"uid"`
 	MCIS          string `json:"mcis"`
 	Namespace     string `json:"namespace"`
 	ClusterConfig string `json:"clusterConfig"`
