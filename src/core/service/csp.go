@@ -29,6 +29,7 @@ var imageMap = map[string]string{
 	"ap-southeast-1": "ami-0c8e97a27be37adfd", //아시아 태평양 (싱가포르)
 	"ap-southeast-2": "ami-099c1869f33464fde", //아시아 태평양 (시드니)
 	"ap-northeast-1": "ami-02b658ac34935766f", //아시아 태평양 (도쿄)
+	"ap-northeast-3": "ami-0b627457758376b52", //아시아 태평양 (오사카)
 	"ca-central-1":   "ami-0c27a26eca5dc74fc", //캐나다 (중부)
 	"eu-central-1":   "ami-092391a11f8aa4b7b", //유럽 (프랑크푸르트)
 	"eu-west-1":      "ami-0823c236601fef765", //유럽 (아일랜드)
