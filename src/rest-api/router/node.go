@@ -99,7 +99,7 @@ func AddNode(c echo.Context) error {
 	node, err := service.AddNode(c.Param("namespace"), c.Param("cluster"), nodeReq)
 	if err != nil {
 		logger.Error(err)
-		return app.SendMessage(c, http.StatusBadRequest, err.Error())
+		return app.SendMessage(c, http.StatusInternalServerError, err.Error())
 	}
 
 	duration := time.Since(start)
@@ -128,7 +128,7 @@ func RemoveNode(c echo.Context) error {
 	status, err := service.RemoveNode(c.Param("namespace"), c.Param("cluster"), c.Param("node"))
 	if err != nil {
 		logger.Error(err)
-		return app.SendMessage(c, http.StatusBadRequest, err.Error())
+		return app.SendMessage(c, http.StatusInternalServerError, err.Error())
 	}
 
 	return app.Send(c, http.StatusOK, status)
