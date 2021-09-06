@@ -12,7 +12,7 @@ import (
 )
 
 type Status struct {
-	Message string `json:"message"`
+	Message string `json:"message" example:"Any message"`
 }
 
 func SendMessage(c echo.Context, httpCode int, msg string) error {

@@ -12,16 +12,17 @@ import (
 	logger "github.com/sirupsen/logrus"
 )
 
-// ListNode
+// ListNode godoc
 // @Tags Node
-// @Summary List Node
-// @Description List Node
+// @Summary List all Nodes in specified Cluster
+// @Description List all Nodes in specified Cluster
 // @ID ListNode
 // @Accept json
 // @Produce json
-// @Param	namespace	path	string	true  "namespace"
-// @Param	cluster	path	string	true  "cluster"
+// @Param	namespace	path	string	true  "Namespace ID"
+// @Param	cluster	path	string	true  "Cluster Name"
 // @Success 200 {object} model.NodeList
+// @Failure 400 {object} app.Status
 // @Router /ns/{namespace}/clusters/{cluster}/nodes [get]
 func ListNode(c echo.Context) error {
 	if err := app.Validate(c, []string{"cluster"}); err != nil {
@@ -38,17 +39,19 @@ func ListNode(c echo.Context) error {
 	return app.Send(c, http.StatusOK, nodeList)
 }
 
-// GetNode
+// GetNode godoc
 // @Tags Node
-// @Summary Get Node
-// @Description Get Node
+// @Summary Get Node in specified Cluster
+// @Description Get Node in specified Cluster
 // @ID GetNode
 // @Accept json
 // @Produce json
-// @Param	namespace	path	string	true  "namespace"
-// @Param	cluster	path	string	true  "cluster"
-// @Param	node	path	string	true  "node"
+// @Param	namespace	path	string	true  "Namespace ID"
+// @Param	cluster	path	string	true  "Cluster Name"
+// @Param	node	path	string	true  "Node Name"
 // @Success 200 {object} model.Node
+// @Failure 400 {object} app.Status
+// @Failure 404 {object} app.Status
 // @Router /ns/{namespace}/clusters/{cluster}/nodes/{node} [get]
 func GetNode(c echo.Context) error {
 	if err := app.Validate(c, []string{"cluster", "node"}); err != nil {
@@ -65,17 +68,19 @@ func GetNode(c echo.Context) error {
 	return app.Send(c, http.StatusOK, node)
 }
 
-// AddNode
+// AddNode godoc
 // @Tags Node
-// @Summary Add Node
-// @Description Add Node
+// @Summary Add Node in specified Cluster
+// @Description Add Node in specified Cluster
 // @ID AddNode
 // @Accept json
 // @Produce json
-// @Param	namespace	path	string	true  "namespace"
-// @Param	cluster	path	string	true  "cluster"
-// @Param json body model.NodeReq true "Reuest json"
+// @Param	namespace	path	string	true  "Namespace ID"
+// @Param	cluster	path	string	true  "Cluster Name"
+// @Param nodeReq body model.NodeReq true "Request Body to add node"
 // @Success 200 {object} model.Node
+// @Failure 400 {object} app.Status
+// @Failure 500 {object} app.Status
 // @Router /ns/{namespace}/clusters/{cluster}/nodes [post]
 func AddNode(c echo.Context) error {
 	start := time.Now()
@@ -107,17 +112,19 @@ func AddNode(c echo.Context) error {
 	return app.Send(c, http.StatusOK, node)
 }
 
-// RemoveNode
+// RemoveNode godoc
 // @Tags Node
-// @Summary Remove Node
-// @Description Remove Node
+// @Summary Remove Node in specified Cluster
+// @Description Remove Node in specified Cluster
 // @ID RemoveNode
 // @Accept json
 // @Produce json
-// @Param	namespace	path	string	true  "namespace"
-// @Param	cluster	path	string	true  "cluster"
-// @Param	node	path	string	true  "node"
+// @Param	namespace	path	string	true  "Namespace ID"
+// @Param	cluster	path	string	true  "Cluster Name"
+// @Param	node	path	string	true  "Node Name"
 // @Success 200 {object} model.Status
+// @Failure 400 {object} app.Status
+// @Failure 500 {object} app.Status
 // @Router /ns/{namespace}/clusters/{cluster}/nodes/{node} [delete]
 func RemoveNode(c echo.Context) error {
 	if err := app.Validate(c, []string{"cluster", "node"}); err != nil {
