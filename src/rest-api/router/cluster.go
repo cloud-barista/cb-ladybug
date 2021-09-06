@@ -88,7 +88,7 @@ func CreateCluster(c echo.Context) error {
 	cluster, err := service.CreateCluster(c.Param("namespace"), clusterReq)
 	if err != nil {
 		logger.Error(err)
-		return app.SendMessage(c, http.StatusBadRequest, err.Error())
+		return app.SendMessage(c, http.StatusInternalServerError, err.Error())
 	}
 
 	duration := time.Since(start)
@@ -116,7 +116,7 @@ func DeleteCluster(c echo.Context) error {
 	status, err := service.DeleteCluster(c.Param("namespace"), c.Param("cluster"))
 	if err != nil {
 		logger.Error(err)
-		return app.SendMessage(c, http.StatusBadRequest, err.Error())
+		return app.SendMessage(c, http.StatusInternalServerError, err.Error())
 	}
 
 	return app.Send(c, http.StatusOK, status)
