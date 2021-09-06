@@ -40,7 +40,6 @@ func GetCluster(namespace string, clusterName string) (*model.Cluster, error) {
 func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, error) {
 	clusterName := req.Name
 	cluster := model.NewCluster(namespace, clusterName)
-	cluster.UId = lang.GetUid()
 	cluster.NetworkCni = req.Config.Kubernetes.NetworkCni
 	mcisName := clusterName
 
@@ -183,7 +182,6 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 		}
 
 		node := model.NewNodeVM(namespace, cluster.Name, vm)
-		node.UId = lang.GetUid()
 
 		// insert node in store
 		nodes = append(nodes, *node)

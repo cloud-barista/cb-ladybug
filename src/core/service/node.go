@@ -210,7 +210,6 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 	nodes := model.NewNodeList(namespace, clusterName)
 	for _, vm := range TVMs {
 		node := model.NewNodeVM(namespace, clusterName, vm.VM)
-		node.UId = lang.GetUid()
 		err := node.Insert()
 		if err != nil {
 			return nil, err

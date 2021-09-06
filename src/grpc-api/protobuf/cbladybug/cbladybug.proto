@@ -59,13 +59,12 @@ message ClusterInfo {
 	string name = 1 [json_name="name", (gogoproto.jsontag) = "name", (gogoproto.moretags) = "yaml:\"name\""];
 	string kind = 2 [json_name="kind", (gogoproto.jsontag) = "kind", (gogoproto.moretags) = "yaml:\"kind\""];
 	string status = 3 [json_name="status", (gogoproto.jsontag) = "status", (gogoproto.moretags) = "yaml:\"status\""];     
-	string uid = 4 [json_name="uid", (gogoproto.jsontag) = "uid", (gogoproto.moretags) = "yaml:\"uid\""];     
-	string mcis = 5 [json_name="mcis", (gogoproto.jsontag) = "mcis", (gogoproto.moretags) = "yaml:\"mcis\""];     
-	string namespace = 6 [json_name="namespace", (gogoproto.jsontag) = "namespace", (gogoproto.moretags) = "yaml:\"namespace\""];     
-	string cluster_config = 7 [json_name="clusterConfig", (gogoproto.jsontag) = "clusterConfig", (gogoproto.moretags) = "yaml:\"clusterConfig\""];
-	string cp_leader = 8 [json_name="cpLeader", (gogoproto.jsontag) = "cpLeader", (gogoproto.moretags) = "yaml:\"cpLeader\""];
-	string network_cni = 9 [json_name="networkCni", (gogoproto.jsontag) = "networkCni", (gogoproto.moretags) = "yaml:\"networkCni\""];
-	repeated NodeInfo nodes = 10 [json_name="nodes", (gogoproto.jsontag) = "nodes", (gogoproto.moretags) = "yaml:\"nodes\""];     
+	string mcis = 4 [json_name="mcis", (gogoproto.jsontag) = "mcis", (gogoproto.moretags) = "yaml:\"mcis\""];     
+	string namespace = 5 [json_name="namespace", (gogoproto.jsontag) = "namespace", (gogoproto.moretags) = "yaml:\"namespace\""];     
+	string cluster_config = 6 [json_name="clusterConfig", (gogoproto.jsontag) = "clusterConfig", (gogoproto.moretags) = "yaml:\"clusterConfig\""];
+	string cp_leader = 7 [json_name="cpLeader", (gogoproto.jsontag) = "cpLeader", (gogoproto.moretags) = "yaml:\"cpLeader\""];
+	string network_cni = 8 [json_name="networkCni", (gogoproto.jsontag) = "networkCni", (gogoproto.moretags) = "yaml:\"networkCni\""];
+	repeated NodeInfo nodes = 9 [json_name="nodes", (gogoproto.jsontag) = "nodes", (gogoproto.moretags) = "yaml:\"nodes\""];     
 }
 
 message ClusterCreateRequest {
@@ -124,10 +123,9 @@ message NodeInfo {
 	string kind = 2 [json_name="kind", (gogoproto.jsontag) = "kind", (gogoproto.moretags) = "yaml:\"kind\""];
 	string credential = 3 [json_name="credential", (gogoproto.jsontag) = "credential", (gogoproto.moretags) = "yaml:\"credential\""]; 
 	string public_ip = 4 [json_name="publicIp", (gogoproto.jsontag) = "publicIp", (gogoproto.moretags) = "yaml:\"publicIp\""];
-	string uid = 5 [json_name="uid", (gogoproto.jsontag) = "uid", (gogoproto.moretags) = "yaml:\"uid\""];
-	string role = 6 [json_name="role", (gogoproto.jsontag) = "role", (gogoproto.moretags) = "yaml:\"role\""];
-	string spec = 7 [json_name="spec", (gogoproto.jsontag) = "spec", (gogoproto.moretags) = "yaml:\"spec\""];
-	string csp = 8 [json_name="csp", (gogoproto.jsontag) = "csp", (gogoproto.moretags) = "yaml:\"csp\""];
+	string role = 5 [json_name="role", (gogoproto.jsontag) = "role", (gogoproto.moretags) = "yaml:\"role\""];
+	string spec = 6 [json_name="spec", (gogoproto.jsontag) = "spec", (gogoproto.moretags) = "yaml:\"spec\""];
+	string csp = 7 [json_name="csp", (gogoproto.jsontag) = "csp", (gogoproto.moretags) = "yaml:\"csp\""];
 }
 
 message NodeCreateRequest {

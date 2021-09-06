@@ -2,8 +2,6 @@ package model
 
 import (
 	"testing"
-
-	"github.com/cloud-barista/cb-ladybug/src/utils/lang"
 )
 
 const ()
@@ -13,11 +11,8 @@ func TestClusterCRUD(t *testing.T) {
 	namespace := "namespace-1"
 	custerName := "cluster-1"
 
-	uid := lang.GetUid()
-
 	// insert
 	cluster := NewCluster(namespace, custerName)
-	cluster.UId = uid
 	cluster.MCIS = "mcis-1"
 	err := cluster.Insert()
 	if err != nil {
@@ -30,8 +25,8 @@ func TestClusterCRUD(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Cluster.Insert error - TestClusaterCRUD :: cluster (cause=%v)", err)
 	}
-	if cluster.UId != uid {
-		t.Fatalf("Cluster.Insert verify : not equals uid (%s != %s)", uid, cluster.UId)
+	if cluster.MCIS != "mcis-1" {
+		t.Fatalf("Cluster.Insert verify : not equals mcis (%s != %s)", "mcis-1", cluster.MCIS)
 	}
 	if cluster.Status != STATUS_CREATED {
 		t.Fatalf("Cluster.Insert verify : status is not 'STATUS_CREATED' (%s)", cluster.Status)
@@ -52,7 +47,7 @@ func TestClusterCRUD(t *testing.T) {
 		t.Fatalf("Cluster.Update error (cause=%v)", err)
 	}
 	if cluster.MCIS != "mcis-modifed" {
-		t.Fatalf("Cluster.Update verify : not equals uid (%s != %s)", uid, cluster.UId)
+		t.Fatalf("Cluster.Update verify : not equals mcis (%s != %s)", "mcis-modifed", cluster.MCIS)
 	}
 	if cluster.Status != STATUS_PROVISIONING {
 		t.Fatalf("Cluster.Update verify : status is not 'STATUS_PROVISIONING' (%s)", cluster.Status)

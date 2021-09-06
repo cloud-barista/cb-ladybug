@@ -16,7 +16,6 @@ type Node struct {
 	clusterName string
 	Credential  string     `json:"credential"`
 	PublicIP    string     `json:"publicIp"`
-	UId         string     `json:"uid"`
 	Role        string     `json:"role"`
 	Spec        string     `json:"spec"`
 	Csp         config.CSP `json:"csp"`

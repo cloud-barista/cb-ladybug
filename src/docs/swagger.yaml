@@ -22,8 +22,6 @@ definitions:
         type: array
       status:
         type: string
-      uid:
-        type: string
     type: object
   model.ClusterList:
     properties:
@@ -38,6 +36,7 @@ definitions:
     properties:
       config:
         $ref: '#/definitions/model.Config'
+        type: object
       controlPlane:
         items:
           $ref: '#/definitions/model.NodeConfig'
@@ -53,6 +52,7 @@ definitions:
     properties:
       kubernetes:
         $ref: '#/definitions/model.Kubernetes'
+        type: object
     type: object
   model.Kubernetes:
     properties:
@@ -80,8 +80,6 @@ definitions:
       role:
         type: string
       spec:
-        type: string
-      uid:
         type: string
     type: object
   model.NodeConfig:

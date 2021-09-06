@@ -30,6 +30,10 @@ object azureCredential #WhiteSmoke {
 	tenant_id	
 	subscription_id
 }
+object alibabaCredential #WhiteSmoke {
+	client_id
+	client_secret
+}
 
 object config #WhiteSmoke {
 }
@@ -39,6 +43,7 @@ object vm #WhiteSmoke {
 awsCredential	--|>	credential
 gcpCredential	--|>	credential
 azureCredential	--|>	credential
+alibabaCredential	--|>	credential
 config			-->		credential
 config			-->		region
 
@@ -79,7 +84,6 @@ object cluster {
 	+clusterConfig
 	+cpLeader
 	+networkCni
-	+uid
 }
 object kubernetesCluster {
 	kubernetesConfiguration
@@ -100,9 +104,8 @@ object node  {
 	+public-ip
 	+role
 	+spec
-	+cps
-	+uid
-	cluster-uid
+	+csp
+	cluster-name
 }
 object controlPlane  {
 	role = "control-plane"
