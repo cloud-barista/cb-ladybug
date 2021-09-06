@@ -9,9 +9,8 @@ import (
 )
 
 // @title CB-Ladybug REST API
-// @version 0.4.0
+// @version latest
 // @description CB-Ladybug REST API
-// @termsOfService http://swagger.io/terms/
 
 // @contact.name API Support
 // @contact.url http://cloud-barista.github.io
@@ -22,6 +21,8 @@ import (
 
 // @host localhost:8080
 // @BasePath /ladybug
+
+// @securityDefinitions.basic BasicAuth
 func main() {
 
 	config.Setup()

@@ -3,7 +3,6 @@
     "info": {
         "description": "CB-Ladybug REST API",
         "title": "CB-Ladybug REST API",
-        "termsOfService": "http://swagger.io/terms/",
         "contact": {
             "name": "API Support",
             "url": "http://cloud-barista.github.io",
@@ -13,7 +12,7 @@
             "name": "Apache 2.0",
             "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
         },
-        "version": "0.4.0"
+        "version": "latest"
     },
     "host": "localhost:8080",
     "basePath": "/ladybug",
@@ -44,7 +43,7 @@
         },
         "/ns/{namespace}/clusters": {
             "get": {
-                "description": "List Cluster",
+                "description": "List all Clusters",
                 "consumes": [
                     "application/json"
                 ],
@@ -54,12 +53,12 @@
                 "tags": [
                     "Cluster"
                 ],
-                "summary": "List Cluster",
+                "summary": "List all Clusters",
                 "operationId": "ListCluster",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "namespace",
+                        "description": "Namespace ID",
                         "name": "namespace",
                         "in": "path",
                         "required": true
@@ -70,6 +69,12 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/model.ClusterList"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/app.Status"
                         }
                     }
                 }
@@ -90,14 +95,14 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "namespace",
+                        "description": "Namespace ID",
                         "name": "namespace",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "Reuest json",
-                        "name": "json",
+                        "description": "Request Body to create cluster",
+                        "name": "ClusterReq",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -110,6 +115,18 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/model.Cluster"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/app.Status"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Status"
                         }
                     }
                 }
@@ -132,14 +149,14 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "namespace",
+                        "description": "Namespace ID",
                         "name": "namespace",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "cluster",
+                        "description": "Cluster Name",
                         "name": "cluster",
                         "in": "path",
                         "required": true
@@ -151,11 +168,23 @@
                         "schema": {
                             "$ref": "#/definitions/model.Cluster"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/app.Status"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/app.Status"
+                        }
                     }
                 }
             },
             "delete": {
-                "description": "Delete a cluster",
+                "description": "Delete Cluster",
                 "consumes": [
                     "application/json"
                 ],
@@ -165,19 +194,19 @@
                 "tags": [
                     "Cluster"
                 ],
-                "summary": "Delete a cluster",
+                "summary": "Delete Cluster",
                 "operationId": "DeleteCluster",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "namespace",
+                        "description": "Namespace ID",
                         "name": "namespace",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "cluster",
+                        "description": "Cluster Name",
                         "name": "cluster",
                         "in": "path",
                         "required": true
@@ -189,13 +218,25 @@
                         "schema": {
                             "$ref": "#/definitions/model.Status"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/app.Status"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Status"
+                        }
                     }
                 }
             }
         },
         "/ns/{namespace}/clusters/{cluster}/nodes": {
             "get": {
-                "description": "List Node",
+                "description": "List all Nodes in specified Cluster",
                 "consumes": [
                     "application/json"
                 ],
@@ -205,19 +246,19 @@
                 "tags": [
                     "Node"
                 ],
-                "summary": "List Node",
+                "summary": "List all Nodes in specified Cluster",
                 "operationId": "ListNode",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "namespace",
+                        "description": "Namespace ID",
                         "name": "namespace",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "cluster",
+                        "description": "Cluster Name",
                         "name": "cluster",
                         "in": "path",
                         "required": true
@@ -229,11 +270,17 @@
                         "schema": {
                             "$ref": "#/definitions/model.NodeList"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/app.Status"
+                        }
                     }
                 }
             },
             "post": {
-                "description": "Add Node",
+                "description": "Add Node in specified Cluster",
                 "consumes": [
                     "application/json"
                 ],
@@ -243,26 +290,26 @@
                 "tags": [
                     "Node"
                 ],
-                "summary": "Add Node",
+                "summary": "Add Node in specified Cluster",
                 "operationId": "AddNode",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "namespace",
+                        "description": "Namespace ID",
                         "name": "namespace",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "cluster",
+                        "description": "Cluster Name",
                         "name": "cluster",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "Reuest json",
-                        "name": "json",
+                        "description": "Request Body to add node",
+                        "name": "nodeReq",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -276,13 +323,25 @@
                         "schema": {
                             "$ref": "#/definitions/model.Node"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/app.Status"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Status"
+                        }
                     }
                 }
             }
         },
         "/ns/{namespace}/clusters/{cluster}/nodes/{node}": {
             "get": {
-                "description": "Get Node",
+                "description": "Get Node in specified Cluster",
                 "consumes": [
                     "application/json"
                 ],
@@ -292,26 +351,26 @@
                 "tags": [
                     "Node"
                 ],
-                "summary": "Get Node",
+                "summary": "Get Node in specified Cluster",
                 "operationId": "GetNode",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "namespace",
+                        "description": "Namespace ID",
                         "name": "namespace",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "cluster",
+                        "description": "Cluster Name",
                         "name": "cluster",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "node",
+                        "description": "Node Name",
                         "name": "node",
                         "in": "path",
                         "required": true
@@ -323,11 +382,23 @@
                         "schema": {
                             "$ref": "#/definitions/model.Node"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/app.Status"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/app.Status"
+                        }
                     }
                 }
             },
             "delete": {
-                "description": "Remove Node",
+                "description": "Remove Node in specified Cluster",
                 "consumes": [
                     "application/json"
                 ],
@@ -337,26 +408,26 @@
                 "tags": [
                     "Node"
                 ],
-                "summary": "Remove Node",
+                "summary": "Remove Node in specified Cluster",
                 "operationId": "RemoveNode",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "namespace",
+                        "description": "Namespace ID",
                         "name": "namespace",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "cluster",
+                        "description": "Cluster Name",
                         "name": "cluster",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "node",
+                        "description": "Node Name",
                         "name": "node",
                         "in": "path",
                         "required": true
@@ -368,12 +439,33 @@
                         "schema": {
                             "$ref": "#/definitions/model.Status"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/app.Status"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/app.Status"
+                        }
                     }
                 }
             }
         }
     },
     "definitions": {
+        "app.Status": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Any message"
+                }
+            }
+        },
         "model.Cluster": {
             "type": "object",
             "properties": {
@@ -396,7 +488,11 @@
                     "type": "string"
                 },
                 "networkCni": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "kilo",
+                        "canal"
+                    ]
                 },
                 "nodes": {
                     "type": "array",
@@ -405,7 +501,13 @@
                     }
                 },
                 "status": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "created",
+                        "provisioning",
+                        "completed",
+                        "failed"
+                    ]
                 }
             }
         },
@@ -437,7 +539,8 @@
                     }
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "cluster-01"
                 },
                 "worker": {
                     "type": "array",
@@ -460,16 +563,24 @@
             "type": "object",
             "properties": {
                 "networkCni": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "kilo",
+                        "canal"
+                    ],
+                    "example": "kilo"
                 },
                 "podCidr": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "10.244.0.0/16"
                 },
                 "serviceCidr": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "10.96.0.0/12"
                 },
                 "serviceDnsDomain": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "cluster.local"
                 }
             }
         },
@@ -480,7 +591,13 @@
                     "type": "string"
                 },
                 "csp": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "aws",
+                        "gcp",
+                        "azure",
+                        "alibaba"
+                    ]
                 },
                 "kind": {
                     "type": "string"
@@ -492,7 +609,11 @@
                     "type": "string"
                 },
                 "role": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "control-plane",
+                        "worker"
+                    ]
                 },
                 "spec": {
                     "type": "string"
@@ -503,13 +624,16 @@
             "type": "object",
             "properties": {
                 "connection": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "config-aws-ap-northeast-2"
                 },
                 "count": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 3
                 },
                 "spec": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "t2.medium"
                 }
             }
         },
@@ -557,6 +681,11 @@
                     "type": "string"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "BasicAuth": {
+            "type": "basic"
         }
     }
 }

@@ -19,12 +19,12 @@ const (
 
 type Cluster struct {
 	Model
-	Status        string `json:"status"`
+	Status        string `json:"status" enums:"created,provisioning,completed,failed"`
 	MCIS          string `json:"mcis"`
 	Namespace     string `json:"namespace"`
 	ClusterConfig string `json:"clusterConfig"`
 	CpLeader      string `json:"cpLeader"`
-	NetworkCni    string `json:"networkCni"`
+	NetworkCni    string `json:"networkCni" enums:"kilo,canal"`
 	Nodes         []Node `json:"nodes"`
 }
 

@@ -1,5 +1,11 @@
 basePath: /ladybug
 definitions:
+  app.Status:
+    properties:
+      message:
+        example: Any message
+        type: string
+    type: object
   model.Cluster:
     properties:
       clusterConfig:
@@ -15,12 +21,20 @@ definitions:
       namespace:
         type: string
       networkCni:
+        enum:
+        - kilo
+        - canal
         type: string
       nodes:
         items:
           $ref: '#/definitions/model.Node'
         type: array
       status:
+        enum:
+        - created
+        - provisioning
+        - completed
+        - failed
         type: string
     type: object
   model.ClusterList:
@@ -42,6 +56,7 @@ definitions:
           $ref: '#/definitions/model.NodeConfig'
         type: array
       name:
+        example: cluster-01
         type: string
       worker:
         items:
@@ -57,12 +72,19 @@ definitions:
   model.Kubernetes:
     properties:
       networkCni:
+        enum:
+        - kilo
+        - canal
+        example: kilo
         type: string
       podCidr:
+        example: 10.244.0.0/16
         type: string
       serviceCidr:
+        example: 10.96.0.0/12
         type: string
       serviceDnsDomain:
+        example: cluster.local
         type: string
     type: object
   model.Node:
@@ -70,6 +92,11 @@ definitions:
       credential:
         type: string
       csp:
+        enum:
+        - aws
+        - gcp
+        - azure
+        - alibaba
         type: string
       kind:
         type: string
@@ -78,6 +105,9 @@ definitions:
       publicIp:
         type: string
       role:
+        enum:
+        - control-plane
+        - worker
         type: string
       spec:
         type: string
@@ -85,10 +115,13 @@ definitions:
   model.NodeConfig:
     properties:
       connection:
+        example: config-aws-ap-northeast-2
         type: string
       count:
+        example: 3
         type: integer
       spec:
+        example: t2.medium
         type: string
     type: object
   model.NodeList:
@@ -130,9 +163,8 @@ info:
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  termsOfService: http://swagger.io/terms/
   title: CB-Ladybug REST API
-  version: 0.4.0
+  version: latest
 paths:
   /healthy:
     get:
@@ -154,10 +186,10 @@ paths:
     get:
       consumes:
       - application/json
-      description: List Cluster
+      description: List all Clusters
       operationId: ListCluster
       parameters:
-      - description: namespace
+      - description: Namespace ID
         in: path
         name: namespace
         required: true
@@ -169,7 +201,11 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.ClusterList'
-      summary: List Cluster
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/app.Status'
+      summary: List all Clusters
       tags:
       - Cluster
     post:
@@ -178,14 +214,14 @@ paths:
       description: Create Cluster
       operationId: CreateCluster
       parameters:
-      - description: namespace
+      - description: Namespace ID
         in: path
         name: namespace
         required: true
         type: string
-      - description: Reuest json
+      - description: Request Body to create cluster
         in: body
-        name: json
+        name: ClusterReq
         required: true
         schema:
           $ref: '#/definitions/model.ClusterReq'
@@ -196,6 +232,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.Cluster'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/app.Status'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Status'
       summary: Create Cluster
       tags:
       - Cluster
@@ -203,15 +247,15 @@ paths:
     delete:
       consumes:
       - application/json
-      description: Delete a cluster
+      description: Delete Cluster
       operationId: DeleteCluster
       parameters:
-      - description: namespace
+      - description: Namespace ID
         in: path
         name: namespace
         required: true
         type: string
-      - description: cluster
+      - description: Cluster Name
         in: path
         name: cluster
         required: true
@@ -223,7 +267,15 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.Status'
-      summary: Delete a cluster
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/app.Status'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Status'
+      summary: Delete Cluster
       tags:
       - Cluster
     get:
@@ -232,12 +284,12 @@ paths:
       description: Get Cluster
       operationId: GetCluster
       parameters:
-      - description: namespace
+      - description: Namespace ID
         in: path
         name: namespace
         required: true
         type: string
-      - description: cluster
+      - description: Cluster Name
         in: path
         name: cluster
         required: true
@@ -249,6 +301,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.Cluster'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/app.Status'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/app.Status'
       summary: Get Cluster
       tags:
       - Cluster
@@ -256,15 +316,15 @@ paths:
     get:
       consumes:
       - application/json
-      description: List Node
+      description: List all Nodes in specified Cluster
       operationId: ListNode
       parameters:
-      - description: namespace
+      - description: Namespace ID
         in: path
         name: namespace
         required: true
         type: string
-      - description: cluster
+      - description: Cluster Name
         in: path
         name: cluster
         required: true
@@ -276,28 +336,32 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.NodeList'
-      summary: List Node
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/app.Status'
+      summary: List all Nodes in specified Cluster
       tags:
       - Node
     post:
       consumes:
       - application/json
-      description: Add Node
+      description: Add Node in specified Cluster
       operationId: AddNode
       parameters:
-      - description: namespace
+      - description: Namespace ID
         in: path
         name: namespace
         required: true
         type: string
-      - description: cluster
+      - description: Cluster Name
         in: path
         name: cluster
         required: true
         type: string
-      - description: Reuest json
+      - description: Request Body to add node
         in: body
-        name: json
+        name: nodeReq
         required: true
         schema:
           $ref: '#/definitions/model.NodeReq'
@@ -308,27 +372,35 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.Node'
-      summary: Add Node
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/app.Status'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Status'
+      summary: Add Node in specified Cluster
       tags:
       - Node
   /ns/{namespace}/clusters/{cluster}/nodes/{node}:
     delete:
       consumes:
       - application/json
-      description: Remove Node
+      description: Remove Node in specified Cluster
       operationId: RemoveNode
       parameters:
-      - description: namespace
+      - description: Namespace ID
         in: path
         name: namespace
         required: true
         type: string
-      - description: cluster
+      - description: Cluster Name
         in: path
         name: cluster
         required: true
         type: string
-      - description: node
+      - description: Node Name
         in: path
         name: node
         required: true
@@ -340,26 +412,34 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.Status'
-      summary: Remove Node
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/app.Status'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/app.Status'
+      summary: Remove Node in specified Cluster
       tags:
       - Node
     get:
       consumes:
       - application/json
-      description: Get Node
+      description: Get Node in specified Cluster
       operationId: GetNode
       parameters:
-      - description: namespace
+      - description: Namespace ID
         in: path
         name: namespace
         required: true
         type: string
-      - description: cluster
+      - description: Cluster Name
         in: path
         name: cluster
         required: true
         type: string
-      - description: node
+      - description: Node Name
         in: path
         name: node
         required: true
@@ -371,7 +451,18 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.Node'
-      summary: Get Node
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/app.Status'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/app.Status'
+      summary: Get Node in specified Cluster
       tags:
       - Node
+securityDefinitions:
+  BasicAuth:
+    type: basic
 swagger: "2.0"

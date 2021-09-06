@@ -12,15 +12,16 @@ import (
 	logger "github.com/sirupsen/logrus"
 )
 
-// ListCluster
+// ListCluster godoc
 // @Tags Cluster
-// @Summary List Cluster
-// @Description List Cluster
+// @Summary List all Clusters
+// @Description List all Clusters
 // @ID ListCluster
 // @Accept json
 // @Produce json
-// @Param	namespace	path	string	true  "namespace"
+// @Param	namespace	path	string	true  "Namespace ID"
 // @Success 200 {object} model.ClusterList
+// @Failure 400 {object} app.Status
 // @Router /ns/{namespace}/clusters [get]
 func ListCluster(c echo.Context) error {
 	clusterList, err := service.ListCluster(c.Param("namespace"))
@@ -32,16 +33,18 @@ func ListCluster(c echo.Context) error {
 	return app.Send(c, http.StatusOK, clusterList)
 }
 
-// GetCluster
+// GetCluster godoc
 // @Tags Cluster
 // @Summary Get Cluster
 // @Description Get Cluster
 // @ID GetCluster
 // @Accept json
 // @Produce json
-// @Param	namespace	path	string	true  "namespace"
-// @Param	cluster	path	string	true  "cluster"
+// @Param	namespace	path	string	true  "Namespace ID"
+// @Param	cluster	path	string	true  "Cluster Name"
 // @Success 200 {object} model.Cluster
+// @Failure 400 {object} app.Status
+// @Failure 404 {object} app.Status
 // @Router /ns/{namespace}/clusters/{cluster} [get]
 func GetCluster(c echo.Context) error {
 	if err := app.Validate(c, []string{"namespace", "cluster"}); err != nil {
@@ -58,16 +61,18 @@ func GetCluster(c echo.Context) error {
 	return app.Send(c, http.StatusOK, cluster)
 }
 
-// CreateCluster
+// CreateCluster godoc
 // @Tags Cluster
 // @Summary Create Cluster
 // @Description Create Cluster
 // @ID CreateCluster
 // @Accept json
 // @Produce json
-// @Param	namespace	path	string	true  "namespace"
-// @Param json body model.ClusterReq true "Reuest json"
+// @Param	namespace	path	string	true  "Namespace ID"
+// @Param ClusterReq body model.ClusterReq true "Request Body to create cluster"
 // @Success 200 {object} model.Cluster
+// @Failure 400 {object} app.Status
+// @Failure 500 {object} app.Status
 // @Router /ns/{namespace}/clusters [post]
 func CreateCluster(c echo.Context) error {
 	start := time.Now()
@@ -96,16 +101,18 @@ func CreateCluster(c echo.Context) error {
 	return app.Send(c, http.StatusOK, cluster)
 }
 
-// DeleteCluster
+// DeleteCluster godoc
 // @Tags Cluster
-// @Summary Delete a cluster
-// @Description Delete a cluster
+// @Summary Delete Cluster
+// @Description Delete Cluster
 // @ID DeleteCluster
 // @Accept json
 // @Produce json
-// @Param	namespace	path	string	true  "namespace"
-// @Param	cluster	path	string	true  "cluster"
+// @Param	namespace	path	string	true  "Namespace ID"
+// @Param	cluster	path	string	true  "Cluster Name"
 // @Success 200 {object} model.Status
+// @Failure 400 {object} app.Status
+// @Failure 500 {object} app.Status
 // @Router /ns/{namespace}/clusters/{cluster} [delete]
 func DeleteCluster(c echo.Context) error {
 	if err := app.Validate(c, []string{"namespace", "cluster"}); err != nil {

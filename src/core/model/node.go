@@ -16,9 +16,9 @@ type Node struct {
 	clusterName string
 	Credential  string     `json:"credential"`
 	PublicIP    string     `json:"publicIp"`
-	Role        string     `json:"role"`
+	Role        string     `json:"role" enums:"control-plane,worker"`
 	Spec        string     `json:"spec"`
-	Csp         config.CSP `json:"csp"`
+	Csp         config.CSP `json:"csp" enums:"aws,gcp,azure,alibaba"`
 }
 
 type NodeList struct {
