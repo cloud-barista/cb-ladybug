@@ -12,6 +12,7 @@ import (
 type MCIS struct {
 	Model
 	Description string     `json:"description"`
+	Label       string     `json:"label"`
 	VMs         []model.VM `json:"vm"` // output
 }
 

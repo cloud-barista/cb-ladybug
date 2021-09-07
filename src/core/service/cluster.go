@@ -159,6 +159,7 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 	}
 
 	// MCIS 생성
+	mcis.Label = "mcks"
 	logger.Infof("start create MCIS (name=%s)", mcisName)
 	if err = mcis.POST(); err != nil {
 		return nil, err
