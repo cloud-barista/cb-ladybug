@@ -88,20 +88,26 @@ func (self *VM) ConnectionTest(sshInfo *ssh.SSHInfo) error {
 
 func (self *VM) CopyScripts(sshInfo *ssh.SSHInfo, networkCni string) error {
 	sourcePath := fmt.Sprintf("%s/src/scripts", *config.Config.AppRootPath)
-	sourceFile := []string{config.BOOTSTRAP_FILE}
+	sourceFiles := []string{config.BOOTSTRAP_FILE, config.SYSTEMD_SERVICE_FILE}
 	if self.Role == config.CONTROL_PLANE && self.IsCPLeader {
-		sourceFile = append(sourceFile, config.INIT_FILE)
-		sourceFile = append(sourceFile, config.HA_PROXY_FILE)
+		sourceFiles = append(sourceFiles, config.INIT_FILE)
+		sourceFiles = append(sourceFiles, config.HA_PROXY_FILE)
+
+		err := self.CreateAddonsDirectory(sshInfo, networkCni)
+		if err != nil {
+			return errors.New(fmt.Sprintf("create addons directory error (name=%s, cause=%v)", self.Name, err))
+		}
+		cniFiles := getCniFiles(networkCni)
+		sourceFiles = append(sourceFiles, cniFiles...)
 	}
 	if networkCni == config.NETWORKCNI_CANAL {
-		sourceFile = append(sourceFile, config.LADYBUG_BOOTSTRAP_CANAL_FILE)
+		sourceFiles = append(sourceFiles, config.LADYBUG_BOOTSTRAP_CANAL_FILE)
 	} else {
-		sourceFile = append(sourceFile, config.LADYBUG_BOOTSTRAP_KILO_FILE)
+		sourceFiles = append(sourceFiles, config.LADYBUG_BOOTSTRAP_KILO_FILE)
 	}
-	sourceFile = append(sourceFile, config.SYSTEMD_SERVICE_FILE)
 
 	logger.Infof("start script file copy (vm=%s, src=%s, dest=%s)\n", self.Name, sourcePath, remoteTargetPath)
-	for _, f := range sourceFile {
+	for _, f := range sourceFiles {
 		src := fmt.Sprintf("%s/%s", sourcePath, f)
 		dest := fmt.Sprintf("%s/%s", remoteTargetPath, f)
 		if err := ssh.SSHCopy(*sshInfo, src, dest); err != nil {
@@ -109,6 +115,19 @@ func (self *VM) CopyScripts(sshInfo *ssh.SSHInfo, networkCni string) error {
 		}
 	}
 	logger.Infof("end script file copy (vm=%s, server=%s)\n", self.Name, sshInfo.ServerPort)
+	return nil
+}
+
+func (self *VM) CreateAddonsDirectory(sshInfo *ssh.SSHInfo, networkCni string) error {
+	addonsPath := fmt.Sprintf("%s/addons/%s", remoteTargetPath, networkCni)
+
+	logger.Infof("create addons directory (vm=%s, path=%s)\n", self.Name, addonsPath)
+
+	cmd := fmt.Sprintf("mkdir -p %s", addonsPath)
+	_, err := ssh.SSHRun(*sshInfo, cmd)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -196,12 +215,10 @@ func (self *VM) ControlPlaneInit(sshInfo *ssh.SSHInfo, reqKubernetes Kubernetes)
 
 func (self *VM) InstallNetworkCNI(sshInfo *ssh.SSHInfo, networkCni string) error {
 	var cmd string
-	if networkCni == config.NETWORKCNI_CANAL {
-		cmd = "sudo kubectl apply -f https://docs.projectcalico.org/manifests/canal.yaml --kubeconfig=/etc/kubernetes/admin.conf"
-	} else {
-		cmd = `sudo kubectl apply -f https://raw.githubusercontent.com/squat/kilo/main/manifests/crds.yaml --kubeconfig=/etc/kubernetes/admin.conf;
-		sudo kubectl apply -f https://raw.githubusercontent.com/squat/kilo/master/manifests/kilo-kubeadm-flannel.yaml --kubeconfig=/etc/kubernetes/admin.conf;
-		sudo kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml --kubeconfig=/etc/kubernetes/admin.conf;`
+	cniFiles := getCniFiles(networkCni)
+
+	for _, file := range cniFiles {
+		cmd += fmt.Sprintf("sudo kubectl apply -f %s/%s --kubeconfig=/etc/kubernetes/admin.conf;\n", remoteTargetPath, file)
 	}
 
 	_, err := ssh.SSHRun(*sshInfo, cmd)
@@ -274,4 +291,15 @@ func getJoinCmd(cpInitResult string) []string {
 	}
 
 	return []string{fmt.Sprintf("%s %s %s", join1, join2, join3), fmt.Sprintf("%s %s", join1, join2)}
+}
+
+func getCniFiles(cni string) (cniFiles []string) {
+	if cni == config.NETWORKCNI_CANAL {
+		cniFiles = append(cniFiles, config.CNI_CANAL_FILE)
+	} else {
+		cniFiles = append(cniFiles, config.CNI_KILO_CRDS_FILE)
+		cniFiles = append(cniFiles, config.CNI_KILO_KUBEADM_FILE)
+		cniFiles = append(cniFiles, config.CNI_KILO_FLANNEL_FILE)
+	}
+	return
 }
