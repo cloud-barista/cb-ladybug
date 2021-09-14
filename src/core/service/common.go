@@ -13,7 +13,6 @@ type NodeConfigInfo struct {
 	model.NodeConfig
 	Csp     config.CSP `json:"csp"`
 	Role    string     `json:"role"`
-	Region  string     `json:"region"`
 	Account string     `json:"account"`
 }
 
@@ -42,7 +41,6 @@ func SetNodeConfigInfos(nodeConfigs []model.NodeConfig, role string) ([]NodeConf
 		if !exists {
 			return nil, errors.New(fmt.Sprintf("%s region does not exist (connectionName=%s)", role, nodeConfig.Connection))
 		}
-		regionName := GetRegionName(region.KeyValueInfoList)
 
 		var nodeConfigInfo NodeConfigInfo
 		nodeConfigInfo.Connection = nodeConfig.Connection
@@ -50,7 +48,6 @@ func SetNodeConfigInfos(nodeConfigs []model.NodeConfig, role string) ([]NodeConf
 		nodeConfigInfo.Spec = nodeConfig.Spec
 		nodeConfigInfo.Csp = csp
 		nodeConfigInfo.Role = role
-		nodeConfigInfo.Region = regionName
 		nodeConfigInfo.Account = GetUserAccount(nodeConfigInfo.Csp)
 
 		nodeConfigInfos = append(nodeConfigInfos, nodeConfigInfo)
