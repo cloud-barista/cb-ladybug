@@ -117,15 +117,3 @@ func GetCSPName(providerName string) (config.CSP, error) {
 	}
 	return "", errors.New(providerName + "is not supported")
 }
-
-// get Region Name
-func GetRegionName(infoList []spider.KeyValue) string {
-	regionName := ""
-	for i := 0; i < len(infoList); i++ {
-		if infoList[i].Key == "Region" || infoList[i].Key == "location" {
-			regionName = infoList[i].Value //get region name
-			break
-		}
-	}
-	return regionName
-}
