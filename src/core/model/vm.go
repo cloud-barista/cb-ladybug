@@ -15,25 +15,26 @@ import (
 )
 
 type VM struct {
-	Name          string          `json:"name"`
-	Config        string          `json:"connectionName"`
-	VPC           string          `json:"vNetId"`
-	Subnet        string          `json:"subnetId"`
-	Firewall      []string        `json:"securityGroupIds"`
-	SSHKey        string          `json:"sshKeyId"`
-	Image         string          `json:"imageId"`
-	Spec          string          `json:"specId"`
-	UserAccount   string          `json:"vmUserAccount"`
-	UserPassword  string          `json:"vmUserPassword"`
-	Description   string          `json:"description"`
-	PublicIP      string          `json:"publicIP"`      // output
-	PrivateIP     string          `json:"privateIP"`     // output
-	Status        config.VMStatus `json:"status"`        // output
-	SystemMessage string          `json:"systemMessage"` // output
-	Credential    string          // private
-	Role          string          `json:"role"`
-	Csp           config.CSP      `json:"csp"`
-	IsCPLeader    bool            `json:"isCPLeader"`
+	Name            string          `json:"name"`
+	Config          string          `json:"connectionName"`
+	VPC             string          `json:"vNetId"`
+	Subnet          string          `json:"subnetId"`
+	Firewall        []string        `json:"securityGroupIds"`
+	SSHKey          string          `json:"sshKeyId"`
+	Image           string          `json:"imageId"`
+	Spec            string          `json:"specId"`
+	UserAccount     string          `json:"vmUserAccount"`
+	UserPassword    string          `json:"vmUserPassword"`
+	Description     string          `json:"description"`
+	PublicIP        string          `json:"publicIP"`        // output
+	PrivateIP       string          `json:"privateIP"`       // output
+	Status          config.VMStatus `json:"status"`          // output
+	SystemMessage   string          `json:"systemMessage"`   // output
+	CspViewVmDetail VMDetail        `json:"cspViewVmDetail"` // output
+	Credential      string          // private
+	Role            string          `json:"role"`
+	Csp             config.CSP      `json:"csp"`
+	IsCPLeader      bool            `json:"isCPLeader"`
 }
 
 type VMInfo struct {
@@ -42,6 +43,10 @@ type VMInfo struct {
 	Role       string     `json:"role"`
 	Csp        config.CSP `json:"csp"`
 	IsCPLeader bool       `json:"isCPLeader"`
+}
+
+type VMDetail struct {
+	VMSpecName string
 }
 
 const (

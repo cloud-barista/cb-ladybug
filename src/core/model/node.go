@@ -34,7 +34,7 @@ func NewNodeVM(namespace string, clusterName string, vm VM) *Node {
 		Credential:  vm.Credential,
 		PublicIP:    vm.PublicIP,
 		Role:        vm.Role,
-		Spec:        vm.Spec,
+		Spec:        vm.CspViewVmDetail.VMSpecName,
 		Csp:         vm.Csp,
 		namespace:   namespace,
 		clusterName: clusterName,
