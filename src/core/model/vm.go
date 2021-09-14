@@ -58,7 +58,7 @@ func (self *VM) CheckConnectivity(sshInfo *ssh.SSHInfo) error {
 	timeout := time.Second * time.Duration(deadline)
 	conn, err := net.DialTimeout("tcp", sshInfo.ServerPort, timeout)
 	if err != nil {
-		logger.Warnf(fmt.Sprintf("check connectivity error (name=%s, server=%s, cause=%v)", self.Name, sshInfo.ServerPort, err))
+		logger.Infof(fmt.Sprintf("check connectivity failed.. retry (name=%s, server=%s, cause=%v)", self.Name, sshInfo.ServerPort, err))
 		return err
 	}
 	if conn != nil {
@@ -69,24 +69,33 @@ func (self *VM) CheckConnectivity(sshInfo *ssh.SSHInfo) error {
 	return errors.New(fmt.Sprintf("Conn is nil (name=%s, server=%s)", self.Name, sshInfo.ServerPort))
 }
 
+func (self *VM) CheckConnectSSH(sshInfo *ssh.SSHInfo) error {
+	cmd := "/bin/hostname"
+	_, err := ssh.SSHRun(*sshInfo, cmd)
+	if err != nil {
+		logger.Infof(fmt.Sprintf("check connect ssh failed.. retry (server=%s, cause=%s)", sshInfo.ServerPort, err))
+		return err
+	}
+	return nil
+}
+
 func (self *VM) ConnectionTest(sshInfo *ssh.SSHInfo) error {
 	retryCheck := 10
 	for i := 0; i < retryCheck; i++ {
 		err := self.CheckConnectivity(sshInfo)
 		if err == nil {
 			logger.Infof(fmt.Sprintf("check connectivity passed (name=%s, server=%s)", self.Name, sshInfo.ServerPort))
-			break
+
+			err = self.CheckConnectSSH(sshInfo)
+			if err == nil {
+				logger.Infof(fmt.Sprintf("check connect ssh passed (name=%s, server=%s)", self.Name, sshInfo.ServerPort))
+				break
+			}
 		}
 		if i == retryCheck-1 {
 			return errors.New(fmt.Sprintf("Cannot do ssh, the port is not opened (name=%s, server=%s)", self.Name, sshInfo.ServerPort))
 		}
 		time.Sleep(2 * time.Second)
-	}
-
-	cmd := "/bin/hostname"
-	_, err := ssh.SSHRun(*sshInfo, cmd)
-	if err != nil {
-		return errors.New(fmt.Sprintf("ssh connection error (server=%s, cause=%s)", sshInfo.ServerPort, err))
 	}
 	return nil
 }
