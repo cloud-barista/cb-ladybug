@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/cloud-barista/cb-ladybug/src/core/model/spider"
+	"github.com/cloud-barista/cb-ladybug/src/core/model/tumblebug"
 	"github.com/cloud-barista/cb-ladybug/src/utils/config"
 	logger "github.com/sirupsen/logrus"
 )
@@ -57,7 +57,7 @@ func GetVmImageId(csp config.CSP, configName string) (string, error) {
 		return ALIBABA_IMAGE_ID, nil
 	} else if csp == config.CSP_AWS {
 		// AWS : 리전별 AMI 가져오기
-		conn := spider.NewConnection(configName)
+		conn := tumblebug.NewConnection(configName)
 		exists, err := conn.GET()
 		if err != nil {
 			return "", err
@@ -67,7 +67,7 @@ func GetVmImageId(csp config.CSP, configName string) (string, error) {
 		}
 
 		// http get region data
-		region := spider.NewRegion(conn.RegionName)
+		region := tumblebug.NewRegion(conn.RegionName)
 		exists, err = region.GET()
 		if err != nil {
 			return "", err
@@ -78,12 +78,13 @@ func GetVmImageId(csp config.CSP, configName string) (string, error) {
 
 		// find region
 		regionName := ""
-		for i := 0; i < len(region.KeyValueInfoList); i++ {
-			if region.KeyValueInfoList[i].Key == "Region" {
-				regionName = region.KeyValueInfoList[i].Value //get region name
+		for _, info := range region.KeyValueInfoList {
+			if info.Key == "Region" {
+				regionName = info.Value //get region name
 				break
 			}
 		}
+
 		if regionName == "" {
 			return "", errors.New(fmt.Sprintf("request not found AMI on AWS (cause = region name is empty, connection='%s', region name='%s')", configName, conn.RegionName))
 		}

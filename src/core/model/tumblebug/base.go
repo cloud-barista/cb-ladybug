@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/beego/beego/v2/core/validation"
 	"github.com/cloud-barista/cb-ladybug/src/core/model"
@@ -27,9 +28,11 @@ type Model struct {
 
 func (self *Model) execute(method string, url string, body interface{}, result interface{}) (bool, error) {
 
-	// validation
-	if err := self.validate(validation.Validation{}); err != nil {
-		return false, err
+	if strings.Contains(url, "/ns") {
+		// validation
+		if err := self.validate(validation.Validation{}); err != nil {
+			return false, err
+		}
 	}
 
 	resp, err := app.ExecuteHTTP(method, *config.Config.TumblebugUrl+url, body, result)

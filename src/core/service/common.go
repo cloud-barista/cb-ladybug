@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/cloud-barista/cb-ladybug/src/core/model"
-	"github.com/cloud-barista/cb-ladybug/src/core/model/spider"
+	"github.com/cloud-barista/cb-ladybug/src/core/model/tumblebug"
 	"github.com/cloud-barista/cb-ladybug/src/utils/config"
 )
 
@@ -20,7 +20,7 @@ func SetNodeConfigInfos(nodeConfigs []model.NodeConfig, role string) ([]NodeConf
 	var nodeConfigInfos []NodeConfigInfo
 
 	for _, nodeConfig := range nodeConfigs {
-		conn := spider.NewConnection(nodeConfig.Connection)
+		conn := tumblebug.NewConnection(nodeConfig.Connection)
 		exists, err := conn.GET()
 		if err != nil {
 			return nil, errors.New(fmt.Sprintf("%s Connection connect error (connectionName=%s)", role, nodeConfig.Connection))
@@ -33,7 +33,7 @@ func SetNodeConfigInfos(nodeConfigs []model.NodeConfig, role string) ([]NodeConf
 			return nil, err
 		}
 
-		region := spider.NewRegion(conn.RegionName)
+		region := tumblebug.NewRegion(conn.RegionName)
 		exists, err = region.GET()
 		if err != nil {
 			return nil, errors.New(fmt.Sprintf("%s get region error (connectionName=%s)", role, nodeConfig.Connection))
