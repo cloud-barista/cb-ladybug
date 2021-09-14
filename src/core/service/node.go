@@ -244,6 +244,7 @@ func RemoveNode(namespace string, clusterName string, nodeName string) (*model.S
 		ServerPort: fmt.Sprintf("%s:22", cpNode.PublicIP),
 	}
 	cmd := fmt.Sprintf("sudo kubectl drain %s --kubeconfig=/etc/kubernetes/admin.conf --ignore-daemonsets --force --delete-local-data", hostName)
+	logger.Infof("[RemoveNode] %s $ %s", cpNode.Name, cmd)
 	result, err := ssh.SSHRun(sshInfo, cmd)
 	if err != nil {
 		status.Message = "kubectl drain failed"
@@ -258,6 +259,7 @@ func RemoveNode(namespace string, clusterName string, nodeName string) (*model.S
 
 	// delete node
 	cmd = fmt.Sprintf("sudo kubectl delete node %s --kubeconfig=/etc/kubernetes/admin.conf", hostName)
+	logger.Infof("[RemoveNode] %s $ %s", cpNode.Name, cmd)
 	result, err = ssh.SSHRun(sshInfo, cmd)
 	if err != nil {
 		status.Message = "kubectl delete node failed"
@@ -390,6 +392,7 @@ func getWorkerJoinCmdForAddNode(namespace string, clusterName string) (string, e
 		ServerPort: fmt.Sprintf("%s:22", cpNode.PublicIP),
 	}
 	cmd := "sudo kubeadm token create --print-join-command"
+	logger.Infof("[getWorkerJoinCmdForAddNode] %s $ %s", cpNode.Name, cmd)
 	result, err := ssh.SSHRun(sshInfo, cmd)
 	if err != nil {
 		return "", err

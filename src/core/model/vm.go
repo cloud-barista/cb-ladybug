@@ -129,6 +129,7 @@ func (self *VM) CreateAddonsDirectory(sshInfo *ssh.SSHInfo, networkCni string) e
 	logger.Infof("create addons directory (vm=%s, path=%s)\n", self.Name, addonsPath)
 
 	cmd := fmt.Sprintf("mkdir -p %s", addonsPath)
+	logger.Infof("[CreateAddonsDirectory] %s $ %s", self.Name, cmd)
 	_, err := ssh.SSHRun(*sshInfo, cmd)
 	if err != nil {
 		return err
@@ -145,12 +146,14 @@ func (self *VM) SetSystemd(sshInfo *ssh.SSHInfo, networkCni string) error {
 	}
 
 	cmd := fmt.Sprintf("cd %s;./%s", remoteTargetPath, bsFile)
+	logger.Infof("[SetSystemd] %s $ %s", self.Name, cmd)
 	_, err := ssh.SSHRun(*sshInfo, cmd)
 	if err != nil {
 		return errors.New(fmt.Sprintf("create ladybug-bootstrap error (name=%s)", self.Name))
 	}
 
 	cmd = fmt.Sprintf("cd %s;./%s", remoteTargetPath, config.SYSTEMD_SERVICE_FILE)
+	logger.Infof("[SetSystemd] %s $ %s", self.Name, cmd)
 	_, err = ssh.SSHRun(*sshInfo, cmd)
 	if err != nil {
 		return errors.New(fmt.Sprintf("set systemd service error (name=%s)", self.Name))
@@ -161,6 +164,7 @@ func (self *VM) SetSystemd(sshInfo *ssh.SSHInfo, networkCni string) error {
 func (self *VM) Bootstrap(sshInfo *ssh.SSHInfo) error {
 	cmd := fmt.Sprintf("cd %s;./%s", remoteTargetPath, config.BOOTSTRAP_FILE)
 
+	logger.Infof("[Bootstrap] %s $ %s", self.Name, cmd)
 	result, err := ssh.SSHRun(*sshInfo, cmd)
 	if err != nil {
 		return errors.New("k8s bootstrap error")
@@ -181,11 +185,13 @@ func (self *VM) InstallHAProxy(sshInfo *ssh.SSHInfo, IPs []string) error {
 		}
 	}
 	cmd := fmt.Sprintf("sudo sed 's/^{{SERVERS}}/%s/g' %s/%s", servers, remoteTargetPath, config.HA_PROXY_FILE)
+	logger.Infof("[InstallHAProxy] %s $ %s", self.Name, cmd)
 	result, err := ssh.SSHRun(*sshInfo, cmd)
 	if err != nil {
 		logger.Warnf("get haproxy command error (name=%s, cause=%v)", self.Name, err)
 		return err
 	}
+	logger.Infof("[InstallHAProxy] %s $ %s", self.Name, result)
 	_, err = ssh.SSHRun(*sshInfo, result)
 	if err != nil {
 		logger.Warnf("install haproxy error (name=%s, cause=%v)", self.Name, err)
@@ -198,6 +204,7 @@ func (self *VM) ControlPlaneInit(sshInfo *ssh.SSHInfo, reqKubernetes Kubernetes)
 	var joinCmd []string
 
 	cmd := fmt.Sprintf("cd %s;./%s %s %s %s", remoteTargetPath, config.INIT_FILE, reqKubernetes.PodCidr, reqKubernetes.ServiceCidr, reqKubernetes.ServiceDnsDomain)
+	logger.Infof("[ControlPlaneInit] %s $ %s", self.Name, cmd)
 	cpInitResult, err := ssh.SSHRun(*sshInfo, cmd)
 	if err != nil {
 		logger.Warnf("control plane init error (name=%s, cause=%v)", self.Name, err)
@@ -226,6 +233,7 @@ func (self *VM) InstallNetworkCNI(sshInfo *ssh.SSHInfo, networkCni string) error
 		cmd += fmt.Sprintf("sudo kubectl apply -f %s/%s --kubeconfig=/etc/kubernetes/admin.conf;\n", remoteTargetPath, file)
 	}
 
+	logger.Infof("[InstallNetworkCNI] %s $ %s", self.Name, cmd)
 	_, err := ssh.SSHRun(*sshInfo, cmd)
 	if err != nil {
 		logger.Warnf("networkCNI install failed (name=%s, cause=%v)", self.Name, err)
@@ -239,6 +247,7 @@ func (self *VM) ControlPlaneJoin(sshInfo *ssh.SSHInfo, CPJoinCmd *string) error 
 		return errors.New("control-plane node join command empty")
 	}
 	cmd := fmt.Sprintf("sudo %s", *CPJoinCmd)
+	logger.Infof("[ControlPlaneJoin] %s $ %s", self.Name, cmd)
 	result, err := ssh.SSHRun(*sshInfo, cmd)
 	if err != nil {
 		logger.Warnf("control-plane join error (name=%s, cause=%v)", self.Name, err)
@@ -262,6 +271,7 @@ func (self *VM) WorkerJoin(sshInfo *ssh.SSHInfo, workerJoinCmd *string) error {
 		return errors.New("worker node join command empty")
 	}
 	cmd := fmt.Sprintf("sudo %s", *workerJoinCmd)
+	logger.Infof("[WorkerJoin] %s $ %s", self.Name, cmd)
 	result, err := ssh.SSHRun(*sshInfo, cmd)
 	if err != nil {
 		logger.Warnf("worker join error (name=%s, cause=%v)", self.Name, err)
