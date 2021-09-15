@@ -153,7 +153,7 @@ definitions:
       message:
         type: string
     type: object
-host: localhost:8080
+host: localhost:1470
 info:
   contact:
     email: contact-to-cloud-barista@googlegroups.com

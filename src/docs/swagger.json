@@ -14,7 +14,7 @@
         },
         "version": "latest"
     },
-    "host": "localhost:8080",
+    "host": "localhost:1470",
     "basePath": "/ladybug",
     "paths": {
         "/healthy": {
