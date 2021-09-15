@@ -318,16 +318,16 @@ func (self *VM) AddNodeLabels(sshInfo *ssh.SSHInfo) error {
 	}
 
 	infos := map[string]interface{}{
-		"csp":    self.Csp,
-		"region": self.Region.Region,
+		"topology.cloud-barista.github.io/csp": self.Csp,
+		"topology.kubernetes.io/region":        self.Region.Region,
 	}
 	if self.Csp != config.CSP_AZURE {
-		infos["zone"] = self.Region.Zone
+		infos["topology.kubernetes.io/zone"] = self.Region.Zone
 	}
 
 	labels := ""
 	for key, value := range infos {
-		labels += fmt.Sprintf("%s/%s=%s ", config.NODE_LABELS_PREFIX, key, value)
+		labels += fmt.Sprintf("%s=%s ", key, value)
 	}
 
 	cmd = fmt.Sprintf("sudo kubectl label nodes %s %s --kubeconfig=/etc/kubernetes/%s;", hostName, labels, configFile)
