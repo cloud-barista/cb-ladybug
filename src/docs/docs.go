@@ -717,7 +717,7 @@ type swaggerInfo struct {
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = swaggerInfo{
 	Version:     "latest",
-	Host:        "localhost:8080",
+	Host:        "localhost:1470",
 	BasePath:    "/ladybug",
 	Schemes:     []string{},
 	Title:       "CB-Ladybug REST API",

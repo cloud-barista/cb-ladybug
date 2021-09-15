@@ -46,5 +46,5 @@ func Server() {
 	g.DELETE("/:namespace/clusters/:cluster/nodes/:node", router.RemoveNode)
 
 	// Start server
-	e.Logger.Fatal(e.Start(":8080"))
+	e.Logger.Fatal(e.Start(":1470"))
 }

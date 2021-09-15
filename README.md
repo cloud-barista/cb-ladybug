@@ -62,7 +62,7 @@ $ nohup ./cb-ladybug & > /dev/null
 ### Test
 
 ```
-$ curl -s  http://localhost:8080/ladybug/healthy -o /dev/null -w "code:%{http_code}"
+$ curl -s  http://localhost:1470/ladybug/healthy -o /dev/null -w "code:%{http_code}"
 
 code:200
 ```
@@ -78,7 +78,7 @@ $ go get -u github.com/swaggo/swag/cmd/swag
 # in src/ folder
 $ swag init
 ```
-* Open http://localhost:8080/swagger/index.html in your web browser 
+* Open http://localhost:1470/swagger/index.html in your web browser 
 
 ## Documents
 
