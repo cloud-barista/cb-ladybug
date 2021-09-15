@@ -336,6 +336,20 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 	}
 	logger.Infoln("end k8s join")
 
+	logger.Infoln("start add node labels")
+	for _, vm := range cpMcis.VMs {
+		sshInfo := ssh.SSHInfo{
+			UserName:   GetUserAccount(vm.Csp),
+			PrivateKey: []byte(vm.Credential),
+			ServerPort: fmt.Sprintf("%s:22", vm.PublicIP),
+		}
+		err := vm.AddNodeLabels(&sshInfo)
+		if err != nil {
+			logger.Warnf("failed to add node labels (vm=%s, cause=%s)", vm.Name, err)
+		}
+	}
+	logger.Infoln("end add node labels")
+
 	cluster.Complete()
 	cluster.Nodes = nodes
 

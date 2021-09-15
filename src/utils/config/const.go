@@ -41,4 +41,6 @@ const (
 	Terminated  VMStatus = "Terminated"
 	NotExist    VMStatus = "NotExist" // VM does not exist
 	Failed      VMStatus = "Failed"
+
+	NODE_LABELS_PREFIX = "topology.cloud-barista.github.io"
 )

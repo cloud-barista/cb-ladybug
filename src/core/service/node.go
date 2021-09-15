@@ -190,6 +190,12 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 			if err != nil {
 				c <- err
 			}
+
+			logger.Infof("add labels (vm=%s)", vm.Name)
+			err = vm.AddNodeLabels(&sshInfo)
+			if err != nil {
+				logger.Warnf("failed to add node labels (vm=%s, cause= %s)", vm.Name, err)
+			}
 		}(tvm.VM)
 	}
 

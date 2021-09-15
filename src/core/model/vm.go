@@ -30,6 +30,7 @@ type VM struct {
 	PrivateIP       string          `json:"privateIP"`       // output
 	Status          config.VMStatus `json:"status"`          // output
 	SystemMessage   string          `json:"systemMessage"`   // output
+	Region          RegionInfo      `json:"region"`          // output
 	CspViewVmDetail VMDetail        `json:"cspViewVmDetail"` // output
 	Credential      string          // private
 	Role            string          `json:"role"`
@@ -43,6 +44,11 @@ type VMInfo struct {
 	Role       string     `json:"role"`
 	Csp        config.CSP `json:"csp"`
 	IsCPLeader bool       `json:"isCPLeader"`
+}
+
+type RegionInfo struct {
+	Region string
+	Zone   string
 }
 
 type VMDetail struct {
@@ -296,6 +302,42 @@ func (self *VM) WorkerJoin(sshInfo *ssh.SSHInfo, workerJoinCmd *string) error {
 		logger.Warnf("worker join failed (name=%s)", self.Name)
 		return errors.New(fmt.Sprintf("worker node join failed (name=%s)", self.Name))
 	}
+}
+
+func (self *VM) AddNodeLabels(sshInfo *ssh.SSHInfo) error {
+	cmd := "/bin/hostname"
+	hostName, err := ssh.SSHRun(*sshInfo, cmd)
+	if err != nil {
+		return errors.New(fmt.Sprintf("ssh connection error (server=%s, cause=%s)", sshInfo.ServerPort, err))
+	}
+	hostName = strings.ToLower(hostName)
+
+	configFile := "admin.conf"
+	if self.Role == config.WORKER {
+		configFile = "kubelet.conf"
+	}
+
+	infos := map[string]interface{}{
+		"csp":    self.Csp,
+		"region": self.Region.Region,
+	}
+	if self.Csp != config.CSP_AZURE {
+		infos["zone"] = self.Region.Zone
+	}
+
+	labels := ""
+	for key, value := range infos {
+		labels += fmt.Sprintf("%s/%s=%s ", config.NODE_LABELS_PREFIX, key, value)
+	}
+
+	cmd = fmt.Sprintf("sudo kubectl label nodes %s %s --kubeconfig=/etc/kubernetes/%s;", hostName, labels, configFile)
+	logger.Infof("[AddNodeLabels] %s $ %s", self.Name, cmd)
+	_, err = ssh.SSHRun(*sshInfo, cmd)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func getJoinCmd(cpInitResult string) []string {
