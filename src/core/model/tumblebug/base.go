@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	"github.com/beego/beego/v2/core/validation"
-	"github.com/cloud-barista/cb-ladybug/src/core/model"
-	"github.com/cloud-barista/cb-ladybug/src/utils/app"
-	"github.com/cloud-barista/cb-ladybug/src/utils/config"
+	"github.com/cloud-barista/cb-mcks/src/core/model"
+	"github.com/cloud-barista/cb-mcks/src/utils/app"
+	"github.com/cloud-barista/cb-mcks/src/utils/config"
 	"github.com/go-resty/resty/v2"
 
 	logger "github.com/sirupsen/logrus"

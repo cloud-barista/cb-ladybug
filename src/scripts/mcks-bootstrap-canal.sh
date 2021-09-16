@@ -19,7 +19,7 @@ if [ -f "/etc/kubernetes/kubelet.conf" ]; then
   fi
 fi
 exit 0
-fi' | sudo tee /lib/systemd/system/ladybug-bootstrap > /dev/null
+fi' | sudo tee /lib/systemd/system/mcks-bootstrap > /dev/null
 
 # 실행권한
-sudo chmod +x /lib/systemd/system/ladybug-bootstrap
+sudo chmod +x /lib/systemd/system/mcks-bootstrap

@@ -75,7 +75,7 @@ vm		-->		spec
 mcis	*-->	vm
 
 
-' # ladybug ----------------
+' # mcks ----------------
 object cluster {
 	+name
 	+status
@@ -139,7 +139,7 @@ node				..		vm
 kubeConfig		--|>	clusterConfig
 
 
-'' # ladybug controller ----------------
+'' # mcks controller ----------------
 'object clusterDeployment #GreenYellow {
 '	+namespace
 '	+mcis

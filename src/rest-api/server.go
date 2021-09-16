@@ -3,13 +3,13 @@ package restapi
 import (
 	"net/http"
 
-	"github.com/cloud-barista/cb-ladybug/src/core/common"
-	"github.com/cloud-barista/cb-ladybug/src/rest-api/router"
-	"github.com/cloud-barista/cb-ladybug/src/utils/config"
+	"github.com/cloud-barista/cb-mcks/src/core/common"
+	"github.com/cloud-barista/cb-mcks/src/rest-api/router"
+	"github.com/cloud-barista/cb-mcks/src/utils/config"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
-	_ "github.com/cloud-barista/cb-ladybug/src/docs"
+	_ "github.com/cloud-barista/cb-mcks/src/docs"
 	echoSwagger "github.com/swaggo/echo-swagger"
 )
 

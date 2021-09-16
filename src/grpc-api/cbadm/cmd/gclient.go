@@ -6,8 +6,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/cloud-barista/cb-ladybug/src/grpc-api/logger"
-	lb_api "github.com/cloud-barista/cb-ladybug/src/grpc-api/request"
+	"github.com/cloud-barista/cb-mcks/src/grpc-api/logger"
+	lb_api "github.com/cloud-barista/cb-mcks/src/grpc-api/request"
 )
 
 // ===== [ Constants and Variables ] =====
@@ -34,7 +34,7 @@ func readInDataFromFile() {
 
 // ===== [ Public Functions ] =====
 
-// SetupAndRun - Ladybug GRPC CLI 구동
+// SetupAndRun - MCKS GRPC CLI 구동
 func SetupAndRun(cmd *cobra.Command, args []string) {
 	logger := logger.NewLogger()
 
@@ -62,7 +62,7 @@ func SetupAndRun(cmd *cobra.Command, args []string) {
 		}
 		err = mcar.Open()
 		if err != nil {
-			logger.Error("ladybug api open failed : ", err)
+			logger.Error("mcks api open failed : ", err)
 			return
 		}
 		defer mcar.Close()

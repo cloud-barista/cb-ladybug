@@ -6,11 +6,11 @@ import (
 	"io"
 	"time"
 
-	gc "github.com/cloud-barista/cb-ladybug/src/grpc-api/common"
-	"github.com/cloud-barista/cb-ladybug/src/grpc-api/config"
-	"github.com/cloud-barista/cb-ladybug/src/grpc-api/logger"
-	pb "github.com/cloud-barista/cb-ladybug/src/grpc-api/protobuf/cbladybug"
-	"github.com/cloud-barista/cb-ladybug/src/grpc-api/request/mcar"
+	gc "github.com/cloud-barista/cb-mcks/src/grpc-api/common"
+	"github.com/cloud-barista/cb-mcks/src/grpc-api/config"
+	"github.com/cloud-barista/cb-mcks/src/grpc-api/logger"
+	pb "github.com/cloud-barista/cb-mcks/src/grpc-api/protobuf/cbmcks"
+	"github.com/cloud-barista/cb-mcks/src/grpc-api/request/mcar"
 
 	"google.golang.org/grpc"
 )
@@ -19,7 +19,7 @@ import (
 
 // ===== [ Types ] =====
 
-// MCARApi - LADYBUG API 구조 정의
+// MCARApi - MCKS API 구조 정의
 type MCARApi struct {
 	gConf        *config.GrpcConfig
 	conn         *grpc.ClientConn
@@ -79,19 +79,19 @@ type NodeReq struct {
 
 // ===== [ Implementations ] =====
 
-// SetServerAddr - Ladybug 서버 주소 설정
+// SetServerAddr - MCKS 서버 주소 설정
 func (m *MCARApi) SetServerAddr(addr string) error {
 	if addr == "" {
 		return errors.New("parameter is empty")
 	}
 
-	m.gConf.GSL.LadybugCli.ServerAddr = addr
+	m.gConf.GSL.MCKSCli.ServerAddr = addr
 	return nil
 }
 
-// GetServerAddr - Ladybug 서버 주소 값 조회
+// GetServerAddr - MCKS 서버 주소 값 조회
 func (m *MCARApi) GetServerAddr() (string, error) {
-	return m.gConf.GSL.LadybugCli.ServerAddr, nil
+	return m.gConf.GSL.MCKSCli.ServerAddr, nil
 }
 
 // SetTLSCA - TLS CA 설정
@@ -100,32 +100,32 @@ func (m *MCARApi) SetTLSCA(tlsCAFile string) error {
 		return errors.New("parameter is empty")
 	}
 
-	if m.gConf.GSL.LadybugCli.TLS == nil {
-		m.gConf.GSL.LadybugCli.TLS = &config.TLSConfig{}
+	if m.gConf.GSL.MCKSCli.TLS == nil {
+		m.gConf.GSL.MCKSCli.TLS = &config.TLSConfig{}
 	}
 
-	m.gConf.GSL.LadybugCli.TLS.TLSCA = tlsCAFile
+	m.gConf.GSL.MCKSCli.TLS.TLSCA = tlsCAFile
 	return nil
 }
 
 // GetTLSCA - TLS CA 값 조회
 func (m *MCARApi) GetTLSCA() (string, error) {
-	if m.gConf.GSL.LadybugCli.TLS == nil {
+	if m.gConf.GSL.MCKSCli.TLS == nil {
 		return "", nil
 	}
 
-	return m.gConf.GSL.LadybugCli.TLS.TLSCA, nil
+	return m.gConf.GSL.MCKSCli.TLS.TLSCA, nil
 }
 
 // SetTimeout - Timeout 설정
 func (m *MCARApi) SetTimeout(timeout time.Duration) error {
-	m.gConf.GSL.LadybugCli.Timeout = timeout
+	m.gConf.GSL.MCKSCli.Timeout = timeout
 	return nil
 }
 
 // GetTimeout - Timeout 값 조회
 func (m *MCARApi) GetTimeout() (time.Duration, error) {
-	return m.gConf.GSL.LadybugCli.Timeout, nil
+	return m.gConf.GSL.MCKSCli.Timeout, nil
 }
 
 // SetJWTToken - JWT 인증 토큰 설정
@@ -134,28 +134,28 @@ func (m *MCARApi) SetJWTToken(token string) error {
 		return errors.New("parameter is empty")
 	}
 
-	if m.gConf.GSL.LadybugCli.Interceptors == nil {
-		m.gConf.GSL.LadybugCli.Interceptors = &config.InterceptorsConfig{}
-		m.gConf.GSL.LadybugCli.Interceptors.AuthJWT = &config.AuthJWTConfig{}
+	if m.gConf.GSL.MCKSCli.Interceptors == nil {
+		m.gConf.GSL.MCKSCli.Interceptors = &config.InterceptorsConfig{}
+		m.gConf.GSL.MCKSCli.Interceptors.AuthJWT = &config.AuthJWTConfig{}
 	}
-	if m.gConf.GSL.LadybugCli.Interceptors.AuthJWT == nil {
-		m.gConf.GSL.LadybugCli.Interceptors.AuthJWT = &config.AuthJWTConfig{}
+	if m.gConf.GSL.MCKSCli.Interceptors.AuthJWT == nil {
+		m.gConf.GSL.MCKSCli.Interceptors.AuthJWT = &config.AuthJWTConfig{}
 	}
 
-	m.gConf.GSL.LadybugCli.Interceptors.AuthJWT.JWTToken = token
+	m.gConf.GSL.MCKSCli.Interceptors.AuthJWT.JWTToken = token
 	return nil
 }
 
 // GetJWTToken - JWT 인증 토큰 값 조회
 func (m *MCARApi) GetJWTToken() (string, error) {
-	if m.gConf.GSL.LadybugCli.Interceptors == nil {
+	if m.gConf.GSL.MCKSCli.Interceptors == nil {
 		return "", nil
 	}
-	if m.gConf.GSL.LadybugCli.Interceptors.AuthJWT == nil {
+	if m.gConf.GSL.MCKSCli.Interceptors.AuthJWT == nil {
 		return "", nil
 	}
 
-	return m.gConf.GSL.LadybugCli.Interceptors.AuthJWT.JWTToken, nil
+	return m.gConf.GSL.MCKSCli.Interceptors.AuthJWT.JWTToken, nil
 }
 
 // SetConfigPath - 환경설정 파일 설정
@@ -181,37 +181,37 @@ func (m *MCARApi) SetConfigPath(configFile string) error {
 		return err
 	}
 
-	// LADYBUG CLIENT 필수 입력 항목 체크
-	ladybugcli := gConf.GSL.LadybugCli
+	// MCKS CLIENT 필수 입력 항목 체크
+	mckscli := gConf.GSL.MCKSCli
 
-	if ladybugcli == nil {
-		return errors.New("ladybugcli field are not specified")
+	if mckscli == nil {
+		return errors.New("mckscli field are not specified")
 	}
 
-	if ladybugcli.ServerAddr == "" {
-		return errors.New("ladybugcli.server_addr field are not specified")
+	if mckscli.ServerAddr == "" {
+		return errors.New("mckscli.server_addr field are not specified")
 	}
 
-	if ladybugcli.Timeout == 0 {
-		ladybugcli.Timeout = 90 * time.Second
+	if mckscli.Timeout == 0 {
+		mckscli.Timeout = 90 * time.Second
 	}
 
-	if ladybugcli.TLS != nil {
-		if ladybugcli.TLS.TLSCA == "" {
-			return errors.New("ladybugcli.tls.tls_ca field are not specified")
+	if mckscli.TLS != nil {
+		if mckscli.TLS.TLSCA == "" {
+			return errors.New("mckscli.tls.tls_ca field are not specified")
 		}
 	}
 
-	if ladybugcli.Interceptors != nil {
-		if ladybugcli.Interceptors.AuthJWT != nil {
-			if ladybugcli.Interceptors.AuthJWT.JWTToken == "" {
-				return errors.New("ladybugcli.interceptors.auth_jwt.jwt_token field are not specified")
+	if mckscli.Interceptors != nil {
+		if mckscli.Interceptors.AuthJWT != nil {
+			if mckscli.Interceptors.AuthJWT.JWTToken == "" {
+				return errors.New("mckscli.interceptors.auth_jwt.jwt_token field are not specified")
 			}
 		}
-		if ladybugcli.Interceptors.Opentracing != nil {
-			if ladybugcli.Interceptors.Opentracing.Jaeger != nil {
-				if ladybugcli.Interceptors.Opentracing.Jaeger.Endpoint == "" {
-					return errors.New("ladybugcli.interceptors.opentracing.jaeger.endpoint field are not specified")
+		if mckscli.Interceptors.Opentracing != nil {
+			if mckscli.Interceptors.Opentracing.Jaeger != nil {
+				if mckscli.Interceptors.Opentracing.Jaeger.Endpoint == "" {
+					return errors.New("mckscli.interceptors.opentracing.jaeger.endpoint field are not specified")
 				}
 			}
 		}
@@ -224,10 +224,10 @@ func (m *MCARApi) SetConfigPath(configFile string) error {
 // Open - 연결 설정
 func (m *MCARApi) Open() error {
 
-	ladybugcli := m.gConf.GSL.LadybugCli
+	mckscli := m.gConf.GSL.MCKSCli
 
 	// grpc 커넥션 생성
-	cbconn, closer, err := gc.NewCBConnection(ladybugcli)
+	cbconn, closer, err := gc.NewCBConnection(mckscli)
 	if err != nil {
 		return err
 	}
@@ -242,7 +242,7 @@ func (m *MCARApi) Open() error {
 	m.clientMCAR = pb.NewMCARClient(m.conn)
 
 	// grpc 호출 Wrapper
-	m.requestMCAR = &mcar.MCARRequest{Client: m.clientMCAR, Timeout: ladybugcli.Timeout, InType: m.inType, OutType: m.outType}
+	m.requestMCAR = &mcar.MCARRequest{Client: m.clientMCAR, Timeout: mckscli.Timeout, InType: m.inType, OutType: m.outType}
 
 	return nil
 }
@@ -532,7 +532,7 @@ func NewMCARManager() (m *MCARApi) {
 
 	m = &MCARApi{}
 	m.gConf = &config.GrpcConfig{}
-	m.gConf.GSL.LadybugCli = &config.GrpcClientConfig{}
+	m.gConf.GSL.MCKSCli = &config.GrpcClientConfig{}
 
 	m.jaegerCloser = nil
 	m.conn = nil

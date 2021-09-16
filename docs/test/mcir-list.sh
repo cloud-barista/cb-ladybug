@@ -3,7 +3,7 @@
 # usage
 if [ "$#" -lt 1 ]; then 
 	echo "./mcir-list.sh <namespace> [all/image/spec/ssh/sg/vpc]"
-	echo "./mcir-list.sh cb-ladybug-ns all"
+	echo "./mcir-list.sh cb-mcks-ns all"
 	exit 0
 fi
 

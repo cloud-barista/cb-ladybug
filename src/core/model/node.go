@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/cloud-barista/cb-ladybug/src/core/common"
-	"github.com/cloud-barista/cb-ladybug/src/utils/config"
-	"github.com/cloud-barista/cb-ladybug/src/utils/lang"
+	"github.com/cloud-barista/cb-mcks/src/core/common"
+	"github.com/cloud-barista/cb-mcks/src/utils/config"
+	"github.com/cloud-barista/cb-mcks/src/utils/lang"
 )
 
 type Node struct {

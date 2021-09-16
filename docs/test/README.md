@@ -33,7 +33,7 @@ $ docker run -d -p 1323:1323 --name cb-tumblebug --link cb-spider:cb-spider clou
 
 #### `batch-register-cloud-info.sh` 활용
 다음의 단계를 수행합니다.
-- `cb-ladybug/docs/test/` 에 있는 `batch-register-cloud-info.sh.example` 파일을 `batch-register-cloud-info.sh` 로 복사
+- `cb-mcks/docs/test/` 에 있는 `batch-register-cloud-info.sh.example` 파일을 `batch-register-cloud-info.sh` 로 복사
 - `batch-register-cloud-info.sh` 파일을 텍스트 에디터로 오픈
 - 자신이 발급받은 클라우드 별 연결정보를 각 환경변수에 입력
 - `batch-register-cloud-info.sh` 파일을 실행
@@ -118,7 +118,7 @@ $ export AZURE_RESOURCE_GROUP="<resource group>"
 
 # 예: koreacentral (한국 중부)
 $ export AZURE_REGION="koreacentral"
-$ export AZURE_RESOURCE_GROUP="cb-ladybugRG"
+$ export AZURE_RESOURCE_GROUP="cb-mcksRG"
 ```
 
 * Cloud Connection Info. 등록
@@ -179,16 +179,16 @@ $ ./connectioninfo-list.sh all
 $ ./ns-create.sh <namespace>
 
 # 예
-$ ./ns-create.sh cb-ladybug-ns
+$ ./ns-create.sh cb-mcks-ns
 
 # 결과 확인
-$ ./ns-get.sh cb-ladybug-ns
+$ ./ns-get.sh cb-mcks-ns
 ```
 
 
 ## Test 
 
-### cb-ladybug 실행
+### CB-MCKS 실행
 
 ```
 $ export CBLOG_ROOT="$(pwd)"
@@ -203,7 +203,7 @@ $ ./cluster-create.sh <namespace> <cluster name>
 
 * 예
 ```
-$ ./cluster-create.sh cb-ladybug-ns cluster-01
+$ ./cluster-create.sh cb-mcks-ns cluster-01
 ```
 
 ### 클러스터 확인
@@ -213,7 +213,7 @@ $ ./cluster-get.sh <namespace> <cluster name>
 
 * 예
 ```
-$ ./cluster-get.sh cb-ladybug-ns cluster-01
+$ ./cluster-get.sh cb-mcks-ns cluster-01
 ```
 
 ### 클러스터 삭제
@@ -223,7 +223,7 @@ $ ./cluster-delete.sh <namespace> <cluster name>
 
 * 예
 ```
-$ ./cluster-delete.sh cb-ladybug-ns cluster-01
+$ ./cluster-delete.sh cb-mcks-ns cluster-01
 ```
 
 ### 클러스터 리스트
@@ -233,7 +233,7 @@ $ ./cluster-list.sh <namespace>
 
 * 예
 ```
-$ ./cluster-list.sh cb-ladybug-ns
+$ ./cluster-list.sh cb-mcks-ns
 ```
 
 ### 노드 생성
@@ -243,7 +243,7 @@ $ ./node-add.sh <namespace> <cluster name>
 
 * 예
 ```
-$ ./node-add.sh cb-ladybug-ns cluster-01
+$ ./node-add.sh cb-mcks-ns cluster-01
 ```
 
 ### 노드 확인
@@ -253,7 +253,7 @@ $ ./node-get.sh <namespace> <cluster name> <node name>
 
 * 예
 ```
-$ ./node-get.sh cb-ladybug-ns cluster-01 cluster-01-w-1-asdflk
+$ ./node-get.sh cb-mcks-ns cluster-01 cluster-01-w-1-asdflk
 ```
 
 ### 노드 삭제
@@ -264,7 +264,7 @@ $ ./node-remove.sh <namespace> <cluster name> <node name>
 
 * 예
 ```
-$ ./node-remove.sh cb-ladybug-ns cluster-01 cluster-01-w-2-asdflk
+$ ./node-remove.sh cb-mcks-ns cluster-01 cluster-01-w-2-asdflk
 ```
 
 ### 노드 리스트
@@ -274,7 +274,7 @@ $ ./node-list.sh <namespace> <cluster name>
 
 * 예
 ```
-$ ./node-list.sh cb-ladybug-ns cluster-01
+$ ./node-list.sh cb-mcks-ns cluster-01
 ```
 
 ## Kubernetes 클러스터 연결
@@ -288,7 +288,7 @@ $ ./cluster-get-kubeconfig.sh <namespace> <cluster name>
 
 * 예
 ```
-$ ./cluster-get-kubeconfig.sh cb-ladybug-ns cluster-01
+$ ./cluster-get-kubeconfig.sh cb-mcks-ns cluster-01
 ```
 
 ### kubectl 사용하기
@@ -308,7 +308,7 @@ $ ./save-sshkey.sh <namespace> <connection info>
 
 * 예
 ```
-$ ./save-sshkey.sh cb-ladybug-ns config-asia-northeast3
+$ ./save-sshkey.sh cb-mcks-ns config-asia-northeast3
 $ cat *.pem
 ```
 
@@ -365,7 +365,7 @@ $ source ./env.sh ALIBABA "${HOME}/.ssh/AccessKey.csv"
 $ ./mcir-list.sh <namespace> [all/image/spec/ssh/sg/vpc]
 
 # 예
-$ ./mcir-list.sh cb-ladybug-ns all
+$ ./mcir-list.sh cb-mcks-ns all
 ```
 
 * MCIR (vpc, securityGroup, sshKey, spec, image) 삭제
@@ -374,5 +374,5 @@ $ ./mcir-list.sh cb-ladybug-ns all
 $ ./mcir-delete.sh <namespace> [all/image/spec/ssh/sg/vpc]
 
 # 예
-$ ./mcir-delete.sh cb-ladybug-ns all
+$ ./mcir-delete.sh cb-mcks-ns all
 ```

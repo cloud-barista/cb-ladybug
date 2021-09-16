@@ -3,8 +3,8 @@ package mcar
 import (
 	"context"
 
-	gc "github.com/cloud-barista/cb-ladybug/src/grpc-api/common"
-	pb "github.com/cloud-barista/cb-ladybug/src/grpc-api/protobuf/cbladybug"
+	gc "github.com/cloud-barista/cb-mcks/src/grpc-api/common"
+	pb "github.com/cloud-barista/cb-mcks/src/grpc-api/protobuf/cbmcks"
 )
 
 // ===== [ Constants and Variables ] =====

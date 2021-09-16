@@ -1,13 +1,13 @@
 #!/bin/bash
 # sysatemd for persistent ip address
-sudo bash -c 'cat > /lib/systemd/system/ladybug-bootstrap.service <<EOF
+sudo bash -c 'cat > /lib/systemd/system/mcks-bootstrap.service <<EOF
 [Unit]
-Description=Ladybug bootstrap script
+Description=MCKS bootstrap script
 After=multi-user.target
 StartLimitIntervalSec=60
 StartLimitBurst=3
 [Service]
-ExecStart=/lib/systemd/system/ladybug-bootstrap
+ExecStart=/lib/systemd/system/mcks-bootstrap
 Restart=on-failure
 RestartSec=10s
 [Install]
@@ -16,4 +16,4 @@ EOF'
 
 # reload 및 reboot 시 실행하도록 지정
 sudo systemctl daemon-reload
-sudo systemctl enable ladybug-bootstrap
+sudo systemctl enable mcks-bootstrap

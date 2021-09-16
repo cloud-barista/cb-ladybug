@@ -30,7 +30,7 @@ export AZURE_TENANT_ID="uuid"
 export AZURE_SUBSCRIPTION_ID="uuid"
 
 export AZURE_REGION="japaneast" 
-export AZURE_RESOURCE_GROUP="ladybug-test"
+export AZURE_RESOURCE_GROUP="mcks-test"
 
 ./connectioninfo-create.sh AZURE
 

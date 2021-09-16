@@ -3,7 +3,7 @@
 # usage
 if [ "$#" -lt 1 ]; then 
 	echo "./ns-get.sh <namespace>"
-	echo "./ns-get.sh cb-ladybug-ns "
+	echo "./ns-get.sh cb-mcks-ns "
 	exit 0
 fi
 

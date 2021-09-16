@@ -1,4 +1,4 @@
-module github.com/cloud-barista/cb-ladybug
+module github.com/cloud-barista/cb-mcks
 
 go 1.16
 

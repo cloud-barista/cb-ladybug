@@ -28,5 +28,5 @@ EOF
 sudo kubeadm init --v=5 --upload-certs --config kubeadm-config.yaml
 
 # control-plane leader 의 경우
-# - ladybug-bootstrap 데몬이 자동 실행
-#systemctl status ladybug-bootstrap
+# - mcks-bootstrap 데몬이 자동 실행
+#systemctl status mcks-bootstrap
