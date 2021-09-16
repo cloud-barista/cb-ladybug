@@ -1,12 +1,12 @@
 @startuml
 
-header **Cloud-Barista Ladybug** (v0.4.0-cafemocha)
+header **Cloud-Barista MCKS** (v0.4.0-cafemocha)
 title Remove a node
 hide footbox
 
 participant	"Webtool"		as webtool		#d1e0ff
-participant	"Ladybug"		as provider
-database	"Ladybug data"	as db
+participant	"MCKS"		as provider
+database	"MCKS data"	as db
 participant	"Tumblebug"		as tumblebug	#d1e0ff
 participant	"Worker nodes"	as wNodes		#eeeeee
 

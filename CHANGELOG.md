@@ -1,4 +1,4 @@
-# Cloud-Barista Multi-Cloud Application Management Framework (CB-Ladybug) ChangeLog
+# Cloud-Barista Multi-Cloud Kubernetes Service Framework (CB-MCKS) ChangeLog
 
 ## v0.4.0-CafeMocha (2021.06.30.)
 

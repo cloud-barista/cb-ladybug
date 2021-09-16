@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/cloud-barista/cb-ladybug/src/grpc-api/logger"
+	"github.com/cloud-barista/cb-mcks/src/grpc-api/logger"
 
 	"gopkg.in/yaml.v2"
 )

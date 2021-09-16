@@ -10,7 +10,7 @@ if [ -f "/etc/kubernetes/kubelet.conf" ]; then
   kubectl --kubeconfig=/etc/kubernetes/kubelet.conf annotate node $(hostname | awk \047{print tolower($0)}\047) kilo.squat.ai/persistent-keepalive=25 --overwrite
 fi
 exit 0
-fi' | sudo tee /lib/systemd/system/ladybug-bootstrap > /dev/null
+fi' | sudo tee /lib/systemd/system/mcks-bootstrap > /dev/null
 
 # 실행권한
-sudo chmod +x /lib/systemd/system/ladybug-bootstrap
+sudo chmod +x /lib/systemd/system/mcks-bootstrap

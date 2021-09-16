@@ -3,7 +3,7 @@
 # usage
 if [ "$1" == "-h" ]; then 
 	echo "./savekey.sh <namespace> <connection info>"
-	echo "./savekey.sh cb-ladybug-ns config-aws-ap-northeast-1"
+	echo "./savekey.sh cb-mcks-ns config-aws-ap-northeast-1"
 	exit 0
 fi
 

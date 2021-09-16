@@ -40,7 +40,7 @@ jobs:
         env:
           # TODO: Change variable to your repository name and image name.
           DOCKER_REPO: cloudbaristaorg
-          IMAGE_NAME: cb-ladybug
+          IMAGE_NAME: cb-mcks
         run: |
           VERSION=latest
           if [[ $GITHUB_REF == refs/tags/* ]]; then

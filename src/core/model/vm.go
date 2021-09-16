@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cloud-barista/cb-ladybug/src/utils/config"
+	"github.com/cloud-barista/cb-mcks/src/utils/config"
 	ssh "github.com/cloud-barista/cb-spider/cloud-control-manager/vm-ssh"
 
 	logger "github.com/sirupsen/logrus"
@@ -121,9 +121,9 @@ func (self *VM) CopyScripts(sshInfo *ssh.SSHInfo, networkCni string) error {
 		sourceFiles = append(sourceFiles, cniFiles...)
 	}
 	if networkCni == config.NETWORKCNI_CANAL {
-		sourceFiles = append(sourceFiles, config.LADYBUG_BOOTSTRAP_CANAL_FILE)
+		sourceFiles = append(sourceFiles, config.MCKS_BOOTSTRAP_CANAL_FILE)
 	} else {
-		sourceFiles = append(sourceFiles, config.LADYBUG_BOOTSTRAP_KILO_FILE)
+		sourceFiles = append(sourceFiles, config.MCKS_BOOTSTRAP_KILO_FILE)
 	}
 
 	logger.Infof("start script file copy (vm=%s, src=%s, dest=%s)\n", self.Name, sourcePath, remoteTargetPath)
@@ -155,16 +155,16 @@ func (self *VM) CreateAddonsDirectory(sshInfo *ssh.SSHInfo, networkCni string) e
 func (self *VM) SetSystemd(sshInfo *ssh.SSHInfo, networkCni string) error {
 	var bsFile string
 	if networkCni == config.NETWORKCNI_CANAL {
-		bsFile = config.LADYBUG_BOOTSTRAP_CANAL_FILE
+		bsFile = config.MCKS_BOOTSTRAP_CANAL_FILE
 	} else {
-		bsFile = config.LADYBUG_BOOTSTRAP_KILO_FILE
+		bsFile = config.MCKS_BOOTSTRAP_KILO_FILE
 	}
 
 	cmd := fmt.Sprintf("cd %s;./%s", remoteTargetPath, bsFile)
 	logger.Infof("[SetSystemd] %s $ %s", self.Name, cmd)
 	_, err := ssh.SSHRun(*sshInfo, cmd)
 	if err != nil {
-		return errors.New(fmt.Sprintf("create ladybug-bootstrap error (name=%s)", self.Name))
+		return errors.New(fmt.Sprintf("create mcks-bootstrap error (name=%s)", self.Name))
 	}
 
 	cmd = fmt.Sprintf("cd %s;./%s", remoteTargetPath, config.SYSTEMD_SERVICE_FILE)
@@ -270,9 +270,9 @@ func (self *VM) ControlPlaneJoin(sshInfo *ssh.SSHInfo, CPJoinCmd *string) error 
 	}
 
 	if strings.Contains(result, "This node has joined the cluster") {
-		_, err = ssh.SSHRun(*sshInfo, "sudo systemctl restart ladybug-bootstrap")
+		_, err = ssh.SSHRun(*sshInfo, "sudo systemctl restart mcks-bootstrap")
 		if err != nil {
-			logger.Warnf("ladybug-bootstrap restart error (name=%s, cause=%v)", self.Name, err)
+			logger.Warnf("mcks-bootstrap restart error (name=%s, cause=%v)", self.Name, err)
 		}
 		return nil
 	} else {
@@ -293,9 +293,9 @@ func (self *VM) WorkerJoin(sshInfo *ssh.SSHInfo, workerJoinCmd *string) error {
 		return errors.New(fmt.Sprintf("worker node join error (name=%s)", self.Name))
 	}
 	if strings.Contains(result, "This node has joined the cluster") {
-		_, err = ssh.SSHRun(*sshInfo, "sudo systemctl restart ladybug-bootstrap")
+		_, err = ssh.SSHRun(*sshInfo, "sudo systemctl restart mcks-bootstrap")
 		if err != nil {
-			logger.Warnf("ladybug-bootstrap restart error (name=%s, cause=%v)", self.Name, err)
+			logger.Warnf("mcks-bootstrap restart error (name=%s, cause=%v)", self.Name, err)
 		}
 		return nil
 	} else {

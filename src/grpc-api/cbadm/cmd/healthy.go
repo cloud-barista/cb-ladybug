@@ -14,13 +14,13 @@ import (
 
 // ===== [ Public Functions ] =====
 
-// NewHealthyCmd - Ladybug 상태를 수행하는 Cobra Command 생성
+// NewHealthyCmd - MCKS 상태를 수행하는 Cobra Command 생성
 func NewHealthyCmd() *cobra.Command {
 
 	healthyCmd := &cobra.Command{
 		Use:   "healthy",
-		Short: "This is a healthy command for checking ladybug",
-		Long:  "This is a healthy command for checking ladybug",
+		Short: "This is a healthy command for checking mcks",
+		Long:  "This is a healthy command for checking mcks",
 		Run: func(cmd *cobra.Command, args []string) {
 			SetupAndRun(cmd, args)
 		},

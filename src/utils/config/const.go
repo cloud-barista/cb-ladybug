@@ -7,12 +7,12 @@ const (
 	CONTROL_PLANE = "control-plane"
 	WORKER        = "worker"
 
-	BOOTSTRAP_FILE               = "bootstrap.sh"
-	INIT_FILE                    = "k8s-init.sh"
-	LADYBUG_BOOTSTRAP_CANAL_FILE = "ladybug-bootstrap-canal.sh"
-	LADYBUG_BOOTSTRAP_KILO_FILE  = "ladybug-bootstrap-kilo.sh"
-	SYSTEMD_SERVICE_FILE         = "systemd-service.sh"
-	HA_PROXY_FILE                = "haproxy.sh"
+	BOOTSTRAP_FILE            = "bootstrap.sh"
+	INIT_FILE                 = "k8s-init.sh"
+	MCKS_BOOTSTRAP_CANAL_FILE = "mcks-bootstrap-canal.sh"
+	MCKS_BOOTSTRAP_KILO_FILE  = "mcks-bootstrap-kilo.sh"
+	SYSTEMD_SERVICE_FILE      = "systemd-service.sh"
+	HA_PROXY_FILE             = "haproxy.sh"
 
 	CNI_CANAL_FILE        = "addons/canal/canal_v3.20.0.yaml"
 	CNI_KILO_CRDS_FILE    = "addons/kilo/crds_v0.3.0.yaml"

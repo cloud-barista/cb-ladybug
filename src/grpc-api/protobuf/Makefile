@@ -9,11 +9,11 @@ regenerate:
 	Mgoogle/protobuf/descriptor.proto=github.com/gogo/protobuf/protoc-gen-gogo/descriptor:\
 	.
 
-	# cbladybug proto compile
+	# cbmcks proto compile
 	protoc \
-			./cbladybug/cbladybug.proto \
+			./cbmcks/cbmcks.proto \
 			-I . \
 			-I $(GOPATH)/src/github.com/gogo/protobuf/protobuf \
-			-I $(GOPATH)/src/github.com/cloud-barista/cb-ladybug/src/grpc-api/protobuf \
+			-I $(GOPATH)/src/github.com/cloud-barista/cb-mcks/src/grpc-api/protobuf \
 			--gofast_out=plugins=grpc:\
 	.	

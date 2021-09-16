@@ -2,7 +2,7 @@
 package cmd
 
 import (
-	"github.com/cloud-barista/cb-ladybug/src/grpc-api/config"
+	"github.com/cloud-barista/cb-mcks/src/grpc-api/config"
 	"github.com/spf13/cobra"
 )
 

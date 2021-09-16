@@ -5,16 +5,16 @@ import (
 	"fmt"
 
 	"github.com/beego/beego/v2/core/validation"
-	"github.com/cloud-barista/cb-ladybug/src/core/model"
-	"github.com/cloud-barista/cb-ladybug/src/utils/config"
-	"github.com/cloud-barista/cb-ladybug/src/utils/lang"
+	"github.com/cloud-barista/cb-mcks/src/core/model"
+	"github.com/cloud-barista/cb-mcks/src/utils/config"
+	"github.com/cloud-barista/cb-mcks/src/utils/lang"
 )
 
 // ===== [ Constants and Variables ] =====
 
 // ===== [ Types ] =====
 
-// MCARService - LADYBUG 서비스 구현
+// MCARService - MCKS 서비스 구현
 type MCARService struct {
 }
 

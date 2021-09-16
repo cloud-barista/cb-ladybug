@@ -157,7 +157,7 @@ if [ "${v_OPTION}" != "add" ]; then
 		# resource group
 		v_RESOURCE_GROUP="${AZURE_RESOURCE_GROUP}"
 		if [ "${v_RESOURCE_GROUP}" == "" ]; then 
-			read -e -p "resource group ? [예:cb-ladybugRG] : "  v_RESOURCE_GROUP
+			read -e -p "resource group ? [예:cb-mcksRG] : "  v_RESOURCE_GROUP
 			if [ "${v_RESOURCE_GROUP}" == "" ]; then echo "[ERROR] missing resource group"; exit -1;fi
 		fi
 	fi
@@ -206,7 +206,7 @@ fi
 # 	# resource group
 # 	v_RESOURCE_GROUP="${RESOURCE_GROUP}"
 # 	if [ "${v_RESOURCE_GROUP}" == "" ]; then 
-# 		read -e -p "resource group ? [예:cb-ladybugRG] : "  v_RESOURCE_GROUP
+# 		read -e -p "resource group ? [예:cb-mcksRG] : "  v_RESOURCE_GROUP
 # 		if [ "${v_RESOURCE_GROUP}" == "" ]; then echo "[ERROR] missing resource group"; exit -1;fi
 # 	fi
 

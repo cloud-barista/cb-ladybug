@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/cloud-barista/cb-ladybug/src/core/common"
-	"github.com/cloud-barista/cb-ladybug/src/utils/lang"
+	"github.com/cloud-barista/cb-mcks/src/core/common"
+	"github.com/cloud-barista/cb-mcks/src/utils/lang"
 )
 
 const (

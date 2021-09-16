@@ -7,11 +7,11 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/cloud-barista/cb-ladybug/src/core/common"
-	"github.com/cloud-barista/cb-ladybug/src/core/model"
-	"github.com/cloud-barista/cb-ladybug/src/core/model/tumblebug"
-	"github.com/cloud-barista/cb-ladybug/src/utils/config"
-	"github.com/cloud-barista/cb-ladybug/src/utils/lang"
+	"github.com/cloud-barista/cb-mcks/src/core/common"
+	"github.com/cloud-barista/cb-mcks/src/core/model"
+	"github.com/cloud-barista/cb-mcks/src/core/model/tumblebug"
+	"github.com/cloud-barista/cb-mcks/src/utils/config"
+	"github.com/cloud-barista/cb-mcks/src/utils/lang"
 
 	ssh "github.com/cloud-barista/cb-spider/cloud-control-manager/vm-ssh"
 	logger "github.com/sirupsen/logrus"

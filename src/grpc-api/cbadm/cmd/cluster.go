@@ -3,7 +3,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/cloud-barista/cb-ladybug/src/grpc-api/logger"
+	"github.com/cloud-barista/cb-mcks/src/grpc-api/logger"
 )
 
 // ===== [ Constants and Variables ] =====

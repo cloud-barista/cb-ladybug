@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/cloud-barista/cb-ladybug/src/core/model/tumblebug"
+	"github.com/cloud-barista/cb-mcks/src/core/model/tumblebug"
 	logger "github.com/sirupsen/logrus"
 )
 

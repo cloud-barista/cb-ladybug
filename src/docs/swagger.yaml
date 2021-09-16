@@ -1,4 +1,4 @@
-basePath: /ladybug
+basePath: /mcks
 definitions:
   app.Status:
     properties:
@@ -159,11 +159,11 @@ info:
     email: contact-to-cloud-barista@googlegroups.com
     name: API Support
     url: http://cloud-barista.github.io
-  description: CB-Ladybug REST API
+  description: CB-MCKS REST API
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  title: CB-Ladybug REST API
+  title: CB-MCKS REST API
   version: latest
 paths:
   /healthy:

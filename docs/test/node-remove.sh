@@ -3,7 +3,7 @@
 # usage
 if [ "$#" -lt 1 ]; then 
 	echo "./node-remove.sh <namespace> <clsuter name> <node name>"
-	echo "./node-remove.sh cb-ladybug-ns cluster-01 cluster-01-w-1-asdflk"
+	echo "./node-remove.sh cb-mcks-ns cluster-01 cluster-01-w-1-asdflk"
 	exit 0; 
 fi
 
@@ -37,7 +37,7 @@ if [ "${v_NODE_NAME}" == "" ]; then
 fi
 if [ "${v_NODE_NAME}" == "" ]; then echo "[ERROR] missing <node name>"; exit -1; fi
 
-c_URL_LADYBUG_NS="${c_URL_LADYBUG}/ns/${v_NAMESPACE}"
+c_URL_MCKS_NS="${c_URL_MCKS}/ns/${v_NAMESPACE}"
 
 
 # ------------------------------------------------------------------------------
@@ -53,16 +53,16 @@ echo "- Node name                  is '${v_NODE_NAME}'"
 # remove node
 delete() {
 
-	if [ "$LADYBUG_CALL_METHOD" == "REST" ]; then
+	if [ "$MCKS_CALL_METHOD" == "REST" ]; then
 		
-		curl -sX DELETE ${c_URL_LADYBUG_NS}/clusters/${v_CLUSTER_NAME}/nodes/${v_NODE_NAME}    -H "${c_CT}" | jq;
+		curl -sX DELETE ${c_URL_MCKS_NS}/clusters/${v_CLUSTER_NAME}/nodes/${v_NODE_NAME}    -H "${c_CT}" | jq;
 
-	elif [ "$LADYBUG_CALL_METHOD" == "GRPC" ]; then
+	elif [ "$MCKS_CALL_METHOD" == "GRPC" ]; then
 
 		$APP_ROOT/src/grpc-api/cbadm/cbadm node remove --config $APP_ROOT/src/grpc-api/cbadm/grpc_conf.yaml -o json --ns ${v_NAMESPACE} --cluster ${v_CLUSTER_NAME} --node ${v_NODE_NAME}
 		
 	else
-		echo "[ERROR] missing LADYBUG_CALL_METHOD"; exit -1;
+		echo "[ERROR] missing MCKS_CALL_METHOD"; exit -1;
 	fi
 	
 }

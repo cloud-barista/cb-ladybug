@@ -1,7 +1,7 @@
 package app
 
 import (
-	"github.com/cloud-barista/cb-ladybug/src/utils/config"
+	"github.com/cloud-barista/cb-mcks/src/utils/config"
 	"github.com/go-resty/resty/v2"
 )
 
