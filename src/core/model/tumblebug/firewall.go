@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/cloud-barista/cb-mcks/src/utils/config"
 	"github.com/cloud-barista/cb-mcks/src/core/model"
 	logger "github.com/sirupsen/logrus"
 )
@@ -26,16 +27,26 @@ type FirewallRules struct {
 	Direction string `json:"direction"`
 }
 
-func NewFirewall(ns string, name string, conf string) *Firewall {
-	return &Firewall{
+func NewFirewall(csp config.CSP, ns string, name string, conf string) *Firewall {
+
+	fw := &Firewall{
 		Model:  Model{Name: name, namespace: ns},
 		Config: conf,
 		FirewallRules: []FirewallRules{
 			{Protocol: "tcp", Direction: "inbound", From: "1", To: "65535"},
 			{Protocol: "udp", Direction: "inbound", From: "1", To: "65535"},
-			{Protocol: "icmp", Direction: "inbound", From: "-1", To: "-1"},
 		},
 	}
+	if csp == config.CSP_TENCENT {
+		fw.FirewallRules = append(fw.FirewallRules,
+			FirewallRules{Protocol: "icmp", Direction: "inbound", From: "ALL"},
+			FirewallRules{Protocol: "ALL", Direction: "outbound", From: "ALL"},
+		)
+	} else {
+		fw.FirewallRules = append(fw.FirewallRules, FirewallRules{Protocol: "icmp", Direction: "inbound", From: "-1", To: "-1"})
+	}
+
+	return fw
 }
 
 func (self *Firewall) GET() (bool, error) {

@@ -2,7 +2,7 @@
 # -----------------------------------------------------------------
 # usage
 if [ "$#" -lt 1 ]; then 
-	echo "./env.sh [AWS/GCP/AZURE/ALBIABA] <credential file>"
+	echo "./env.sh [AWS/GCP/AZURE/ALBIABA/TENCENT] <credential file>"
 	echo "./env.sh AWS ~/.aws/credential"
 	exit 0; 
 fi
@@ -14,10 +14,10 @@ fi
 # 1. CSP
 if [ "$#" -gt 0 ]; then v_CSP="$1"; else	v_CSP="${CSP}"; fi
 if [ "${v_CSP}" = "" ]; then
-	read -e -p "Cloud ? [AWS(default) or GCP or AZURE or ALIBABA] : "  v_CSP
+	read -e -p "Cloud ? [AWS(default) or GCP or AZURE or ALIBABA or TENCENT] : "  v_CSP
 fi
 
-if [ "${v_CSP}" != "GCP" ] && [ "${v_CSP}" != "AWS" ] && [ "${v_CSP}" != "AZURE" ] && [ "${v_CSP}" != "ALIBABA" ]; then echo "[ERROR] missing <cloud>"; exit -1;fi
+if [ "${v_CSP}" != "GCP" ] && [ "${v_CSP}" != "AWS" ] && [ "${v_CSP}" != "AZURE" ] && [ "${v_CSP}" != "ALIBABA" ] && [ "${v_CSP}" != "TENCENT" ]; then echo "[ERROR] missing <cloud>"; exit -1;fi
 
 # credential file
 if [ "$#" -gt 1 ]; then v_FILE="$2"; else	v_FILE="${CRT_FILE}"; fi
@@ -62,6 +62,15 @@ if [ "${v_CSP}" = "ALIBABA" ]; then
 
 fi
 
+# credential (tencent)
+if [ "${v_CSP}" = "TENCENT" ]; then
+
+	export TENCENT_KEY="$(cat ${v_FILE} | jq '.secretId' | sed  '/^$/d; s/\r//; s/"//g')"
+	export TENCENT_SECRET="$(cat ${v_FILE} | jq '.secretKey' | sed  '/^$/d; s/\r//; s/"//g')"
+
+fi
+
+
 # ------------------------------------------------------------------------------
 # print info.
 echo ""
@@ -81,3 +90,6 @@ echo -E "- SUBSCRIPTION_ID is '${AZURE_SUBSCRIPTION_ID}'"
 echo "ALIBABA"
 echo -E "- KEY     is '${ALIBABA_KEY}'"
 echo -E "- SECRET  is '${ALIBABA_SECRET}'"
+echo "TENCENT"
+echo -E "- KEY     is '${TENCENT_KEY}'"
+echo -E "- SECRET  is '${TENCENT_SECRET}'"

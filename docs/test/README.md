@@ -152,19 +152,44 @@ $ export ALIBABA_ZONE="ap-northeast-1a"
 ```
 $ ./connectioninfo-create.sh ALIBABA
 ```
+#### TENCENT
+
+* 환경변수 : 클라우드별 연결정보
+
+```
+$ export TENCENT_KEY="<tencent_access_key_id>"
+$ export TENCENT_SECRET="<tencent_access_key_secret>"
+```
+
+* 환경변수 : TENCENT_REGION, TENCENT_ZONE
+
+```
+$ export TENCENT_REGION="<region name>" 
+$ export TENCENT_ZONE="<zone name>"
+
+# 예: ap-seoul (서울리전)
+$ export TENCENT_REGION="ap-seoul"
+$ export TENCENT_ZONE="ap-seoul-1"
+```
+
+* Cloud Connection Info. 등록
+
+```
+$ ./connectioninfo-create.sh TENCENT
+```
 
 #### Cloud Connection Info 추가
 
 ```
-# AWS/GCP/ALIBABA
-$ export [AWS/GCP/ALIBABA]_REGION="<region name>"
-$ export [AWS/GCP/ALIBABA]_ZONE="<zone name>"
+# AWS/GCP/ALIBABA/TENCENT
+$ export [AWS/GCP/ALIBABA/TENCENT]_REGION="<region name>"
+$ export [AWS/GCP/ALIBABA/TENCENT]_ZONE="<zone name>"
 
 # AZURE
 $ export AZURE_REGION="<region name>"
 $ export AZURE_RESOURCE_GROUP="<resource group>"
 
-$ ./connectioninfo-create.sh [AWS/GCP/AZURE/ALIBABA] add
+$ ./connectioninfo-create.sh [AWS/GCP/AZURE/ALIBABA/TENCENT] add
 ```
 
 #### 결과 확인

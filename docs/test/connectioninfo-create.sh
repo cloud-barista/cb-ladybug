@@ -2,7 +2,7 @@
 # ------------------------------------------------------------------------------
 # usage
 if [ "$#" -lt 1 ]; then 
-	echo "./connectioninfo-create.sh [AWS/GCP/AZURE/ALIBABA] <option>"
+	echo "./connectioninfo-create.sh [AWS/GCP/AZURE/ALIBABA/TENCENT] <option>"
 	echo "./connectioninfo-create.sh GCP"
 	echo "./connectioninfo-create.sh AWS add"
 	exit 0
@@ -21,11 +21,11 @@ source ./conf.env
 # 1. CSP
 if [ "$#" -gt 0 ]; then v_CSP="$1"; else	v_CSP="${CSP}"; fi
 if [ "${v_CSP}" == "" ]; then 
-	read -e -p "Cloud ? [AWS(default) or GCP or AZURE OR ALIBABA] : "  v_CSP
+	read -e -p "Cloud ? [AWS(default) or GCP or AZURE OR ALIBABA OR TENCENT] : "  v_CSP
 fi
 
 if [ "${v_CSP}" == "" ]; then v_CSP="AWS"; fi
-if [ "${v_CSP}" != "GCP" ] && [ "${v_CSP}" != "AWS" ] && [ "${v_CSP}" != "AZURE" ] && [ "${v_CSP}" != "ALIBABA" ]; then echo "[ERROR] missing <cloud>"; exit -1;fi
+if [ "${v_CSP}" != "GCP" ] && [ "${v_CSP}" != "AWS" ] && [ "${v_CSP}" != "AZURE" ] && [ "${v_CSP}" != "ALIBABA" ] && [ "${v_CSP}" != "TENCENT" ]; then echo "[ERROR] missing <cloud>"; exit -1;fi
 
 v_CSP_LOWER="$(echo ${v_CSP} | tr [:upper:] [:lower:])"
 
@@ -42,6 +42,8 @@ elif [ "${v_CSP}" == "AZURE" ]; then
 	v_DRIVER="${c_AZURE_DRIVER}"
 elif [ "${v_CSP}" == "ALIBABA" ]; then 
 	v_DRIVER="${c_ALIBABA_DRIVER}"
+elif [ "${v_CSP}" == "TENCENT" ]; then 
+	v_DRIVER="${c_TENCENT_DRIVER}"
 fi
 
 if [ "${v_OPTION}" != "add" ]; then 
@@ -168,13 +170,13 @@ if [ "${v_OPTION}" != "add" ]; then
 
 		v_ALIBABA_ACCESS_KEY="${ALIBABA_KEY}"
 		if [ "${v_ALIBABA_ACCESS_KEY}" == "" ]; then 
-			read -e -p "Access Key ? [예:AH24UUA2ZGNOP6DKKIA6] : "  v_AWS_ACCESS_KEY
+			read -e -p "Access Key ? [예:AH24UUA2ZGNOP6DKKIA6] : "  v_ALIBABA_ACCESS_KEY
 			if [ "${v_ALIBABA_ACCESS_KEY}" == "" ]; then echo "[ERROR] missing <alibaba_access_key_id>"; exit -1;fi
 		fi
 
 		v_ALIBABA_SECRET="${ALIBABA_SECRET}"
 		if [ "${v_ALIBABA_SECRET}" == "" ]; then 
-			read -e -p "Access-key Secret ? [예:y76ZWz6A/vwqGanDAI926TTPCJrrMo1VbPOh8X7K] : "  v_AWS_SECRET
+			read -e -p "Access-key Secret ? [예:y76ZWz6A/vwqGanDAI926TTPCJrrMo1VbPOh8X7K] : "  v_ALIBABA_SECRET
 			if [ "${v_ALIBABA_SECRET}" == "" ]; then echo "[ERROR] missing <alibaba_access_key_secret>"; exit -1;fi
 		fi
 
@@ -192,6 +194,37 @@ if [ "${v_OPTION}" != "add" ]; then
 			if [ "${v_ZONE}" == "" ]; then v_ZONE="${v_REGION}a";fi
 		fi
 	fi
+
+	# TENCENT
+	if [ "${v_CSP}" == "TENCENT" ]; then 
+
+		v_TENCENT_ACCESS_KEY="${TENCENT_KEY}"
+		if [ "${v_TENCENT_ACCESS_KEY}" == "" ]; then 
+			read -e -p "Access Key ? [예:AH24UUA2ZGNOP6DKKIA6] : "  v_TENCENT_ACCESS_KEY
+			if [ "${v_TENCENT_ACCESS_KEY}" == "" ]; then echo "[ERROR] missing <tencent_access_key_id>"; exit -1;fi
+		fi
+
+		v_TENCENT_SECRET="${TENCENT_SECRET}"
+		if [ "${v_TENCENT_SECRET}" == "" ]; then 
+			read -e -p "Access-key Secret ? [예:y76ZWz6A/vwqGanDAI926TTPCJrrMo1VbPOh8X7K] : "  v_TENCENT_SECRET
+			if [ "${v_TENCENT_SECRET}" == "" ]; then echo "[ERROR] missing <tencent_access_key_secret>"; exit -1;fi
+		fi
+
+		# region
+		v_REGION="${TENCENT_REGION}"
+		if [ "${v_REGION}" == "" ]; then 
+			read -e -p "region ? [예:ap-seoul] : "  v_REGION
+			if [ "${v_REGION}" == "" ]; then echo "[ERROR] missing region"; exit -1;fi
+		fi
+
+		# zone
+		v_ZONE="${TENCENT_ZONE}"
+		if [ "${v_ZONE}" == "" ]; then 
+			read -e -p "zone ? [예:ap-seoul-1] : "  v_ZONE
+			if [ "${v_ZONE}" == "" ]; then v_ZONE="${v_REGION}a";fi
+		fi
+	fi
+
 fi
 
 # # region
@@ -251,6 +284,10 @@ elif [ "${v_CSP}" == "ALIBABA" ]; then
 	echo "- Zone                       is '${v_ZONE}'"
  	echo "- alibaba_access_key_id      is '${v_ALIBABA_ACCESS_KEY}'"
 	echo "- alibaba_access_key_secret  is '${v_ALIBABA_SECRET}'"
+elif [ "${v_CSP}" == "TENCENT" ]; then 
+	echo "- Zone                       is '${v_ZONE}'"
+ 	echo "- tencent_access_key_id      is '${v_TENCENT_ACCESS_KEY}'"
+	echo "- tencent_access_key_secret  is '${v_TENCENT_SECRET}'"
 fi
 echo "- (Name of credential)       is '${NM_CREDENTIAL}'"
 echo "- (Name of region)           is '${NM_REGION}'"
@@ -325,6 +362,18 @@ EOF
 			]
 			}
 EOF
+		elif [ "${v_CSP}" == "TENCENT" ]; then
+			curl -sX DELETE ${c_URL_SPIDER}/credential/${NM_CREDENTIAL} -H "${c_CT}" -o /dev/null -w "CREDENTIAL.delete():%{http_code}\n"
+			curl -sX POST   ${c_URL_SPIDER}/credential                  -H "${c_CT}" -o /dev/null -w "CREDENTIAL.regist():%{http_code}\n" -d @- <<EOF
+			{
+			"CredentialName"   : "${NM_CREDENTIAL}",
+			"ProviderName"     : "${v_CSP}",
+			"KeyValueInfoList" : [
+				{"Key" : "ClientId",       "Value" : "${v_TENCENT_ACCESS_KEY}"},
+				{"Key" : "ClientSecret",   "Value" : "${v_TENCENT_SECRET}"}
+			]
+			}
+EOF
 		fi
 
 fi
@@ -374,9 +423,9 @@ EOF
 # ------------------------------------------------------------------------------
 # show init result
 show() {
-	echo "DRIVER";     curl -sX GET ${c_URL_SPIDER}/driver/${v_DRIVER}							-H "${c_CT}" | jq
+	echo "DRIVER";     curl -sX GET ${c_URL_SPIDER}/driver/${v_DRIVER}					-H "${c_CT}" | jq
 	echo "CREDENTIAL"; curl -sX GET ${c_URL_SPIDER}/credential/${NM_CREDENTIAL}			-H "${c_CT}" | jq
-	echo "REGION";     curl -sX GET ${c_URL_SPIDER}/region/${NM_REGION}							-H "${c_CT}" | jq
+	echo "REGION";     curl -sX GET ${c_URL_SPIDER}/region/${NM_REGION}					-H "${c_CT}" | jq
 	echo "CONFIG";     curl -sX GET ${c_URL_SPIDER}/connectionconfig/${NM_CONFIG}		-H "${c_CT}" | jq
 }
 
