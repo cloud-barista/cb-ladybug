@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/cloud-barista/cb-mcks/src/core/model/tumblebug"
+	"github.com/cloud-barista/cb-mcks/src/utils/config"
 	logger "github.com/sirupsen/logrus"
 )
 
@@ -31,7 +32,7 @@ func (nodeConfigInfo *NodeConfigInfo) CreateFirewall(namespace string) (*tumbleb
 	firewallName := fmt.Sprintf("%s-sg", getConfigName(nodeConfigInfo.Connection))
 	vpcName := fmt.Sprintf("%s-vpc", getConfigName(nodeConfigInfo.Connection))
 	logger.Infof("start create firewall (name=%s)", firewallName)
-	fw := tumblebug.NewFirewall(namespace, firewallName, nodeConfigInfo.Connection)
+	fw := tumblebug.NewFirewall(nodeConfigInfo.Csp, namespace, firewallName, nodeConfigInfo.Connection)
 	fw.VPCId = vpcName
 	exists, e := fw.GET()
 	if e != nil {
@@ -50,6 +51,9 @@ func (nodeConfigInfo *NodeConfigInfo) CreateFirewall(namespace string) (*tumbleb
 
 func (nodeConfigInfo *NodeConfigInfo) CreateSshKey(namespace string) (*tumblebug.SSHKey, error) {
 	sshkeyName := fmt.Sprintf("%s-sshkey", getConfigName(nodeConfigInfo.Connection))
+	if nodeConfigInfo.Csp == config.CSP_TENCENT {
+		sshkeyName = strings.ReplaceAll(sshkeyName, "-", "") //Tencent is not allowed charactor '-'
+	}
 	logger.Infof("start create ssh key (name=%s)", sshkeyName)
 	sshKey := tumblebug.NewSSHKey(namespace, sshkeyName, nodeConfigInfo.Connection)
 	sshKey.Username = nodeConfigInfo.Account

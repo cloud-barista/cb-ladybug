@@ -23,6 +23,7 @@ const (
 	CSP_GCP     CSP = "gcp"
 	CSP_AZURE   CSP = "azure"
 	CSP_ALIBABA CSP = "alibaba"
+	CSP_TENCENT CSP = "tencent"
 
 	NETWORKCNI_KILO  = "kilo"
 	NETWORKCNI_CANAL = "canal"

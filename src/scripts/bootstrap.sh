@@ -2,6 +2,12 @@
 K8S_VERSION="1.18.9-00"  # curl https://packages.cloud.google.com/apt/dists/kubernetes-xenial/main/binary-amd64/Packages
 # K8S_VERSION="1.17.8-00"
 
+sudo killall apt apt-get > /dev/null 2>&1
+sudo rm -vf /var/lib/apt/lists/lock
+sudo rm -vf /var/cache/apt/archives/lock
+sudo rm -vf /var/lib/dpkg/lock*
+sudo dpkg --configure -a
+
 sudo apt-get update
 sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common gnupg2
 
