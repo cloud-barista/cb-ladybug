@@ -127,9 +127,9 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 			}
 
 			if nodeConfigInfo.Role == config.CONTROL_PLANE {
-				tvm.VM.Name = lang.GetNodeName(clusterName, config.CONTROL_PLANE, maxCIdx+cIdx)
+				tvm.VM.Name = lang.GetNodeName(config.CONTROL_PLANE, maxCIdx+cIdx)
 			} else {
-				tvm.VM.Name = lang.GetNodeName(clusterName, config.WORKER, maxWIdx+wIdx)
+				tvm.VM.Name = lang.GetNodeName(config.WORKER, maxWIdx+wIdx)
 			}
 
 			// vm 생성

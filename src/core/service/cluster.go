@@ -143,13 +143,13 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 			}
 
 			if nodeConfigInfo.Role == config.CONTROL_PLANE {
-				vm.Name = lang.GetNodeName(clusterName, config.CONTROL_PLANE, cIdx)
+				vm.Name = lang.GetNodeName(config.CONTROL_PLANE, cIdx)
 				if cIdx == 1 {
 					vmInfo.IsCPLeader = true
 					cluster.CpLeader = vm.Name
 				}
 			} else {
-				vm.Name = lang.GetNodeName(clusterName, config.WORKER, wIdx)
+				vm.Name = lang.GetNodeName(config.WORKER, wIdx)
 			}
 			vmInfo.Name = vm.Name
 
