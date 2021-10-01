@@ -66,7 +66,7 @@ func (self *MCIS) DELETE() error {
 }
 
 func (self *MCIS) TERMINATE() error {
-	_, err := self.execute(http.MethodGet, fmt.Sprintf("/ns/%s/mcis/%s?action=terminate", self.namespace, self.Name), nil, model.Status{})
+	_, err := self.execute(http.MethodGet, fmt.Sprintf("/ns/%s/control/mcis/%s?action=terminate", self.namespace, self.Name), nil, model.Status{})
 	if err != nil {
 		return err
 	}
@@ -74,7 +74,7 @@ func (self *MCIS) TERMINATE() error {
 }
 
 func (self *MCIS) REFINE() error {
-	_, err := self.execute(http.MethodGet, fmt.Sprintf("/ns/%s/mcis/%s?action=refine", self.namespace, self.Name), nil, model.Status{})
+	_, err := self.execute(http.MethodGet, fmt.Sprintf("/ns/%s/control/mcis/%s?action=refine", self.namespace, self.Name), nil, model.Status{})
 	if err != nil {
 		return err
 	}
