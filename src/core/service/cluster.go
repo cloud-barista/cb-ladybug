@@ -1,10 +1,10 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/cloud-barista/cb-mcks/src/core/model"
@@ -12,6 +12,7 @@ import (
 	"github.com/cloud-barista/cb-mcks/src/utils/config"
 	"github.com/cloud-barista/cb-mcks/src/utils/lang"
 	ssh "github.com/cloud-barista/cb-spider/cloud-control-manager/vm-ssh"
+	"golang.org/x/sync/errgroup"
 
 	logger "github.com/sirupsen/logrus"
 )
@@ -197,10 +198,6 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 		return nil, err
 	}
 
-	var wg sync.WaitGroup
-	c := make(chan error)
-	wg.Add(len(cpMcis.VMs))
-
 	// bootstrap
 	logger.Infoln("start k8s bootstrap")
 
@@ -210,14 +207,13 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 	if err != nil {
 		return nil, err
 	}
+	eg, _ := errgroup.WithContext(context.Background())
 
 	for _, vm := range cpMcis.VMs {
-		go func(vm model.VM) {
-			defer wg.Done()
-
+		vm := vm
+		eg.Go(func() error {
 			if vm.Status != config.Running || vm.PublicIP == "" {
-				cluster.Fail()
-				c <- errors.New(fmt.Sprintf("Cannot do ssh, VM IP is not Running (name=%s, ip=%s, systemMessage=%s)", vm.Name, vm.PublicIP, vm.SystemMessage))
+				return errors.New(fmt.Sprintf("Cannot do ssh, VM IP is not Running (name=%s, ip=%s, systemMessage=%s)", vm.Name, vm.PublicIP, vm.SystemMessage))
 			}
 
 			sshInfo := ssh.SSHInfo{
@@ -227,40 +223,32 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 			}
 			err := vm.ConnectionTest(&sshInfo)
 			if err != nil {
-				cluster.Fail()
-				c <- err
+				return err
 			}
 
 			err = vm.CopyScripts(&sshInfo, cluster.NetworkCni)
 			if err != nil {
-				cluster.Fail()
-				c <- err
+				return err
 			}
 
 			err = vm.SetSystemd(&sshInfo, cluster.NetworkCni)
 			if err != nil {
-				cluster.Fail()
-				c <- err
+				return err
 			}
 
 			err = vm.Bootstrap(&sshInfo)
 			if err != nil {
-				cluster.Fail()
-				c <- err
+				return err
 			}
-		}(vm)
+
+			return nil
+		})
 	}
 
-	go func() {
-		wg.Wait()
-		close(c)
-		logger.Infoln("end k8s bootstrap")
-	}()
-
-	for err := range c {
-		if err != nil {
-			return nil, err
-		}
+	if err := eg.Wait(); err != nil {
+		cluster.Fail()
+		deleteMcis(namespace, clusterName)
+		return nil, err
 	}
 
 	// init & join
@@ -280,6 +268,7 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 			err := vm.InstallHAProxy(&sshInfo, IPs)
 			if err != nil {
 				cluster.Fail()
+				deleteMcis(namespace, clusterName)
 				return nil, err
 			}
 
@@ -288,6 +277,7 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 			joinCmd, clusterConfig, err = vm.ControlPlaneInit(&sshInfo, req.Config.Kubernetes)
 			if err != nil {
 				cluster.Fail()
+				deleteMcis(namespace, clusterName)
 				return nil, err
 			}
 			cluster.ClusterConfig = clusterConfig
@@ -296,6 +286,7 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 			err = vm.InstallNetworkCNI(&sshInfo, req.Config.Kubernetes.NetworkCni)
 			if err != nil {
 				cluster.Fail()
+				deleteMcis(namespace, clusterName)
 				return nil, err
 			}
 		}
@@ -314,6 +305,7 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 			err := vm.ControlPlaneJoin(&sshInfo, &joinCmd[0])
 			if err != nil {
 				cluster.Fail()
+				deleteMcis(namespace, clusterName)
 				return nil, err
 			}
 		}
@@ -330,6 +322,7 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 			err := vm.WorkerJoin(&sshInfo, &joinCmd[1])
 			if err != nil {
 				cluster.Fail()
+				deleteMcis(namespace, clusterName)
 				return nil, err
 			}
 		}
@@ -415,4 +408,18 @@ func DeleteCluster(namespace string, clusterName string) (*model.Status, error) 
 
 	status.Code = model.STATUS_SUCCESS
 	return status, nil
+}
+
+func deleteMcis(namespace string, clusterName string) error {
+	status, err := DeleteCluster(namespace, clusterName)
+	if err != nil {
+		logger.Errorf("failed to delete mcis (clusterName=%s, cause=%v)", clusterName, err)
+		return nil
+	}
+	if status.Code == model.STATUS_SUCCESS {
+		logger.Infof("mcis has been deleted (clusterName=%s)", clusterName)
+		return nil
+	}
+
+	return nil
 }

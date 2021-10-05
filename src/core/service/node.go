@@ -1,17 +1,18 @@
 package service
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
-	"sync"
 
 	"github.com/cloud-barista/cb-mcks/src/core/common"
 	"github.com/cloud-barista/cb-mcks/src/core/model"
 	"github.com/cloud-barista/cb-mcks/src/core/model/tumblebug"
 	"github.com/cloud-barista/cb-mcks/src/utils/config"
 	"github.com/cloud-barista/cb-mcks/src/utils/lang"
+	"golang.org/x/sync/errgroup"
 
 	ssh "github.com/cloud-barista/cb-spider/cloud-control-manager/vm-ssh"
 	logger "github.com/sirupsen/logrus"
@@ -69,6 +70,7 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 	wIdx := 0
 	maxCIdx, maxWIdx := getMaxIdx(namespace, clusterName)
 	var TVMs []tumblebug.TVM
+	var sTVMs []tumblebug.TVM
 
 	for _, nodeConfigInfo := range nodeConfigInfos {
 		// MCIR - 존재하면 재활용 없다면 생성 기준
@@ -137,22 +139,22 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 			err := tvm.POST()
 			if err != nil {
 				logger.Warnf("create VM error (mcisname=%s, nodename=%s)", mcisName, tvm.VM.Name)
+				deleteVMs(namespace, clusterName, sTVMs)
 				return nil, err
 			}
 			logger.Infof("create VM OK.. (mcisname=%s, nodename=%s)", mcisName, tvm.VM.Name)
 
 			TVMs = append(TVMs, *tvm)
+			sTVMs = append(sTVMs, *tvm)
 		}
 	}
 
-	var wg sync.WaitGroup
-	c := make(chan error)
-	wg.Add(len(TVMs))
-
 	logger.Infoln("start connect VMs")
+	eg, _ := errgroup.WithContext(context.Background())
+
 	for _, tvm := range TVMs {
-		go func(vm model.VM) {
-			defer wg.Done()
+		vm := tvm.VM
+		eg.Go(func() error {
 			sshInfo := ssh.SSHInfo{
 				UserName:   GetUserAccount(vm.Csp),
 				PrivateKey: []byte(vm.Credential),
@@ -160,35 +162,35 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 			}
 
 			if vm.Status != config.Running || vm.PublicIP == "" {
-				c <- errors.New(fmt.Sprintf("Cannot do ssh, VM IP is not Running (name=%s, ip=%s, systemMessage=%s)", vm.Name, vm.PublicIP, vm.SystemMessage))
+				return errors.New(fmt.Sprintf("Cannot do ssh, VM IP is not Running (name=%s, ip=%s, systemMessage=%s)", vm.Name, vm.PublicIP, vm.SystemMessage))
 			}
 
 			err := vm.ConnectionTest(&sshInfo)
 			if err != nil {
-				c <- err
+				return err
 			}
 
 			err = vm.CopyScripts(&sshInfo, networkCni)
 			if err != nil {
-				c <- err
+				return err
 			}
 
 			logger.Infof("set systemd service (vm=%s)", vm.Name)
 			err = vm.SetSystemd(&sshInfo, networkCni)
 			if err != nil {
-				c <- err
+				return err
 			}
 
 			logger.Infof("bootstrap (vm=%s)", vm.Name)
 			err = vm.Bootstrap(&sshInfo)
 			if err != nil {
-				c <- err
+				return err
 			}
 
 			logger.Infof("join (vm=%s)", vm.Name)
 			err = vm.WorkerJoin(&sshInfo, &workerJoinCmd)
 			if err != nil {
-				c <- err
+				return err
 			}
 
 			logger.Infof("add labels (vm=%s)", vm.Name)
@@ -196,20 +198,13 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 			if err != nil {
 				logger.Warnf("failed to add node labels (vm=%s, cause= %s)", vm.Name, err)
 			}
-		}(tvm.VM)
+			return nil
+		})
 	}
-
-	go func() {
-		wg.Wait()
-		close(c)
-		logger.Infoln("end connect VMs")
-	}()
-
-	for err := range c {
-		if err != nil {
-			logger.Warnf("worker join error (cause=%v)", err)
-			return nil, err
-		}
+	if err := eg.Wait(); err != nil {
+		logger.Warnf("worker join error (cause=%v)", err)
+		deleteVMs(namespace, clusterName, TVMs)
+		return nil, err
 	}
 
 	// insert store
@@ -432,4 +427,17 @@ func getMaxIdx(namespace string, clusterName string) (maxCpIdx int, maxWkIdx int
 	maxCpIdx = lang.GetMaxNumber(arrCp)
 	maxWkIdx = lang.GetMaxNumber(arrWk)
 	return
+}
+
+func deleteVMs(namespace string, clusterName string, TVMs []tumblebug.TVM) error {
+	logger.Infof("delete VMs")
+	for _, tvm := range TVMs {
+		vm := tumblebug.NewTVm(namespace, clusterName)
+		vm.VM.Name = tvm.VM.Name
+		if err := vm.DELETE(); err != nil {
+			logger.Errorf("failed to delete vm (nodeName=%s, cause=%v)", tvm.VM.Name, err)
+			continue
+		}
+	}
+	return nil
 }
