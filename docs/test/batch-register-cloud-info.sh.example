@@ -43,5 +43,27 @@ export ALIBABA_SECRET="key_secret"
 export ALIBABA_REGION="ap-northeast-1"
 export ALIBABA_ZONE="ap-northeast-1a"
 
-
 ./connectioninfo-create.sh ALIBABA
+
+
+# Tencent
+export TENCENT_KEY="key_id"
+export TENCENT_SECRET="key_secret"
+
+export TENCENT_REGION="ap-seoul"
+export TENCENT_ZONE="ap-seoul-1"
+
+./connectioninfo-create.sh TENCENT
+
+
+# Openstack
+export OS_AUTH_URL="http://123.456.789.123:5000/v3"
+export OS_USERNAME="mcks"
+export OS_PASSWORD="mcks1234"
+export OS_USER_DOMAIN_NAME="default"
+export OS_PROJECT_ID="1234"
+
+export OS_REGION="RegionOne"
+export OS_ZONE="RegionOne"
+
+./connectioninfo-create.sh OPENSTACK

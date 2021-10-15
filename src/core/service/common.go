@@ -3,10 +3,12 @@ package service
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/cloud-barista/cb-mcks/src/core/model"
 	"github.com/cloud-barista/cb-mcks/src/core/model/tumblebug"
 	"github.com/cloud-barista/cb-mcks/src/utils/config"
+	"github.com/cloud-barista/cb-mcks/src/utils/lang"
 )
 
 type NodeConfigInfo struct {
@@ -14,6 +16,7 @@ type NodeConfigInfo struct {
 	Csp     config.CSP `json:"csp"`
 	Role    string     `json:"role"`
 	Account string     `json:"account"`
+	ImageId string     `json:"imageId"`
 }
 
 func SetNodeConfigInfos(nodeConfigs []model.NodeConfig, role string) ([]NodeConfigInfo, error) {
@@ -42,6 +45,11 @@ func SetNodeConfigInfos(nodeConfigs []model.NodeConfig, role string) ([]NodeConf
 			return nil, errors.New(fmt.Sprintf("%s region does not exist (connectionName=%s)", role, nodeConfig.Connection))
 		}
 
+		imageId, err := GetVmImageId(csp, nodeConfig.Connection, region)
+		if err != nil {
+			return nil, err
+		}
+
 		var nodeConfigInfo NodeConfigInfo
 		nodeConfigInfo.Connection = nodeConfig.Connection
 		nodeConfigInfo.Count = nodeConfig.Count
@@ -49,6 +57,7 @@ func SetNodeConfigInfos(nodeConfigs []model.NodeConfig, role string) ([]NodeConf
 		nodeConfigInfo.Csp = csp
 		nodeConfigInfo.Role = role
 		nodeConfigInfo.Account = GetUserAccount(nodeConfigInfo.Csp)
+		nodeConfigInfo.ImageId = imageId
 
 		nodeConfigInfos = append(nodeConfigInfos, nodeConfigInfo)
 	}
@@ -64,4 +73,10 @@ func GetControlPlaneIPs(VMs []model.VM) []string {
 		}
 	}
 	return IPs
+}
+
+func GetVmImageName(name string) string {
+	tmp := lang.GetOnlyLettersAndNumbers(name)
+
+	return strings.ToLower(tmp)
 }

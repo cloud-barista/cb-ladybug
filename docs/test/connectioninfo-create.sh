@@ -2,7 +2,7 @@
 # ------------------------------------------------------------------------------
 # usage
 if [ "$#" -lt 1 ]; then 
-	echo "./connectioninfo-create.sh [AWS/GCP/AZURE/ALIBABA/TENCENT] <option>"
+	echo "./connectioninfo-create.sh [AWS/GCP/AZURE/ALIBABA/TENCENT/OPENSTACK] <option>"
 	echo "./connectioninfo-create.sh GCP"
 	echo "./connectioninfo-create.sh AWS add"
 	exit 0
@@ -21,11 +21,11 @@ source ./conf.env
 # 1. CSP
 if [ "$#" -gt 0 ]; then v_CSP="$1"; else	v_CSP="${CSP}"; fi
 if [ "${v_CSP}" == "" ]; then 
-	read -e -p "Cloud ? [AWS(default) or GCP or AZURE OR ALIBABA OR TENCENT] : "  v_CSP
+	read -e -p "Cloud ? [AWS(default) or GCP or AZURE or ALIBABA or TENCENT or OPENSTACK] : "  v_CSP
 fi
 
 if [ "${v_CSP}" == "" ]; then v_CSP="AWS"; fi
-if [ "${v_CSP}" != "GCP" ] && [ "${v_CSP}" != "AWS" ] && [ "${v_CSP}" != "AZURE" ] && [ "${v_CSP}" != "ALIBABA" ] && [ "${v_CSP}" != "TENCENT" ]; then echo "[ERROR] missing <cloud>"; exit -1;fi
+if [ "${v_CSP}" != "GCP" ] && [ "${v_CSP}" != "AWS" ] && [ "${v_CSP}" != "AZURE" ] && [ "${v_CSP}" != "ALIBABA" ] && [ "${v_CSP}" != "TENCENT" ] && [ "${v_CSP}" != "OPENSTACK" ]; then echo "[ERROR] missing <cloud>"; exit -1;fi
 
 v_CSP_LOWER="$(echo ${v_CSP} | tr [:upper:] [:lower:])"
 
@@ -44,6 +44,8 @@ elif [ "${v_CSP}" == "ALIBABA" ]; then
 	v_DRIVER="${c_ALIBABA_DRIVER}"
 elif [ "${v_CSP}" == "TENCENT" ]; then 
 	v_DRIVER="${c_TENCENT_DRIVER}"
+elif [ "${v_CSP}" == "OPENSTACK" ]; then 
+	v_DRIVER="${c_OPENSTACK_DRIVER}"
 fi
 
 if [ "${v_OPTION}" != "add" ]; then 
@@ -225,38 +227,61 @@ if [ "${v_OPTION}" != "add" ]; then
 		fi
 	fi
 
+	# OPENSTACK
+	if [ "${v_CSP}" == "OPENSTACK" ]; then 
+
+		v_OPENSTACK_ENDPOINT="${OS_AUTH_URL}"
+		if [ "${v_OPENSTACK_ENDPOINT}" == "" ]; then 
+			read -e -p "Identity Endpoint ? [예:http://123.456.789.123:5000/v3] : "  v_OPENSTACK_ENDPOINT
+			if [ "${v_OPENSTACK_ENDPOINT}" == "" ]; then echo "[ERROR] missing <openstack identity endpoint>"; exit -1;fi
+		fi
+
+		v_OPENSTACK_USERNAME="${OS_USERNAME}"
+		if [ "${v_OPENSTACK_USERNAME}" == "" ]; then 
+			read -e -p "Username ? [예:mcks] : "  v_OPENSTACK_USERNAME
+			if [ "${v_OPENSTACK_USERNAME}" == "" ]; then echo "[ERROR] missing <openstack username>"; exit -1;fi
+		fi
+
+		v_OPENSTACK_PASSWORD="${OS_PASSWORD}"
+		if [ "${v_OPENSTACK_PASSWORD}" == "" ]; then 
+			read -e -p "Password ? [예:asdfqwer12] : "  v_OPENSTACK_PASSWORD
+			if [ "${v_OPENSTACK_PASSWORD}" == "" ]; then echo "[ERROR] missing <openstack password>"; exit -1;fi
+		fi
+
+		v_OPENSTACK_DOMAINNAME="${OS_USER_DOMAIN_NAME}"
+		if [ "${v_OPENSTACK_DOMAINNAME}" == "" ]; then 
+			read -e -p "DomainName ? [예:default] : "  v_OPENSTACK_DOMAINNAME
+			if [ "${v_OPENSTACK_DOMAINNAME}" == "" ]; then echo "[ERROR] missing <openstack domainname>"; exit -1;fi
+		fi
+
+		v_OPENSTACK_PROJECTID="${OS_PROJECT_ID}"
+		if [ "${v_OPENSTACK_PROJECTID}" == "" ]; then 
+			read -e -p "ProjectID ? [예:kdjf1k12jkdjf2kjskjf] : "  v_OPENSTACK_PROJECTID
+			if [ "${v_OPENSTACK_PROJECTID}" == "" ]; then echo "[ERROR] missing <openstack projectid>"; exit -1;fi
+		fi
+
+		# region
+		v_REGION="${OS_REGION}"
+		if [ "${v_REGION}" == "" ]; then 
+			read -e -p "region ? [예:ap-seoul] : "  v_REGION
+			if [ "${v_REGION}" == "" ]; then echo "[ERROR] missing region"; exit -1;fi
+		fi
+
+		# zone
+		v_ZONE="${OS_ZONE}"
+		if [ "${v_ZONE}" == "" ]; then 
+			read -e -p "zone ? [예:ap-seoul-1] : "  v_ZONE
+			if [ "${v_ZONE}" == "" ]; then v_ZONE="${v_REGION}a";fi
+		fi
+	fi
+
 fi
 
-# # region
-# v_REGION="${REGION}"
-# if [ "${v_REGION}" == "" ]; then 
-# 	read -e -p "region ? [예:asia-northeast3] : "  v_REGION
-# 	if [ "${v_REGION}" == "" ]; then echo "[ERROR] missing region"; exit -1;fi
-# fi
-
-# if [ "${v_CSP}" == "AZURE" ]; then 
-
-# 	# resource group
-# 	v_RESOURCE_GROUP="${RESOURCE_GROUP}"
-# 	if [ "${v_RESOURCE_GROUP}" == "" ]; then 
-# 		read -e -p "resource group ? [예:cb-mcksRG] : "  v_RESOURCE_GROUP
-# 		if [ "${v_RESOURCE_GROUP}" == "" ]; then echo "[ERROR] missing resource group"; exit -1;fi
-# 	fi
-
-# else
-
-# 	# zone
-# 	v_ZONE="${ZONE}"
-# 	if [ "${v_ZONE}" == "" ]; then 
-# 		read -e -p "zone ? [예:asia-northeast3-a] : "  v_ZONE
-# 		if [ "${v_ZONE}" == "" ]; then v_ZONE="${v_REGION}-a";fi
-# 	fi
-
-# fi
+v_REGION_LOWER="$(echo ${v_REGION} | tr [:upper:] [:lower:])"
 
 NM_CREDENTIAL="credential-${v_CSP_LOWER}"
-NM_REGION="region-${v_CSP_LOWER}-${v_REGION}"
-NM_CONFIG="config-${v_CSP_LOWER}-${v_REGION}"
+NM_REGION="region-${v_CSP_LOWER}-${v_REGION_LOWER}"
+NM_CONFIG="config-${v_CSP_LOWER}-${v_REGION_LOWER}"
 
 # ------------------------------------------------------------------------------
 # print info.
@@ -288,6 +313,13 @@ elif [ "${v_CSP}" == "TENCENT" ]; then
 	echo "- Zone                       is '${v_ZONE}'"
  	echo "- tencent_access_key_id      is '${v_TENCENT_ACCESS_KEY}'"
 	echo "- tencent_access_key_secret  is '${v_TENCENT_SECRET}'"
+elif [ "${v_CSP}" == "OPENSTACK" ]; then 
+	echo "- Zone                        is '${v_ZONE}'"
+ 	echo "- openstack_identity_endpoint is '${v_OPENSTACK_ENDPOINT}'"
+	echo "- openstack_username  			  is '${v_OPENSTACK_USERNAME}'"
+	echo "- openstack_password  			  is '${v_OPENSTACK_PASSWORD}'"
+	echo "- openstack_domainname			  is '${v_OPENSTACK_DOMAINNAME}'"
+	echo "- openstack_projectid		 	    is '${v_OPENSTACK_PROJECTID}'"
 fi
 echo "- (Name of credential)       is '${NM_CREDENTIAL}'"
 echo "- (Name of region)           is '${NM_REGION}'"
@@ -371,6 +403,21 @@ EOF
 			"KeyValueInfoList" : [
 				{"Key" : "ClientId",       "Value" : "${v_TENCENT_ACCESS_KEY}"},
 				{"Key" : "ClientSecret",   "Value" : "${v_TENCENT_SECRET}"}
+			]
+			}
+EOF
+		elif [ "${v_CSP}" == "OPENSTACK" ]; then
+			curl -sX DELETE ${c_URL_SPIDER}/credential/${NM_CREDENTIAL} -H "${c_CT}" -o /dev/null -w "CREDENTIAL.delete():%{http_code}\n"
+			curl -sX POST   ${c_URL_SPIDER}/credential                  -H "${c_CT}" -o /dev/null -w "CREDENTIAL.regist():%{http_code}\n" -d @- <<EOF
+			{
+			"CredentialName"   : "${NM_CREDENTIAL}",
+			"ProviderName"     : "${v_CSP}",
+			"KeyValueInfoList" : [
+				{"Key" : "IdentityEndpoint",	"Value" : "${v_OPENSTACK_ENDPOINT}"},
+				{"Key" : "Username",    			"Value" : "${v_OPENSTACK_USERNAME}"},
+				{"Key" : "Password",					"Value" : "${v_OPENSTACK_PASSWORD}"},
+				{"Key" : "DomainName",				"Value" : "${v_OPENSTACK_DOMAINNAME}"},
+				{"Key" : "ProjectID",					"Value" : "${v_OPENSTACK_PROJECTID}"}
 			]
 			}
 EOF

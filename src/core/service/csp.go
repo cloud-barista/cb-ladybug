@@ -48,7 +48,7 @@ func GetUserAccount(csp config.CSP) string {
 }
 
 // get vm image-id
-func GetVmImageId(csp config.CSP, configName string) (string, error) {
+func GetVmImageId(csp config.CSP, configName string, region *tumblebug.Region) (string, error) {
 
 	if csp == config.CSP_GCP {
 		return GCP_IMAGE_ID, nil
@@ -58,28 +58,32 @@ func GetVmImageId(csp config.CSP, configName string) (string, error) {
 		return ALIBABA_IMAGE_ID, nil
 	} else if csp == config.CSP_TENCENT {
 		return TENCENT_IMAGE_ID, nil
+	} else if csp == config.CSP_OPENSTACK {
+		// openstack : lookupImages를 통해 사용자가 등록한 이미지를 검색하여, 이미지 이름에 'ubuntu'와 '1804'가 포함된 이미지 정보 가져오기
+		lookupImages := tumblebug.NewLookupImages(configName)
+		err := lookupImages.LookupImages()
+		if err != nil {
+			return "", errors.New(fmt.Sprintf("failed to lookup images on openstack (connection='%s', cause=%v)", configName, err))
+		}
+
+		var filterImages []tumblebug.LookupImagesInfo
+		for _, li := range lookupImages.Image {
+			imageInfo := tumblebug.LookupImagesInfo{
+				NameId:   li.IId.NameId,
+				FilterId: GetVmImageName(li.IId.NameId),
+			}
+			filterImages = append(filterImages, imageInfo)
+		}
+
+		for _, fi := range filterImages {
+			if strings.Contains(fi.FilterId, "ubuntu") && strings.Contains(fi.FilterId, "1804") {
+				return fi.NameId, nil
+			}
+		}
+		return "", errors.New(fmt.Sprintf("request not found ubuntu 18.04 image on openstack. please create an image based on Ubuntu 18.04 The image name must include 'ubuntu' and '18.04'. (connection='%s')", configName))
+
 	} else if csp == config.CSP_AWS {
 		// AWS : 리전별 AMI 가져오기
-		conn := tumblebug.NewConnection(configName)
-		exists, err := conn.GET()
-		if err != nil {
-			return "", err
-		}
-		if !exists {
-			return "", errors.New(fmt.Sprintf("request not found AMI on AWS (cause = not found connection config `%s`)", configName))
-		}
-
-		// http get region data
-		region := tumblebug.NewRegion(conn.RegionName)
-		exists, err = region.GET()
-		if err != nil {
-			return "", err
-		}
-		if !exists {
-			return "", errors.New(fmt.Sprintf("request not found AMI on AWS (cause = not found region, connection='%s', region name='%s')", configName, conn.RegionName))
-		}
-
-		// find region
 		regionName := ""
 		for _, info := range region.KeyValueInfoList {
 			if info.Key == "Region" {
@@ -89,7 +93,7 @@ func GetVmImageId(csp config.CSP, configName string) (string, error) {
 		}
 
 		if regionName == "" {
-			return "", errors.New(fmt.Sprintf("request not found AMI on AWS (cause = region name is empty, connection='%s', region name='%s')", configName, conn.RegionName))
+			return "", errors.New(fmt.Sprintf("request not found AMI on AWS (cause = region name is empty, connection='%s', region name='%s')", configName, region.RegionName))
 		}
 
 		// TODO [update/hard-coding] region별 image id
@@ -121,6 +125,8 @@ func GetCSPName(providerName string) (config.CSP, error) {
 		return config.CSP_ALIBABA, nil
 	case string(config.CSP_TENCENT):
 		return config.CSP_TENCENT, nil
+	case string(config.CSP_OPENSTACK):
+		return config.CSP_OPENSTACK, nil
 	}
 	return "", errors.New(providerName + "is not supported")
 }

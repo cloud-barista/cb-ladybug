@@ -178,18 +178,43 @@ $ export TENCENT_ZONE="ap-seoul-1"
 $ ./connectioninfo-create.sh TENCENT
 ```
 
+#### OPENSTACK
+
+* 환경변수 : 클라우드별 연결정보
+
+```
+$ export OS_AUTH_URL="<openstack_auth_url>"
+$ export OS_USERNAME="<openstack_username>"
+$ export OS_PASSWORD="<openstack_password>"
+$ export OS_USER_DOMAIN_NAME="<openstack_domainname>"
+$ export OS_PROJECT_ID="<openstack_project_id>"
+```
+
+* 환경변수 : OS_REGION, OS_ZONE
+
+```
+$ export OS_REGION="RegionOne"
+$ export OS_ZONE="RegionOne"
+```
+
+* Cloud Connection Info. 등록
+
+```
+$ ./connectioninfo-create.sh OPENSTACK
+```
+
 #### Cloud Connection Info 추가
 
 ```
-# AWS/GCP/ALIBABA/TENCENT
-$ export [AWS/GCP/ALIBABA/TENCENT]_REGION="<region name>"
-$ export [AWS/GCP/ALIBABA/TENCENT]_ZONE="<zone name>"
+# AWS/GCP/ALIBABA/TENCENT/OPENSTACK
+$ export [AWS/GCP/ALIBABA/TENCENT/OS]_REGION="<region name>"
+$ export [AWS/GCP/ALIBABA/TENCENT/OS]_ZONE="<zone name>"
 
 # AZURE
 $ export AZURE_REGION="<region name>"
 $ export AZURE_RESOURCE_GROUP="<resource group>"
 
-$ ./connectioninfo-create.sh [AWS/GCP/AZURE/ALIBABA/TENCENT] add
+$ ./connectioninfo-create.sh [AWS/GCP/AZURE/ALIBABA/TENCENT/OPENSTACK] add
 ```
 
 #### 결과 확인
@@ -381,6 +406,23 @@ $ source ./env.sh ALIBABA "<credentials file path>"
 # 예
 $ source ./env.sh ALIBABA "${HOME}/.ssh/AccessKey.csv"
 ```
+
+* TENCENT
+```
+$ source ./env.sh TENCENT "<credentials file path>"
+
+# 예
+$ source ./env.sh TENCENT "${HOME}/.tccli/default.credential"
+```
+
+* OPENSTACK
+```
+$ source ./env.sh OPENSTACK "<credentials file path>"
+
+# 예
+$ source ./env.sh OPENSTACK "${HOME}/openrc.sh"
+```
+
 
 ### clean up
 

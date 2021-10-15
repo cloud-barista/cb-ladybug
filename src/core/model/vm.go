@@ -86,7 +86,7 @@ func (self *VM) CheckConnectSSH(sshInfo *ssh.SSHInfo) error {
 }
 
 func (self *VM) ConnectionTest(sshInfo *ssh.SSHInfo) error {
-	retryCheck := 10
+	retryCheck := 15
 	for i := 0; i < retryCheck; i++ {
 		err := self.CheckConnectivity(sshInfo)
 		if err == nil {
@@ -321,7 +321,7 @@ func (self *VM) AddNodeLabels(sshInfo *ssh.SSHInfo) error {
 		"topology.cloud-barista.github.io/csp": self.Csp,
 		"topology.kubernetes.io/region":        self.Region.Region,
 	}
-	if self.Csp != config.CSP_AZURE {
+	if self.Region.Zone != "" {
 		infos["topology.kubernetes.io/zone"] = self.Region.Zone
 	}
 

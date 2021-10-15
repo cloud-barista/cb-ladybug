@@ -114,3 +114,10 @@ func CheckIpCidr(name string, val string) error {
 	}
 	return nil
 }
+
+func GetOnlyLettersAndNumbers(name string) string {
+	reg := regexp.MustCompile("[^a-zA-Z0-9]+")
+	val := reg.ReplaceAllString(name, "")
+
+	return val
+}

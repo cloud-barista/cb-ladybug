@@ -73,15 +73,10 @@ func (nodeConfigInfo *NodeConfigInfo) CreateSshKey(namespace string) (*tumblebug
 }
 
 func (nodeConfigInfo *NodeConfigInfo) CreateImage(namespace string) (*tumblebug.Image, error) {
-	imageId, e := GetVmImageId(nodeConfigInfo.Csp, nodeConfigInfo.Connection)
-	if e != nil {
-		return nil, e
-	}
-
 	imageName := fmt.Sprintf("%s-ubuntu1804", getConfigName(nodeConfigInfo.Connection))
 	logger.Infof("start create image (name=%s)", imageName)
 	image := tumblebug.NewImage(namespace, imageName, nodeConfigInfo.Connection)
-	image.CspImageId = imageId
+	image.CspImageId = nodeConfigInfo.ImageId
 	exists, e := image.GET()
 	if e != nil {
 		return nil, e
