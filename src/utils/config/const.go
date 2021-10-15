@@ -19,11 +19,12 @@ const (
 	CNI_KILO_KUBEADM_FILE = "addons/kilo/kilo-kubeadm-flannel_v0.3.0.yaml"
 	CNI_KILO_FLANNEL_FILE = "addons/kilo/kube-flannel_v0.14.0.yaml"
 
-	CSP_AWS     CSP = "aws"
-	CSP_GCP     CSP = "gcp"
-	CSP_AZURE   CSP = "azure"
-	CSP_ALIBABA CSP = "alibaba"
-	CSP_TENCENT CSP = "tencent"
+	CSP_AWS       CSP = "aws"
+	CSP_GCP       CSP = "gcp"
+	CSP_AZURE     CSP = "azure"
+	CSP_ALIBABA   CSP = "alibaba"
+	CSP_TENCENT   CSP = "tencent"
+	CSP_OPENSTACK CSP = "openstack"
 
 	NETWORKCNI_KILO  = "kilo"
 	NETWORKCNI_CANAL = "canal"
