@@ -160,7 +160,7 @@ func (self *VM) SetSystemd(sshInfo *ssh.SSHInfo, networkCni string) error {
 		bsFile = config.MCKS_BOOTSTRAP_KILO_FILE
 	}
 
-	cmd := fmt.Sprintf("cd %s;./%s", remoteTargetPath, bsFile)
+	cmd := fmt.Sprintf("cd %s;./%s %s", remoteTargetPath, bsFile, self.PublicIP)
 	logger.Infof("[SetSystemd] %s $ %s", self.Name, cmd)
 	_, err := ssh.SSHRun(*sshInfo, cmd)
 	if err != nil {
@@ -177,7 +177,7 @@ func (self *VM) SetSystemd(sshInfo *ssh.SSHInfo, networkCni string) error {
 }
 
 func (self *VM) Bootstrap(sshInfo *ssh.SSHInfo) error {
-	cmd := fmt.Sprintf("cd %s;./%s", remoteTargetPath, config.BOOTSTRAP_FILE)
+	cmd := fmt.Sprintf("cd %s;./%s %s", remoteTargetPath, config.BOOTSTRAP_FILE, self.PublicIP)
 
 	logger.Infof("[Bootstrap] %s $ %s", self.Name, cmd)
 	result, err := ssh.SSHRun(*sshInfo, cmd)
@@ -218,7 +218,7 @@ func (self *VM) InstallHAProxy(sshInfo *ssh.SSHInfo, IPs []string) error {
 func (self *VM) ControlPlaneInit(sshInfo *ssh.SSHInfo, reqKubernetes Kubernetes) ([]string, string, error) {
 	var joinCmd []string
 
-	cmd := fmt.Sprintf("cd %s;./%s %s %s %s", remoteTargetPath, config.INIT_FILE, reqKubernetes.PodCidr, reqKubernetes.ServiceCidr, reqKubernetes.ServiceDnsDomain)
+	cmd := fmt.Sprintf("cd %s;./%s %s %s %s %s", remoteTargetPath, config.INIT_FILE, reqKubernetes.PodCidr, reqKubernetes.ServiceCidr, reqKubernetes.ServiceDnsDomain, self.PublicIP)
 	logger.Infof("[ControlPlaneInit] %s $ %s", self.Name, cmd)
 	cpInitResult, err := ssh.SSHRun(*sshInfo, cmd)
 	if err != nil {

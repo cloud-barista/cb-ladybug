@@ -6,12 +6,12 @@ cat << EOF > kubeadm-config.yaml
 apiVersion: kubeadm.k8s.io/v1beta2
 kind: ClusterConfiguration
 imageRepository: k8s.gcr.io
-controlPlaneEndpoint: $(dig +short myip.opendns.com @resolver1.opendns.com):9998
+controlPlaneEndpoint: $4:9998
 dns:
   type: CoreDNS
 apiServer:
   extraArgs:
-    advertise-address: $(dig +short myip.opendns.com @resolver1.opendns.com)
+    advertise-address: $4
     authorization-mode: Node,RBAC
 etcd:
   local:
