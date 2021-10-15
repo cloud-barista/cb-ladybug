@@ -45,4 +45,4 @@ sudo apt-get install -y wireguard
 
 # public ip nic up
 IFACE="$(ip route get 8.8.8.8 | awk '{ print $5; exit }')"
-sudo ifconfig ${IFACE}:1 $(dig +short myip.opendns.com @resolver1.opendns.com) netmask 255.255.255.255  broadcast 0.0.0.0 up
+sudo ifconfig ${IFACE}:1 $1 netmask 255.255.255.255  broadcast 0.0.0.0 up
