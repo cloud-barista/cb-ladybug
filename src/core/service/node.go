@@ -2,12 +2,10 @@ package service
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
 
-	"github.com/cloud-barista/cb-mcks/src/core/common"
 	"github.com/cloud-barista/cb-mcks/src/core/model"
 	"github.com/cloud-barista/cb-mcks/src/core/model/tumblebug"
 	"github.com/cloud-barista/cb-mcks/src/utils/config"
@@ -19,8 +17,18 @@ import (
 )
 
 func ListNode(namespace string, clusterName string) (*model.NodeList, error) {
+	err := CheckNamespace(namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	err = CheckMcis(namespace, clusterName)
+	if err != nil {
+		return nil, err
+	}
+
 	nodes := model.NewNodeList(namespace, clusterName)
-	err := nodes.SelectList()
+	err = nodes.SelectList()
 	if err != nil {
 		return nil, err
 	}
@@ -29,8 +37,18 @@ func ListNode(namespace string, clusterName string) (*model.NodeList, error) {
 }
 
 func GetNode(namespace string, clusterName string, nodeName string) (*model.Node, error) {
+	err := CheckNamespace(namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	err = CheckMcis(namespace, clusterName)
+	if err != nil {
+		return nil, err
+	}
+
 	node := model.NewNode(namespace, clusterName, nodeName)
-	err := node.Select()
+	err = node.Select()
 	if err != nil {
 		return nil, err
 	}
@@ -39,24 +57,32 @@ func GetNode(namespace string, clusterName string, nodeName string) (*model.Node
 }
 
 func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.NodeList, error) {
-
-	mcisName := clusterName
-	mcis := tumblebug.NewMCIS(namespace, mcisName)
-
-	exists, err := mcis.GET()
+	err := CheckNamespace(namespace)
 	if err != nil {
 		return nil, err
 	}
-	if !exists {
-		return nil, errors.New("MCIS not found")
+
+	err = CheckMcis(namespace, clusterName)
+	if err != nil {
+		return nil, err
 	}
 
-	// get join command
+	err = CheckClusterStatus(namespace, clusterName)
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("failed to get cluster status (cause=%v)", err))
+	}
+
+	mcisName := clusterName
+
+	// get join command & network cni
 	workerJoinCmd, err := getWorkerJoinCmdForAddNode(namespace, clusterName)
 	if err != nil {
-		return nil, errors.New("join command cannot get")
+		return nil, errors.New(fmt.Sprintf("failed to get join command (cause=%v)", err))
 	}
-	networkCni := getClusterNetworkCNI(namespace, clusterName)
+	networkCni, err := getClusterNetworkCNI(namespace, clusterName)
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("failed to get network cni (cause=%v)", err))
+	}
 
 	var nodeConfigInfos []NodeConfigInfo
 	// worker
@@ -222,19 +248,35 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 }
 
 func RemoveNode(namespace string, clusterName string, nodeName string) (*model.Status, error) {
+	err := CheckNamespace(namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	err = CheckMcis(namespace, clusterName)
+	if err != nil {
+		return nil, err
+	}
+
+	node := model.NewNode(namespace, clusterName, nodeName)
+	err = node.Select()
+	if err != nil {
+		return nil, err
+	}
+
 	status := model.NewStatus()
 	status.Code = model.STATUS_UNKNOWN
 
 	cpNode, err := getCPLeaderNode(namespace, clusterName)
 	if err != nil {
-		status.Message = "control-plane node not found"
-		return status, err
+		status.Message = "failed to find control-plane node"
+		return status, errors.New(fmt.Sprintf("%s (cause=%v)", status.Message, err))
 	}
 
-	hostName, err := getHostName(namespace, clusterName, nodeName)
+	hostName, err := getHostName(node)
 	if err != nil {
-		status.Message = "get node name error"
-		return status, err
+		status.Message = "failed to get hostname"
+		return status, errors.New(fmt.Sprintf("%s (cause=%v)", status.Message, err))
 	}
 
 	// drain node
@@ -249,13 +291,13 @@ func RemoveNode(namespace string, clusterName string, nodeName string) (*model.S
 	result, err := ssh.SSHRun(sshInfo, cmd)
 	if err != nil {
 		status.Message = "kubectl drain failed"
-		return status, err
+		return status, errors.New(fmt.Sprintf("%s (cause=%v)", status.Message, err))
 	}
 	if strings.Contains(result, fmt.Sprintf("node/%s drained", hostName)) || strings.Contains(result, fmt.Sprintf("node/%s evicted", hostName)) {
 		logger.Infoln("drain node success")
 	} else {
 		status.Message = "kubectl drain failed"
-		return status, err
+		return status, errors.New(fmt.Sprintf("%s (cause=%v)", status.Message, err))
 	}
 
 	// delete node
@@ -264,7 +306,7 @@ func RemoveNode(namespace string, clusterName string, nodeName string) (*model.S
 	result, err = ssh.SSHRun(sshInfo, cmd)
 	if err != nil {
 		status.Message = "kubectl delete node failed"
-		return status, err
+		return status, errors.New(fmt.Sprintf("%s (cause=%v)", status.Message, err))
 	}
 	if strings.Contains(result, "deleted") {
 		logger.Infoln("delete node success")
@@ -279,98 +321,62 @@ func RemoveNode(namespace string, clusterName string, nodeName string) (*model.S
 	err = vm.DELETE()
 	if err != nil {
 		status.Message = "delete vm failed"
-		return status, err
+		return status, errors.New(fmt.Sprintf("%s (cause=%v)", status.Message, err))
 	}
 
 	// delete node in store
-	node := model.NewNode(namespace, clusterName, nodeName)
 	if err := node.Delete(); err != nil {
 		status.Message = err.Error()
 		return status, nil
 	}
 
 	status.Code = model.STATUS_SUCCESS
-	status.Message = "success"
+	status.Message = fmt.Sprintf("node '%s' has been deleted", nodeName)
 
 	return status, nil
 }
 
-func getCluster(namespace string, clusterName string) (*model.Cluster, error) {
-	key := lang.GetStoreClusterKey(namespace, clusterName)
-	keyValue, err := common.CBStore.Get(key)
-	if err != nil {
-		return nil, err
-	}
-	if keyValue == nil {
-		return nil, errors.New(fmt.Sprintf("%s not found", key))
-	}
-	cluster := &model.Cluster{}
-	json.Unmarshal([]byte(keyValue.Value), cluster)
-
-	return cluster, nil
-}
-
 func getCPLeaderNode(namespace string, clusterName string) (*model.Node, error) {
-	cluster, err := getCluster(namespace, clusterName)
-	if err != nil {
-		return nil, errors.New("cluster info not found")
-	}
-	CpLeader := cluster.CpLeader
-
-	key := lang.GetStoreNodeKey(namespace, clusterName, "")
-	keyValues, err := common.CBStore.GetList(key, true)
+	cluster := model.NewCluster(namespace, clusterName)
+	err := cluster.Select()
 	if err != nil {
 		return nil, err
 	}
-	if keyValues == nil {
-		return nil, errors.New(fmt.Sprintf("%s not found", key))
+	cpLeaderName := cluster.CpLeader
+	if cpLeaderName == "" {
+		return nil, errors.New("control-place node is empty")
 	}
-	cpNode := &model.Node{}
-	for _, keyValue := range keyValues {
-		node := &model.Node{}
-		json.Unmarshal([]byte(keyValue.Value), &node)
-		if node.Name == CpLeader {
-			cpNode = node
-			break
-		}
+
+	cpNode := model.NewNode(namespace, clusterName, cpLeaderName)
+	err = cpNode.Select()
+	if err != nil {
+		return nil, err
 	}
 
 	return cpNode, nil
 }
 
-func getClusterNetworkCNI(namespace string, clusterName string) string {
-	cluster, err := getCluster(namespace, clusterName)
-	if err != nil {
-		return ""
-	}
-
-	return cluster.NetworkCni
-}
-
-func getHostName(namespace string, clusterName string, nodeName string) (string, error) {
-	key := lang.GetStoreNodeKey(namespace, clusterName, "")
-	keyValues, err := common.CBStore.GetList(key, true)
+func getClusterNetworkCNI(namespace string, clusterName string) (string, error) {
+	cluster := model.NewCluster(namespace, clusterName)
+	err := cluster.Select()
 	if err != nil {
 		return "", err
 	}
-	if keyValues == nil {
-		return "", errors.New(fmt.Sprintf("%s not found", key))
-	}
-	dNode := &model.Node{}
-	for _, keyValue := range keyValues {
-		node := &model.Node{}
-		json.Unmarshal([]byte(keyValue.Value), &node)
-		if node.Name == nodeName {
-			dNode = node
-			break
-		}
+
+	networkCni := cluster.NetworkCni
+	if networkCni == "" {
+		return "", errors.New("network cni is empty")
 	}
 
-	userAccount := GetUserAccount(dNode.Csp)
+	return networkCni, nil
+}
+
+func getHostName(node *model.Node) (string, error) {
+	userAccount := GetUserAccount(node.Csp)
 	sshInfo := ssh.SSHInfo{
 		UserName:   userAccount,
-		PrivateKey: []byte(dNode.Credential),
-		ServerPort: fmt.Sprintf("%s:22", dNode.PublicIP),
+		PrivateKey: []byte(node.Credential),
+		ServerPort: fmt.Sprintf("%s:22", node.PublicIP),
 	}
 	cmd := "/bin/hostname"
 	hostName, err := ssh.SSHRun(sshInfo, cmd)
@@ -384,7 +390,7 @@ func getHostName(namespace string, clusterName string, nodeName string) (string,
 func getWorkerJoinCmdForAddNode(namespace string, clusterName string) (string, error) {
 	cpNode, err := getCPLeaderNode(namespace, clusterName)
 	if err != nil {
-		return "", errors.New("control-plane node not found")
+		return "", err
 	}
 	userAccount := GetUserAccount(cpNode.Csp)
 	sshInfo := ssh.SSHInfo{
@@ -394,11 +400,15 @@ func getWorkerJoinCmdForAddNode(namespace string, clusterName string) (string, e
 	}
 	cmd := "sudo kubeadm token create --print-join-command"
 	logger.Infof("[getWorkerJoinCmdForAddNode] %s $ %s", cpNode.Name, cmd)
-	result, err := ssh.SSHRun(sshInfo, cmd)
+	joinCommand, err := ssh.SSHRun(sshInfo, cmd)
 	if err != nil {
 		return "", err
 	}
-	return result, nil
+	if joinCommand == "" {
+		return "", errors.New("join command is empty")
+	}
+
+	return joinCommand, nil
 }
 
 func getMaxIdx(namespace string, clusterName string) (maxCpIdx int, maxWkIdx int) {

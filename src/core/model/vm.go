@@ -99,6 +99,7 @@ func (self *VM) ConnectionTest(sshInfo *ssh.SSHInfo) error {
 			}
 		}
 		if i == retryCheck-1 {
+			logger.Warnf(fmt.Sprintf("failed to test connection (name=%s, server=%s)", self.Name, sshInfo.ServerPort))
 			return errors.New(fmt.Sprintf("Cannot do ssh, the port is not opened (name=%s, server=%s)", self.Name, sshInfo.ServerPort))
 		}
 		time.Sleep(2 * time.Second)
@@ -282,9 +283,6 @@ func (self *VM) ControlPlaneJoin(sshInfo *ssh.SSHInfo, CPJoinCmd *string) error 
 }
 
 func (self *VM) WorkerJoin(sshInfo *ssh.SSHInfo, workerJoinCmd *string) error {
-	if *workerJoinCmd == "" {
-		return errors.New("worker node join command empty")
-	}
 	cmd := fmt.Sprintf("sudo %s", *workerJoinCmd)
 	logger.Infof("[WorkerJoin] %s $ %s", self.Name, cmd)
 	result, err := ssh.SSHRun(*sshInfo, cmd)

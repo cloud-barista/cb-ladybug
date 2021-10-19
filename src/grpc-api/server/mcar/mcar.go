@@ -46,13 +46,38 @@ func (s *MCARService) ClusterReqDef(clusterReq *model.ClusterReq) error {
 
 func (s *MCARService) ClusterReqValidate(req model.ClusterReq) error {
 	if len(req.ControlPlane) == 0 {
-		return errors.New("control plane node count must be one")
+		return errors.New("control plane node must be at least one")
+	}
+	if len(req.ControlPlane) > 1 {
+		return errors.New("only one control plane node is supported")
 	}
 	if len(req.Worker) == 0 {
-		return errors.New("worker node count must be at least one")
+		return errors.New("worker node must be at least one")
 	}
 	if !(req.Config.Kubernetes.NetworkCni == config.NETWORKCNI_CANAL || req.Config.Kubernetes.NetworkCni == config.NETWORKCNI_KILO) {
-		return errors.New("network cni allows only Kilo or Canal")
+		return errors.New("network cni allows only kilo or canal")
+	}
+
+	if len(req.Name) == 0 {
+		return errors.New("cluster name is empty")
+	} else {
+		err := lang.CheckName(req.Name)
+		if err != nil {
+			return err
+		}
+	}
+
+	if len(req.Config.Kubernetes.PodCidr) > 0 {
+		err := lang.CheckIpCidr("podCidr", req.Config.Kubernetes.PodCidr)
+		if err != nil {
+			return err
+		}
+	}
+	if len(req.Config.Kubernetes.ServiceCidr) > 0 {
+		err := lang.CheckIpCidr("serviceCidr", req.Config.Kubernetes.ServiceCidr)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -60,10 +85,10 @@ func (s *MCARService) ClusterReqValidate(req model.ClusterReq) error {
 
 func (s *MCARService) NodeReqValidate(req model.NodeReq) error {
 	if len(req.ControlPlane) > 0 {
-		return errors.New("control plane node not supported")
+		return errors.New("control plane node is not supported")
 	}
 	if len(req.Worker) == 0 {
-		return errors.New("worker node count must be at least one")
+		return errors.New("worker node must be at least one")
 	}
 
 	return nil
