@@ -15,6 +15,8 @@ const (
 	AZURE_IMAGE_ID   = "Canonical:UbuntuServer:18.04-LTS:latest"
 	ALIBABA_IMAGE_ID = "ubuntu_18_04_x64_20G_alibase_20210521.vhd"
 	TENCENT_IMAGE_ID = "img-pi0ii46r"
+
+	VM_USER_ACCOUNT = "cb-user"
 )
 
 // region별 AMI :  (AMI 이름 : ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-20200908, 소유자:099720109477 )
@@ -40,11 +42,6 @@ var imageMap = map[string]string{
 	"eu-north-1":     "ami-0ede7f804d699ea83", //유럽 (스톡홀름)
 	"me-south-1":     "",                      //중동 (바레인)
 	"sa-east-1":      "ami-0fd2c3d373788b726", //남아메리카 (상파울루)
-}
-
-// get vm user account
-func GetUserAccount(csp config.CSP) string {
-	return "cb-user"
 }
 
 // get vm image-id

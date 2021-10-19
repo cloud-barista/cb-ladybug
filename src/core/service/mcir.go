@@ -56,7 +56,7 @@ func (nodeConfigInfo *NodeConfigInfo) CreateSshKey(namespace string) (*tumblebug
 	}
 	logger.Infof("start create ssh key (name=%s)", sshkeyName)
 	sshKey := tumblebug.NewSSHKey(namespace, sshkeyName, nodeConfigInfo.Connection)
-	sshKey.Username = nodeConfigInfo.Account
+	sshKey.Username = VM_USER_ACCOUNT
 	exists, e := sshKey.GET()
 	if e != nil {
 		return nil, e

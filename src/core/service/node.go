@@ -146,7 +146,7 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 				SSHKey:       sshKey.Name,
 				Image:        image.Name,
 				Spec:         spec.Name,
-				UserAccount:  nodeConfigInfo.Account,
+				UserAccount:  VM_USER_ACCOUNT,
 				UserPassword: "",
 				Description:  "",
 				Credential:   sshKey.PrivateKey,
@@ -182,7 +182,7 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 		vm := tvm.VM
 		eg.Go(func() error {
 			sshInfo := ssh.SSHInfo{
-				UserName:   GetUserAccount(vm.Csp),
+				UserName:   VM_USER_ACCOUNT,
 				PrivateKey: []byte(vm.Credential),
 				ServerPort: fmt.Sprintf("%s:22", vm.PublicIP),
 			}
@@ -280,9 +280,8 @@ func RemoveNode(namespace string, clusterName string, nodeName string) (*model.S
 	}
 
 	// drain node
-	userAccount := GetUserAccount(cpNode.Csp)
 	sshInfo := ssh.SSHInfo{
-		UserName:   userAccount,
+		UserName:   VM_USER_ACCOUNT,
 		PrivateKey: []byte(cpNode.Credential),
 		ServerPort: fmt.Sprintf("%s:22", cpNode.PublicIP),
 	}
@@ -372,9 +371,8 @@ func getClusterNetworkCNI(namespace string, clusterName string) (string, error) 
 }
 
 func getHostName(node *model.Node) (string, error) {
-	userAccount := GetUserAccount(node.Csp)
 	sshInfo := ssh.SSHInfo{
-		UserName:   userAccount,
+		UserName:   VM_USER_ACCOUNT,
 		PrivateKey: []byte(node.Credential),
 		ServerPort: fmt.Sprintf("%s:22", node.PublicIP),
 	}
@@ -392,9 +390,8 @@ func getWorkerJoinCmdForAddNode(namespace string, clusterName string) (string, e
 	if err != nil {
 		return "", err
 	}
-	userAccount := GetUserAccount(cpNode.Csp)
 	sshInfo := ssh.SSHInfo{
-		UserName:   userAccount,
+		UserName:   VM_USER_ACCOUNT,
 		PrivateKey: []byte(cpNode.Credential),
 		ServerPort: fmt.Sprintf("%s:22", cpNode.PublicIP),
 	}
