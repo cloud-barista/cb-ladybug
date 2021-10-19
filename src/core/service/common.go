@@ -16,7 +16,6 @@ type NodeConfigInfo struct {
 	model.NodeConfig
 	Csp     config.CSP `json:"csp"`
 	Role    string     `json:"role"`
-	Account string     `json:"account"`
 	ImageId string     `json:"imageId"`
 }
 
@@ -66,7 +65,6 @@ func SetNodeConfigInfos(nodeConfigs []model.NodeConfig, role string) ([]NodeConf
 		nodeConfigInfo.Spec = nodeConfig.Spec
 		nodeConfigInfo.Csp = csp
 		nodeConfigInfo.Role = role
-		nodeConfigInfo.Account = GetUserAccount(nodeConfigInfo.Csp)
 		nodeConfigInfo.ImageId = imageId
 
 		nodeConfigInfos = append(nodeConfigInfos, nodeConfigInfo)

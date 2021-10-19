@@ -137,7 +137,7 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 				SSHKey:       sshKey.Name,
 				Image:        image.Name,
 				Spec:         spec.Name,
-				UserAccount:  nodeConfigInfo.Account,
+				UserAccount:  VM_USER_ACCOUNT,
 				UserPassword: "",
 				Description:  "",
 			}
@@ -222,7 +222,7 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 			}
 
 			sshInfo := ssh.SSHInfo{
-				UserName:   GetUserAccount(vm.Csp),
+				UserName:   VM_USER_ACCOUNT,
 				PrivateKey: []byte(vm.Credential),
 				ServerPort: fmt.Sprintf("%s:22", vm.PublicIP),
 			}
@@ -264,7 +264,7 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 	for _, vm := range cpMcis.VMs {
 		if vm.Role == config.CONTROL_PLANE && vm.IsCPLeader {
 			sshInfo := ssh.SSHInfo{
-				UserName:   GetUserAccount(vm.Csp),
+				UserName:   VM_USER_ACCOUNT,
 				PrivateKey: []byte(vm.Credential),
 				ServerPort: fmt.Sprintf("%s:22", vm.PublicIP),
 			}
@@ -302,7 +302,7 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 	for _, vm := range cpMcis.VMs {
 		if vm.Role == config.CONTROL_PLANE && !vm.IsCPLeader {
 			sshInfo := ssh.SSHInfo{
-				UserName:   GetUserAccount(vm.Csp),
+				UserName:   VM_USER_ACCOUNT,
 				PrivateKey: []byte(vm.Credential),
 				ServerPort: fmt.Sprintf("%s:22", vm.PublicIP),
 			}
@@ -319,7 +319,7 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 	for _, vm := range cpMcis.VMs {
 		if vm.Role == config.WORKER {
 			sshInfo := ssh.SSHInfo{
-				UserName:   GetUserAccount(vm.Csp),
+				UserName:   VM_USER_ACCOUNT,
 				PrivateKey: []byte(vm.Credential),
 				ServerPort: fmt.Sprintf("%s:22", vm.PublicIP),
 			}
@@ -337,7 +337,7 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 	logger.Infoln("start add node labels")
 	for _, vm := range cpMcis.VMs {
 		sshInfo := ssh.SSHInfo{
-			UserName:   GetUserAccount(vm.Csp),
+			UserName:   VM_USER_ACCOUNT,
 			PrivateKey: []byte(vm.Credential),
 			ServerPort: fmt.Sprintf("%s:22", vm.PublicIP),
 		}
