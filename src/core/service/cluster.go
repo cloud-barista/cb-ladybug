@@ -18,9 +18,13 @@ import (
 )
 
 func ListCluster(namespace string) (*model.ClusterList, error) {
-	clusters := model.NewClusterList(namespace)
+	err := CheckNamespace(namespace)
+	if err != nil {
+		return nil, err
+	}
 
-	err := clusters.SelectList()
+	clusters := model.NewClusterList(namespace)
+	err = clusters.SelectList()
 	if err != nil {
 		return nil, err
 	}
@@ -29,8 +33,13 @@ func ListCluster(namespace string) (*model.ClusterList, error) {
 }
 
 func GetCluster(namespace string, clusterName string) (*model.Cluster, error) {
+	err := CheckNamespace(namespace)
+	if err != nil {
+		return nil, err
+	}
+
 	cluster := model.NewCluster(namespace, clusterName)
-	err := cluster.Select()
+	err = cluster.Select()
 	if err != nil {
 		return nil, err
 	}
@@ -45,18 +54,14 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 	mcisName := clusterName
 
 	// Namespace 존재여부 확인
-	ns := tumblebug.NewNS(namespace)
-	exists, err := ns.GET()
+	err := CheckNamespace(namespace)
 	if err != nil {
-		return cluster, err
-	}
-	if !exists {
-		return cluster, errors.New(fmt.Sprintf("namespace does not exist (name=%s)", namespace))
+		return nil, err
 	}
 
 	// MCIS 존재여부 확인
 	mcis := tumblebug.NewMCIS(namespace, mcisName)
-	exists, err = mcis.GET()
+	exists, err := mcis.GET()
 	if err != nil {
 		return cluster, err
 	}
@@ -350,6 +355,11 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 }
 
 func DeleteCluster(namespace string, clusterName string) (*model.Status, error) {
+	err := CheckNamespace(namespace)
+	if err != nil {
+		return nil, err
+	}
+
 	mcisName := clusterName
 
 	status := model.NewStatus()
@@ -398,10 +408,10 @@ func DeleteCluster(namespace string, clusterName string) (*model.Status, error) 
 		}
 	} else {
 		logger.Infof("delete Cluster skip (MCIS cannot find).. (name=%s)", mcisName)
-		status.Message = fmt.Sprintf("cluster %s not found", mcisName)
+		status.Message = fmt.Sprintf("cluster '%s' does not exist", mcisName)
 
 		if err := cluster.Delete(); err != nil {
-			status.Message = fmt.Sprintf("cluster %s not found and cannot delete from the store", mcisName)
+			status.Message = fmt.Sprintf("cluster %s does not exist and cannot delete from the store", mcisName)
 			return status, nil
 		}
 	}

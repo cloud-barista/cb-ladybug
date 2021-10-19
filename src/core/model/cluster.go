@@ -87,7 +87,7 @@ func (self *Cluster) Select() error {
 		return err
 	}
 	if keyValue == nil {
-		return errors.New(fmt.Sprintf("%s not found", key))
+		return errors.New(fmt.Sprintf("cluster `%s` does not exist", key))
 	}
 	json.Unmarshal([]byte(keyValue.Value), &self)
 
