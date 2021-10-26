@@ -14,43 +14,32 @@ func TestClusterCRUD(t *testing.T) {
 	// insert
 	cluster := NewCluster(namespace, custerName)
 	cluster.MCIS = "mcis-1"
-	err := cluster.Insert()
+	err := cluster.UpdatePhase(ClusterPhaseProvisioning)
 	if err != nil {
 		t.Fatalf("Cluster.Insert error - TestClusaterCRUD :: mcis (cause=%v)", err)
 	}
 
 	// verify insert
 	cluster = NewCluster(namespace, custerName)
-	err = cluster.Select()
+	_, err = cluster.Select()
 	if err != nil {
 		t.Fatalf("Cluster.Insert error - TestClusaterCRUD :: cluster (cause=%v)", err)
 	}
 	if cluster.MCIS != "mcis-1" {
 		t.Fatalf("Cluster.Insert verify : not equals mcis (%s != %s)", "mcis-1", cluster.MCIS)
 	}
-	if cluster.Status != STATUS_CREATED {
-		t.Fatalf("Cluster.Insert verify : status is not 'STATUS_CREATED' (%s)", cluster.Status)
-	}
-
-	// update
-	cluster = NewCluster(namespace, custerName)
-	cluster.MCIS = "mcis-modifed"
-	err = cluster.Update()
-	if err != nil {
-		t.Fatalf("Cluster.Update error (cause=%v)", err)
-	}
 
 	// verify update
 	cluster = NewCluster(namespace, custerName)
-	err = cluster.Select()
+	_, err = cluster.Select()
 	if err != nil {
 		t.Fatalf("Cluster.Update error (cause=%v)", err)
 	}
 	if cluster.MCIS != "mcis-modifed" {
 		t.Fatalf("Cluster.Update verify : not equals mcis (%s != %s)", "mcis-modifed", cluster.MCIS)
 	}
-	if cluster.Status != STATUS_PROVISIONING {
-		t.Fatalf("Cluster.Update verify : status is not 'STATUS_PROVISIONING' (%s)", cluster.Status)
+	if cluster.Status.Phase != ClusterPhasePending {
+		t.Fatalf("Cluster.Update verify : phase is not 'STATUS_PROVISIONING' (%s)", cluster.Status.Phase)
 	}
 
 	// delete
@@ -61,7 +50,7 @@ func TestClusterCRUD(t *testing.T) {
 	}
 	// verify delete
 	cluster = NewCluster(namespace, custerName)
-	err = cluster.Select()
+	_, err = cluster.Select()
 	if err == nil {
 		t.Fatalf("Cluster.Delete exist data, not deleted")
 	}
@@ -75,7 +64,7 @@ func TestClusterSelectList(t *testing.T) {
 
 	// insert
 	cluster := NewCluster(namespace, custerName)
-	err := cluster.Insert()
+	err := cluster.UpdatePhase(ClusterPhaseProvisioning)
 	if err != nil {
 		t.Fatalf("Cluster.Insert error - TestClusterSelectList :: cluster-2 (cause=%v)", err)
 	}
@@ -97,11 +86,11 @@ func TestClusterSelectList(t *testing.T) {
 func TestClusterComplete(t *testing.T) {
 
 	cluster := NewCluster("namespace-3", "cluster-3")
-	err := cluster.Complete()
+	err := cluster.UpdatePhase(ClusterPhaseProvisioned)
 	if err != nil {
 		t.Fatalf("error cluster.Complete() (cause=%v)", err)
 	}
-	if cluster.Status != STATUS_COMPLETED {
+	if cluster.Status.Phase != ClusterPhaseProvisioned {
 		t.Fatalf("error cluster.Complete() NOT_STATUS_COMPLETED (cause=%v)", err)
 	}
 }
@@ -110,11 +99,11 @@ func TestClusterFail(t *testing.T) {
 
 	cluster := NewCluster("namespace-4", "cluster-4")
 
-	err := cluster.Fail()
+	err := cluster.FailReason(CreateMCISFailedReason, "failed create mcis")
 	if err != nil {
 		t.Fatalf("error cluster.Fail() (cause=%v)", err)
 	}
-	if cluster.Status != STATUS_FAILED {
+	if cluster.Status.Phase != ClusterPhaseFailed {
 		t.Fatalf("error cluster.Fail() NOT_STATUS_FAILED (cause=%v)", err)
 	}
 }

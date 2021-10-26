@@ -30,12 +30,19 @@ definitions:
           $ref: '#/definitions/model.Node'
         type: array
       status:
-        enum:
-        - created
-        - provisioning
-        - completed
-        - failed
-        type: string
+        properties:
+          message:
+            type: string
+          phase:
+            enum:
+            - Pending
+            - Provisioning
+            - Provisioned
+            - Failed
+            type: string
+          reason:
+            type: string
+        type: object
     type: object
   model.ClusterList:
     properties:

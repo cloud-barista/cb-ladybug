@@ -58,7 +58,7 @@ message ListClusterInfoResponse {
 message ClusterInfo {
 	string name = 1 [json_name="name", (gogoproto.jsontag) = "name", (gogoproto.moretags) = "yaml:\"name\""];
 	string kind = 2 [json_name="kind", (gogoproto.jsontag) = "kind", (gogoproto.moretags) = "yaml:\"kind\""];
-	string status = 3 [json_name="status", (gogoproto.jsontag) = "status", (gogoproto.moretags) = "yaml:\"status\""];     
+	ClusterStatusInfo status = 3 [json_name="status", (gogoproto.jsontag) = "status", (gogoproto.moretags) = "yaml:\"status\""];     
 	string mcis = 4 [json_name="mcis", (gogoproto.jsontag) = "mcis", (gogoproto.moretags) = "yaml:\"mcis\""];     
 	string namespace = 5 [json_name="namespace", (gogoproto.jsontag) = "namespace", (gogoproto.moretags) = "yaml:\"namespace\""];     
 	string cluster_config = 6 [json_name="clusterConfig", (gogoproto.jsontag) = "clusterConfig", (gogoproto.moretags) = "yaml:\"clusterConfig\""];
@@ -103,6 +103,12 @@ message ClusterAllQryRequest {
 message ClusterQryRequest {
 	string namespace = 1 [json_name="namespace", (gogoproto.jsontag) = "namespace", (gogoproto.moretags) = "yaml:\"namespace\""]; 
 	string cluster = 2 [json_name="cluster", (gogoproto.jsontag) = "cluster", (gogoproto.moretags) = "yaml:\"cluster\""]; 
+}
+
+message ClusterStatusInfo {
+	string phase = 1 [json_name="phase", (gogoproto.jsontag) = "phase", (gogoproto.moretags) = "yaml:\"phase\""];  
+	string reason = 2 [json_name="reason", (gogoproto.jsontag) = "reason", (gogoproto.moretags) = "yaml:\"reason\""];  
+	string message = 3 [json_name="message", (gogoproto.jsontag) = "message", (gogoproto.moretags) = "yaml:\"message\""];  
 }
 
 //////////////////////////////////

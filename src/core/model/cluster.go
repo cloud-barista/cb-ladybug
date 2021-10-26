@@ -2,24 +2,48 @@ package model
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
 	"strings"
 
 	"github.com/cloud-barista/cb-mcks/src/core/common"
 	"github.com/cloud-barista/cb-mcks/src/utils/lang"
 )
 
+type ClusterPhase string
+type ClusterReason string
+
 const (
-	STATUS_CREATED      = "created"
-	STATUS_PROVISIONING = "provisioning"
-	STATUS_COMPLETED    = "completed"
-	STATUS_FAILED       = "failed"
+	ClusterPhasePending      = ClusterPhase("Pending")
+	ClusterPhaseProvisioning = ClusterPhase("Provisioning")
+	ClusterPhaseProvisioned  = ClusterPhase("Provisioned")
+	ClusterPhaseFailed       = ClusterPhase("Failed")
+	ClusterPhaseDeleting     = ClusterPhase("Deleting")
+
+	GetMCISFailedReason                       = ClusterReason("GetMCISFailedReason")
+	AlreadyExistMCISFailedReason              = ClusterReason("AlreadyExistMCISFailedReason")
+	CreateMCISFailedReason                    = ClusterReason("CreateMCISFailedReason")
+	GetControlPlaneConnectionInfoFailedReason = ClusterReason("GetControlPlaneConnectionInfoFailedReason")
+	GetWorkerConnectionInfoFailedReason       = ClusterReason("GetWorkerConnectionInfoFailedReason")
+	CreateVpcFailedReason                     = ClusterReason("CreateVpcFailedReason")
+	CreateSecurityGroupFailedReason           = ClusterReason("CreateSecurityGroupFailedReason")
+	CreateSSHKeyFailedReason                  = ClusterReason("CreateSSHKeyFailedReason")
+	CreateVmImageFailedReason                 = ClusterReason("CreateVmImageFailedReason")
+	CreateVmSpecFailedReason                  = ClusterReason("CreateVmSpecFailedReason")
+	AddNodeEntityFailedReason                 = ClusterReason("AddNodeEntityFailedReason")
+	SetupBoostrapFailedReason                 = ClusterReason("SetupBoostrapFailedReason")
+	SetupHaproxyFailedReason                  = ClusterReason("SetupHaproxyFailedReason")
+	InitControlPlaneFailedReason              = ClusterReason("InitControlPlaneFailedReason")
+	SetupNetworkCNIFailedReason               = ClusterReason("SetupNetworkCNIFailedReason")
+	JoinControlPlaneFailedReason              = ClusterReason("JoinControlPlaneFailedReason")
+	JoinWorkerFailedReason                    = ClusterReason("JoinWorkerFailedReason")
 )
 
 type Cluster struct {
 	Model
-	Status        string `json:"status" enums:"created,provisioning,completed,failed"`
+	Status struct {
+		Phase   ClusterPhase  `json:"phase" enums:"Pending,Provisioning,Provisioned,Failed"`
+		Reason  ClusterReason `json:"reason"`
+		Message string        `json:"message"`
+	} `json:"status"`
 	MCIS          string `json:"mcis"`
 	Namespace     string `json:"namespace"`
 	ClusterConfig string `json:"clusterConfig"`
@@ -38,7 +62,12 @@ func NewCluster(namespace string, name string) *Cluster {
 	return &Cluster{
 		Model:     Model{Kind: KIND_CLUSTER, Name: name},
 		Namespace: namespace,
-		Nodes:     []Node{},
+		Status: struct {
+			Phase   ClusterPhase  "json:\"phase\" enums:\"Pending,Provisioning,Provisioned,Failed\""
+			Reason  ClusterReason "json:\"reason\""
+			Message string        "json:\"message\""
+		}{Phase: ClusterPhasePending, Reason: "", Message: ""},
+		Nodes: []Node{},
 	}
 }
 
@@ -50,23 +79,19 @@ func NewClusterList(namespace string) *ClusterList {
 	}
 }
 
-func (self *Cluster) Insert() error {
-	self.Status = STATUS_CREATED
+func (self *Cluster) UpdatePhase(phase ClusterPhase) error {
+	self.Status.Phase = phase
+	if phase != ClusterPhaseFailed {
+		self.Status.Reason = ""
+		self.Status.Message = ""
+	}
 	return self.putStore()
 }
 
-func (self *Cluster) Update() error {
-	self.Status = STATUS_PROVISIONING
-	return self.putStore()
-}
-
-func (self *Cluster) Complete() error {
-	self.Status = STATUS_COMPLETED
-	return self.putStore()
-}
-
-func (self *Cluster) Fail() error {
-	self.Status = STATUS_FAILED
+func (self *Cluster) FailReason(reason ClusterReason, message string) error {
+	self.Status.Phase = ClusterPhaseFailed
+	self.Status.Reason = reason
+	self.Status.Message = message
 	return self.putStore()
 }
 
@@ -80,23 +105,24 @@ func (self *Cluster) putStore() error {
 	return nil
 }
 
-func (self *Cluster) Select() error {
+func (self *Cluster) Select() (bool, error) {
+	exists := false
+
 	key := lang.GetStoreClusterKey(self.Namespace, self.Name)
 	keyValue, err := common.CBStore.Get(key)
 	if err != nil {
-		return err
+		return exists, err
 	}
-	if keyValue == nil {
-		return errors.New(fmt.Sprintf("cluster `%s` does not exist", key))
+	exists = (keyValue != nil)
+	if exists {
+		json.Unmarshal([]byte(keyValue.Value), &self)
+		err = getClusterNodes(self)
+		if err != nil {
+			return exists, err
+		}
 	}
-	json.Unmarshal([]byte(keyValue.Value), &self)
 
-	err = getClusterNodes(self)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return exists, nil
 }
 
 func (self *Cluster) Delete() error {
