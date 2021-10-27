@@ -516,13 +516,24 @@ var doc = `{
                     }
                 },
                 "status": {
-                    "type": "string",
-                    "enum": [
-                        "created",
-                        "provisioning",
-                        "completed",
-                        "failed"
-                    ]
+                    "type": "object",
+                    "properties": {
+                        "message": {
+                            "type": "string"
+                        },
+                        "phase": {
+                            "type": "string",
+                            "enum": [
+                                "Pending",
+                                "Provisioning",
+                                "Provisioned",
+                                "Failed"
+                            ]
+                        },
+                        "reason": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
         },

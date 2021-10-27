@@ -337,9 +337,11 @@ func RemoveNode(namespace string, clusterName string, nodeName string) (*model.S
 
 func getCPLeaderNode(namespace string, clusterName string) (*model.Node, error) {
 	cluster := model.NewCluster(namespace, clusterName)
-	err := cluster.Select()
+	exists, err := cluster.Select()
 	if err != nil {
 		return nil, err
+	} else if exists == false {
+		return nil, errors.New(fmt.Sprintf("Cluster not found (namespace=%s, cluster=%s)", namespace, clusterName))
 	}
 	cpLeaderName := cluster.CpLeader
 	if cpLeaderName == "" {
@@ -357,9 +359,11 @@ func getCPLeaderNode(namespace string, clusterName string) (*model.Node, error) 
 
 func getClusterNetworkCNI(namespace string, clusterName string) (string, error) {
 	cluster := model.NewCluster(namespace, clusterName)
-	err := cluster.Select()
+	exists, err := cluster.Select()
 	if err != nil {
 		return "", err
+	} else if exists == false {
+		return "", errors.New(fmt.Sprintf("Cluster not found (namespace=%s, cluster=%s)", namespace, clusterName))
 	}
 
 	networkCni := cluster.NetworkCni

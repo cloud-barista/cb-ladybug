@@ -115,12 +115,13 @@ func CheckMcis(namespace string, mcisName string) error {
 
 func CheckClusterStatus(namespace string, clusterName string) error {
 	cluster := model.NewCluster(namespace, clusterName)
-	err := cluster.Select()
+	exists, err := cluster.Select()
 	if err != nil {
 		return err
-	}
-	if cluster.Status != model.STATUS_COMPLETED {
-		return errors.New(fmt.Sprintf("cannot add node. status is not '%s'", model.STATUS_COMPLETED))
+	} else if exists == false {
+		return errors.New(fmt.Sprintf("Cluster not found (namespace=%s, cluster=%s)", namespace, clusterName))
+	} else if cluster.Status.Phase != model.ClusterPhaseProvisioned {
+		return errors.New(fmt.Sprintf("cannot add node. status is '%s'", cluster.Status.Phase))
 	}
 	return nil
 }
