@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/cloud-barista/cb-mcks/src/core/model"
 	"github.com/cloud-barista/cb-mcks/src/core/model/tumblebug"
 	"github.com/cloud-barista/cb-mcks/src/utils/config"
 	logger "github.com/sirupsen/logrus"
@@ -56,7 +57,7 @@ func (nodeConfigInfo *NodeConfigInfo) CreateSshKey(namespace string) (*tumblebug
 	}
 	logger.Infof("start create ssh key (name=%s)", sshkeyName)
 	sshKey := tumblebug.NewSSHKey(namespace, sshkeyName, nodeConfigInfo.Connection)
-	sshKey.Username = VM_USER_ACCOUNT
+	sshKey.Username = model.VM_USER_ACCOUNT
 	exists, e := sshKey.GET()
 	if e != nil {
 		return nil, e

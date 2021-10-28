@@ -26,7 +26,7 @@ import (
 func ListCluster(c echo.Context) error {
 	clusterList, err := service.ListCluster(c.Param("namespace"))
 	if err != nil {
-		logger.Error(err)
+		logger.Infof("respond to an error (ListCluster) message=%v'", err)
 		return app.SendMessage(c, http.StatusBadRequest, err.Error())
 	}
 
@@ -54,7 +54,7 @@ func GetCluster(c echo.Context) error {
 
 	cluster, err := service.GetCluster(c.Param("namespace"), c.Param("cluster"))
 	if err != nil {
-		logger.Infof("not found a cluster (namespace=%s, cluster=%s, cause=%s)", c.Param("namespace"), c.Param("cluster"), err)
+		logger.Infof("respond to an error (GetCluster) message=%v'", err)
 		return app.SendMessage(c, http.StatusNotFound, err.Error())
 	}
 
@@ -92,12 +92,12 @@ func CreateCluster(c echo.Context) error {
 
 	cluster, err := service.CreateCluster(c.Param("namespace"), clusterReq)
 	if err != nil {
-		logger.Error(err)
+		logger.Infof("respond to an error (CreateCluster) message=%v", err)
 		return app.SendMessage(c, http.StatusInternalServerError, err.Error())
 	}
 
 	duration := time.Since(start)
-	logger.Info("duration := ", duration)
+	logger.Info("CreateCluster duration := ", duration)
 	return app.Send(c, http.StatusOK, cluster)
 }
 
@@ -122,7 +122,7 @@ func DeleteCluster(c echo.Context) error {
 
 	status, err := service.DeleteCluster(c.Param("namespace"), c.Param("cluster"))
 	if err != nil {
-		logger.Error(err)
+		logger.Infof("respond to an error (DeleteCluster) message=%v'", err)
 		return app.SendMessage(c, http.StatusInternalServerError, err.Error())
 	}
 
