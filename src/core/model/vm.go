@@ -14,6 +14,10 @@ import (
 	logger "github.com/sirupsen/logrus"
 )
 
+const (
+	VM_USER_ACCOUNT = "cb-user"
+)
+
 type VM struct {
 	Name            string          `json:"name"`
 	Config          string          `json:"connectionName"`
@@ -59,64 +63,112 @@ const (
 	remoteTargetPath = "/tmp"
 )
 
-func (self *VM) CheckConnectivity(sshInfo *ssh.SSHInfo) error {
-	deadline := 10
-	timeout := time.Second * time.Duration(deadline)
-	conn, err := net.DialTimeout("tcp", sshInfo.ServerPort, timeout)
+func (self *VM) SSHRun(format string, a ...interface{}) (string, error) {
+
+	address := fmt.Sprintf("%s:22", self.PublicIP)
+	command := fmt.Sprintf(format, a...)
+
+	output, err := ssh.SSHRun(
+		ssh.SSHInfo{
+			UserName:   VM_USER_ACCOUNT,
+			PrivateKey: []byte(self.Credential),
+			ServerPort: address,
+		}, command)
 	if err != nil {
-		logger.Infof(fmt.Sprintf("check connectivity failed.. retry (name=%s, server=%s, cause=%v)", self.Name, sshInfo.ServerPort, err))
+		logger.Errorf("[%s] failed to run SSH command (server=%s, cause=%v) \ncommand=%s", self.Name, address, err, command)
+	} else {
+		logger.Infof("[%s] ssh execute is completed (server=%s) \ncommand=%s \noutput=%s", self.Name, address, command, output)
+	}
+	return output, err
+}
+
+func (self *VM) SSHCopy(source string, destination string) error {
+
+	address := fmt.Sprintf("%s:22", self.PublicIP)
+
+	err := ssh.SSHCopy(
+		ssh.SSHInfo{
+			UserName:   VM_USER_ACCOUNT,
+			PrivateKey: []byte(self.Credential),
+			ServerPort: address,
+		}, source, destination)
+	if err != nil {
+		logger.Errorf("[%s] failed to copying files (server=%s, source=%s, destination=%s, cause=%v)", self.Name, address, source, destination, err)
+	} else {
+		logger.Infof("[%s] file copy is completed (server=%s, source=%s, destination=%s)", self.Name, address, source, destination)
+	}
+	return err
+}
+
+func (self *VM) checkConnectivity() error {
+
+	address := fmt.Sprintf("%s:22", self.PublicIP)
+	timeout := time.Second * time.Duration(10)
+	conn, err := net.DialTimeout("tcp", address, timeout)
+	if err != nil {
+		logger.Warnf("[%s] failed to checking connectivity.. retry (cause=%v)", self.Name, err)
 		return err
 	}
 	if conn != nil {
 		defer conn.Close()
+		logger.Infof("[%s] check connectivity is completed (server=%s)", self.Name, address)
 		return nil
 	}
 
-	return errors.New(fmt.Sprintf("Conn is nil (name=%s, server=%s)", self.Name, sshInfo.ServerPort))
+	logger.Errorf("[%s] failed to checking connectivity (server=%s)", self.Name, address)
+	return errors.New(fmt.Sprintf("Check connectivity failed. (vm=%s, cause=connection is nil)", self.Name))
 }
 
-func (self *VM) CheckConnectSSH(sshInfo *ssh.SSHInfo) error {
-	cmd := "/bin/hostname"
-	_, err := ssh.SSHRun(*sshInfo, cmd)
-	if err != nil {
-		logger.Infof(fmt.Sprintf("check connect ssh failed.. retry (server=%s, cause=%s)", sshInfo.ServerPort, err))
-		return err
+func (self *VM) createAddonsDirectory(networkCni string) error {
+
+	addonsPath := fmt.Sprintf("%s/addons/%s", remoteTargetPath, networkCni)
+	if _, err := self.SSHRun("mkdir -p %s", addonsPath); err != nil {
+		return errors.New(fmt.Sprintf("Failed to create a addon directory. (node=%s, path=%s)", self.Name, addonsPath))
 	}
 	return nil
 }
 
-func (self *VM) ConnectionTest(sshInfo *ssh.SSHInfo) error {
+func (self *VM) CheckConnectSSH() error {
+	if _, err := self.SSHRun("/bin/hostname"); err != nil {
+		return errors.New(fmt.Sprintf("Failed to check connect VM. (vm=%s)", self.Name))
+	}
+	return nil
+}
+
+func (self *VM) ConnectionTest() error {
+
+	logger.Infof("[%s] start the process of 'connection test'", self.Name)
 	retryCheck := 15
 	for i := 0; i < retryCheck; i++ {
-		err := self.CheckConnectivity(sshInfo)
+		err := self.checkConnectivity()
 		if err == nil {
-			logger.Infof(fmt.Sprintf("check connectivity passed (name=%s, server=%s)", self.Name, sshInfo.ServerPort))
-
-			err = self.CheckConnectSSH(sshInfo)
+			err = self.CheckConnectSSH()
 			if err == nil {
-				logger.Infof(fmt.Sprintf("check connect ssh passed (name=%s, server=%s)", self.Name, sshInfo.ServerPort))
 				break
 			}
 		}
 		if i == retryCheck-1 {
-			logger.Warnf(fmt.Sprintf("failed to test connection (name=%s, server=%s)", self.Name, sshInfo.ServerPort))
-			return errors.New(fmt.Sprintf("Cannot do ssh, the port is not opened (name=%s, server=%s)", self.Name, sshInfo.ServerPort))
+			logger.Errorf("[%s] Connection retry test count exceeded.", self.Name)
+			return errors.New(fmt.Sprintf("Cannot do ssh, the port is not opened. (vm=%s, connection retry test count exceeded)", self.Name))
 		}
 		time.Sleep(2 * time.Second)
 	}
+	logger.Infof("[%s] completed the 'connection test' process", self.Name)
 	return nil
 }
 
-func (self *VM) CopyScripts(sshInfo *ssh.SSHInfo, networkCni string) error {
+func (self *VM) CopyScripts(networkCni string) error {
+
+	logger.Infof("[%s] start the process of 'copy script files'", self.Name)
+
 	sourcePath := fmt.Sprintf("%s/src/scripts", *config.Config.AppRootPath)
 	sourceFiles := []string{config.BOOTSTRAP_FILE, config.SYSTEMD_SERVICE_FILE}
 	if self.Role == config.CONTROL_PLANE && self.IsCPLeader {
 		sourceFiles = append(sourceFiles, config.INIT_FILE)
 		sourceFiles = append(sourceFiles, config.HA_PROXY_FILE)
 
-		err := self.CreateAddonsDirectory(sshInfo, networkCni)
-		if err != nil {
-			return errors.New(fmt.Sprintf("create addons directory error (name=%s, cause=%v)", self.Name, err))
+		if err := self.createAddonsDirectory(networkCni); err != nil {
+			return err
 		}
 		cniFiles := getCniFiles(networkCni)
 		sourceFiles = append(sourceFiles, cniFiles...)
@@ -127,33 +179,21 @@ func (self *VM) CopyScripts(sshInfo *ssh.SSHInfo, networkCni string) error {
 		sourceFiles = append(sourceFiles, config.MCKS_BOOTSTRAP_KILO_FILE)
 	}
 
-	logger.Infof("start script file copy (vm=%s, src=%s, dest=%s)\n", self.Name, sourcePath, remoteTargetPath)
 	for _, f := range sourceFiles {
 		src := fmt.Sprintf("%s/%s", sourcePath, f)
 		dest := fmt.Sprintf("%s/%s", remoteTargetPath, f)
-		if err := ssh.SSHCopy(*sshInfo, src, dest); err != nil {
-			return errors.New(fmt.Sprintf("copy scripts error (server=%s, cause=%s)", sshInfo.ServerPort, err))
+		if err := self.SSHCopy(src, dest); err != nil {
+			return err
 		}
 	}
-	logger.Infof("end script file copy (vm=%s, server=%s)\n", self.Name, sshInfo.ServerPort)
+	logger.Infof("[%s] completed the 'copy script files' process", self.Name)
 	return nil
 }
 
-func (self *VM) CreateAddonsDirectory(sshInfo *ssh.SSHInfo, networkCni string) error {
-	addonsPath := fmt.Sprintf("%s/addons/%s", remoteTargetPath, networkCni)
+func (self *VM) SetSystemd(networkCni string) error {
 
-	logger.Infof("create addons directory (vm=%s, path=%s)\n", self.Name, addonsPath)
+	logger.Infof("[%s] start the process of 'set systemd'", self.Name)
 
-	cmd := fmt.Sprintf("mkdir -p %s", addonsPath)
-	logger.Infof("[CreateAddonsDirectory] %s $ %s", self.Name, cmd)
-	_, err := ssh.SSHRun(*sshInfo, cmd)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (self *VM) SetSystemd(sshInfo *ssh.SSHInfo, networkCni string) error {
 	var bsFile string
 	if networkCni == config.NETWORKCNI_CANAL {
 		bsFile = config.MCKS_BOOTSTRAP_CANAL_FILE
@@ -161,38 +201,38 @@ func (self *VM) SetSystemd(sshInfo *ssh.SSHInfo, networkCni string) error {
 		bsFile = config.MCKS_BOOTSTRAP_KILO_FILE
 	}
 
-	cmd := fmt.Sprintf("cd %s;./%s %s", remoteTargetPath, bsFile, self.PublicIP)
-	logger.Infof("[SetSystemd] %s $ %s", self.Name, cmd)
-	_, err := ssh.SSHRun(*sshInfo, cmd)
-	if err != nil {
-		return errors.New(fmt.Sprintf("create mcks-bootstrap error (name=%s)", self.Name))
+	if _, err := self.SSHRun("cd %s;./%s %s", remoteTargetPath, bsFile, self.PublicIP); err != nil {
+		return errors.New(fmt.Sprintf("Failed to execute bootstrap shell. (vm=%s, shell=%s)", self.Name, bsFile))
 	}
 
-	cmd = fmt.Sprintf("cd %s;./%s", remoteTargetPath, config.SYSTEMD_SERVICE_FILE)
-	logger.Infof("[SetSystemd] %s $ %s", self.Name, cmd)
-	_, err = ssh.SSHRun(*sshInfo, cmd)
-	if err != nil {
-		return errors.New(fmt.Sprintf("set systemd service error (name=%s)", self.Name))
+	if _, err := self.SSHRun("cd %s;./%s", remoteTargetPath, config.SYSTEMD_SERVICE_FILE); err != nil {
+		return errors.New(fmt.Sprintf("Failed to execute systemd shell. (vm=%s, shell=%s)", self.Name, bsFile))
 	}
+
+	logger.Infof("[%s] completed the 'set systemd' process", self.Name)
 	return nil
 }
 
-func (self *VM) Bootstrap(sshInfo *ssh.SSHInfo) error {
-	cmd := fmt.Sprintf("cd %s;./%s %s", remoteTargetPath, config.BOOTSTRAP_FILE, self.PublicIP)
+func (self *VM) Bootstrap() error {
 
-	logger.Infof("[Bootstrap] %s $ %s", self.Name, cmd)
-	result, err := ssh.SSHRun(*sshInfo, cmd)
-	if err != nil {
-		return errors.New("k8s bootstrap error")
+	logger.Infof("[%s] start the process of 'bootstrap'", self.Name)
+
+	if output, err := self.SSHRun("cd %s;./%s %s %s", remoteTargetPath, config.BOOTSTRAP_FILE, self.Name, self.PublicIP); err != nil {
+		return errors.New(fmt.Sprintf("Failed to execute bootstrap shell. (vm=%s, shell=%s)", self.Name, config.BOOTSTRAP_FILE))
+	} else if !strings.Contains(output, "kubectl set on hold") {
+		logger.Errorf("[%s] failed to execute bootstrap shell (cause='kubectl not set on hold')", self.Name)
+		return errors.New(fmt.Sprintf("Failed to execute bootstrap shell. (vm=%s, cause='kubectl not set on hold', cause=kubectl set on hold)", self.Name))
 	}
-	if strings.Contains(result, "kubectl set on hold") {
-		return nil
-	} else {
-		return errors.New(fmt.Sprintf("k8s bootstrap failed (name=%s)", self.Name))
-	}
+
+	logger.Infof("[%s] complted the'bootstrap process", self.Name)
+	return nil
+
 }
 
-func (self *VM) InstallHAProxy(sshInfo *ssh.SSHInfo, IPs []string) error {
+func (self *VM) InstallHAProxy(IPs []string) error {
+
+	logger.Infof("[%s] start the process of 'set up HA'", self.Name)
+
 	var servers string
 	for i, ip := range IPs {
 		servers += fmt.Sprintf("  server  api%d  %s:6443  check", i+1, ip)
@@ -200,48 +240,44 @@ func (self *VM) InstallHAProxy(sshInfo *ssh.SSHInfo, IPs []string) error {
 			servers += "\\n"
 		}
 	}
-	cmd := fmt.Sprintf("sudo sed 's/^{{SERVERS}}/%s/g' %s/%s", servers, remoteTargetPath, config.HA_PROXY_FILE)
-	logger.Infof("[InstallHAProxy] %s $ %s", self.Name, cmd)
-	result, err := ssh.SSHRun(*sshInfo, cmd)
-	if err != nil {
-		logger.Warnf("get haproxy command error (name=%s, cause=%v)", self.Name, err)
-		return err
+
+	if output, err := self.SSHRun("sudo sed 's/^{{SERVERS}}/%s/g' %s/%s", servers, remoteTargetPath, config.HA_PROXY_FILE); err != nil {
+		return errors.New(fmt.Sprintf("Failed to set up haproxy. (vm=%s, shell=%s)", self.Name, config.HA_PROXY_FILE))
+	} else {
+		if _, err = self.SSHRun(output); err != nil {
+			return errors.New(fmt.Sprintf("Failed to set up haproxy. (vm=%s, command='%s')", self.Name, output))
+		}
 	}
-	logger.Infof("[InstallHAProxy] %s $ %s", self.Name, result)
-	_, err = ssh.SSHRun(*sshInfo, result)
-	if err != nil {
-		logger.Warnf("install haproxy error (name=%s, cause=%v)", self.Name, err)
-		return err
-	}
+
+	logger.Infof("[%s] completed the 'set up HA' process", self.Name)
 	return nil
 }
 
-func (self *VM) ControlPlaneInit(sshInfo *ssh.SSHInfo, reqKubernetes Kubernetes) ([]string, string, error) {
+func (self *VM) ControlPlaneInit(reqKubernetes Kubernetes) ([]string, string, error) {
+
+	logger.Infof("[%s] start the process of 'control-plane init.'", self.Name)
+
 	var joinCmd []string
 
-	cmd := fmt.Sprintf("cd %s;./%s %s %s %s %s", remoteTargetPath, config.INIT_FILE, reqKubernetes.PodCidr, reqKubernetes.ServiceCidr, reqKubernetes.ServiceDnsDomain, self.PublicIP)
-	logger.Infof("[ControlPlaneInit] %s $ %s", self.Name, cmd)
-	cpInitResult, err := ssh.SSHRun(*sshInfo, cmd)
-	if err != nil {
-		logger.Warnf("control plane init error (name=%s, cause=%v)", self.Name, err)
-		return nil, "", errors.New("k8s control plane node init error")
-	}
-	if strings.Contains(cpInitResult, "Your Kubernetes control-plane has initialized successfully") {
-		joinCmd = getJoinCmd(cpInitResult)
+	if output, err := self.SSHRun("cd %s;./%s %s %s %s %s", remoteTargetPath, config.INIT_FILE, reqKubernetes.PodCidr, reqKubernetes.ServiceCidr, reqKubernetes.ServiceDnsDomain, self.PublicIP); err != nil {
+		return nil, "", errors.New(fmt.Sprintf("Failed to initialize control-plane. (vm=%s, shell=%s)", self.Name, config.INIT_FILE))
+	} else if strings.Contains(output, "Your Kubernetes control-plane has initialized successfully") {
+		joinCmd = getJoinCmd(output)
 	} else {
-		return nil, "", errors.New(fmt.Sprintf("control palne init failed (name=%s)", self.Name))
+		logger.Errorf("[%s] failed to initialize control-plane (the output not contains 'Your Kubernetes control-plane has initialized successfully')")
+		return nil, "", errors.New(fmt.Sprintf("Failed to initialize control-plane. (vm=%s)", self.Name))
 	}
 
-	cmd = "sudo cat /etc/kubernetes/admin.conf"
-	clusterConfig, err := ssh.SSHRun(*sshInfo, cmd)
-	if err != nil {
-		logger.Errorf("Error while running cmd %s (vm=%s, cause=%v)", cmd, self.Name, err)
-	}
+	ouput, _ := self.SSHRun("sudo cat /etc/kubernetes/admin.conf")
 
-	return joinCmd, clusterConfig, nil
+	logger.Infof("[%s] completed the 'control-plane init.' process", self.Name)
+	return joinCmd, ouput, nil
 }
 
-func (self *VM) InstallNetworkCNI(sshInfo *ssh.SSHInfo, networkCni string) error {
+func (self *VM) InstallNetworkCNI(networkCni string) error {
+
+	logger.Infof("[%s] start the process of 'set up network-cni'", self.Name)
+
 	var cmd string
 	cniFiles := getCniFiles(networkCni)
 
@@ -249,64 +285,64 @@ func (self *VM) InstallNetworkCNI(sshInfo *ssh.SSHInfo, networkCni string) error
 		cmd += fmt.Sprintf("sudo kubectl apply -f %s/%s --kubeconfig=/etc/kubernetes/admin.conf;\n", remoteTargetPath, file)
 	}
 
-	logger.Infof("[InstallNetworkCNI] %s $ %s", self.Name, cmd)
-	_, err := ssh.SSHRun(*sshInfo, cmd)
-	if err != nil {
-		logger.Warnf("networkCNI install failed (name=%s, cause=%v)", self.Name, err)
-		return errors.New("NetworkCNI Install error")
+	if _, err := self.SSHRun(cmd); err != nil {
+		return errors.New(fmt.Sprintf("Failed to set up network-cni plug-in. (node=%s, command='%s')", self.Name, cmd))
 	}
+
+	logger.Infof("[%s] completed the 'set up network-cni' process", self.Name)
 	return nil
 }
 
-func (self *VM) ControlPlaneJoin(sshInfo *ssh.SSHInfo, CPJoinCmd *string) error {
+func (self *VM) ControlPlaneJoin(CPJoinCmd *string) error {
+
+	logger.Infof("[%s] start the process of 'control-plane join'", self.Name)
+
 	if *CPJoinCmd == "" {
-		return errors.New("control-plane node join command empty")
+		logger.Errorf("[%s] control-plane join-command is empty", self.Name)
+		return errors.New(fmt.Sprintf("The control-plane join-command is empty. (node=%s)", self.Name))
 	}
-	cmd := fmt.Sprintf("sudo %s", *CPJoinCmd)
-	logger.Infof("[ControlPlaneJoin] %s $ %s", self.Name, cmd)
-	result, err := ssh.SSHRun(*sshInfo, cmd)
-	if err != nil {
-		logger.Warnf("control-plane join error (name=%s, cause=%v)", self.Name, err)
-		return errors.New("control-plane node join error")
+	if output, err := self.SSHRun("sudo %s", *CPJoinCmd); err != nil {
+		return errors.New(fmt.Sprintf("Failed to join control-plane. (node=%s)", self.Name))
+	} else if strings.Contains(output, "This node has joined the cluster") {
+		if _, err = self.SSHRun("sudo systemctl restart mcks-bootstrap"); err != nil {
+			logger.Warnf("[%s] mcks-bootstrap restart error (command='sudo systemctl restart mcks-bootstrap' cause=%v)", self.Name, err)
+		}
+	} else {
+		logger.Errorf("[%s] control-plane join failed (the output not contains 'This node has joined the cluster')", self.Name)
+		return errors.New(fmt.Sprintf("Failed to join control-plane. (vm=%s)", self.Name))
 	}
 
-	if strings.Contains(result, "This node has joined the cluster") {
-		_, err = ssh.SSHRun(*sshInfo, "sudo systemctl restart mcks-bootstrap")
-		if err != nil {
-			logger.Warnf("mcks-bootstrap restart error (name=%s, cause=%v)", self.Name, err)
-		}
-		return nil
-	} else {
-		logger.Warnf("control-plane join failed (name=%s)", self.Name)
-		return errors.New(fmt.Sprintf("control-plane join failed (name=%s)", self.Name))
-	}
+	logger.Infof("[%s] completed the 'control-plane join' process", self.Name)
+	return nil
 }
 
-func (self *VM) WorkerJoin(sshInfo *ssh.SSHInfo, workerJoinCmd *string) error {
-	cmd := fmt.Sprintf("sudo %s", *workerJoinCmd)
-	logger.Infof("[WorkerJoin] %s $ %s", self.Name, cmd)
-	result, err := ssh.SSHRun(*sshInfo, cmd)
-	if err != nil {
-		logger.Warnf("worker join error (name=%s, cause=%v)", self.Name, err)
-		return errors.New(fmt.Sprintf("worker node join error (name=%s)", self.Name))
-	}
-	if strings.Contains(result, "This node has joined the cluster") {
-		_, err = ssh.SSHRun(*sshInfo, "sudo systemctl restart mcks-bootstrap")
-		if err != nil {
-			logger.Warnf("mcks-bootstrap restart error (name=%s, cause=%v)", self.Name, err)
+func (self *VM) WorkerJoin(workerJoinCmd *string) error {
+
+	logger.Infof("[%s] start the process of 'worker-node join'", self.Name)
+
+	if output, err := self.SSHRun("sudo %s", *workerJoinCmd); err != nil {
+		return errors.New(fmt.Sprintf("Failed to join worker-node. (vm=%s)", self.Name))
+	} else if strings.Contains(output, "This node has joined the cluster") {
+		if _, err = self.SSHRun("sudo systemctl restart mcks-bootstrap"); err != nil {
+			logger.Warnf("[%s] mcks-bootstrap restart error (command='sudo systemctl restart mcks-bootstrap', cause=%v)", self.Name, err)
 		}
-		return nil
 	} else {
-		logger.Warnf("worker join failed (name=%s)", self.Name)
-		return errors.New(fmt.Sprintf("worker node join failed (name=%s)", self.Name))
+		logger.Errorf("[%s] worker join failed (the output not contains 'This node has joined the cluster')", self.Name)
+		return errors.New(fmt.Sprintf("Failed to execute 'kubeadm join' command. (vm=%s)", self.Name))
 	}
+
+	logger.Infof("[%s] completed the 'worker-node join' process", self.Name)
+	return nil
+
 }
 
-func (self *VM) AddNodeLabels(sshInfo *ssh.SSHInfo) error {
-	cmd := "/bin/hostname"
-	hostName, err := ssh.SSHRun(*sshInfo, cmd)
+func (self *VM) AddNodeLabels() error {
+
+	logger.Infof("[%s] start the process of 'set node label'", self.Name)
+
+	hostName, err := self.SSHRun("/bin/hostname")
 	if err != nil {
-		return errors.New(fmt.Sprintf("ssh connection error (server=%s, cause=%s)", sshInfo.ServerPort, err))
+		return errors.New(fmt.Sprintf("Failed to get the hostname. (vm=%s)", self.Name))
 	}
 	hostName = strings.ToLower(hostName)
 
@@ -328,13 +364,11 @@ func (self *VM) AddNodeLabels(sshInfo *ssh.SSHInfo) error {
 		labels += fmt.Sprintf("%s=%s ", key, value)
 	}
 
-	cmd = fmt.Sprintf("sudo kubectl label nodes %s %s --kubeconfig=/etc/kubernetes/%s;", hostName, labels, configFile)
-	logger.Infof("[AddNodeLabels] %s $ %s", self.Name, cmd)
-	_, err = ssh.SSHRun(*sshInfo, cmd)
-	if err != nil {
-		return err
+	if _, err = self.SSHRun("sudo kubectl label nodes %s %s --kubeconfig=/etc/kubernetes/%s;", hostName, labels, configFile); err != nil {
+		return errors.New(fmt.Sprintf("Failed to set label. (node=%s, label=%s)", self.Name, labels))
 	}
 
+	logger.Infof("[%s] completed the 'set node label' process", self.Name)
 	return nil
 }
 

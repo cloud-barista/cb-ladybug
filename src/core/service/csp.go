@@ -15,8 +15,6 @@ const (
 	AZURE_IMAGE_ID   = "Canonical:UbuntuServer:18.04-LTS:latest"
 	ALIBABA_IMAGE_ID = "ubuntu_18_04_x64_20G_alibase_20210521.vhd"
 	TENCENT_IMAGE_ID = "img-pi0ii46r"
-
-	VM_USER_ACCOUNT = "cb-user"
 )
 
 // region별 AMI :  (AMI 이름 : ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-20200908, 소유자:099720109477 )

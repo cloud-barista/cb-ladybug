@@ -57,18 +57,15 @@ func GetNode(namespace string, clusterName string, nodeName string) (*model.Node
 }
 
 func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.NodeList, error) {
-	err := CheckNamespace(namespace)
-	if err != nil {
+	if err := CheckNamespace(namespace); err != nil {
 		return nil, err
 	}
 
-	err = CheckMcis(namespace, clusterName)
-	if err != nil {
+	if err := CheckMcis(namespace, clusterName); err != nil {
 		return nil, err
 	}
 
-	err = CheckClusterStatus(namespace, clusterName)
-	if err != nil {
+	if err := CheckClusterStatus(namespace, clusterName); err != nil {
 		return nil, errors.New(fmt.Sprintf("failed to get cluster status (cause=%v)", err))
 	}
 
@@ -146,7 +143,7 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 				SSHKey:       sshKey.Name,
 				Image:        image.Name,
 				Spec:         spec.Name,
-				UserAccount:  VM_USER_ACCOUNT,
+				UserAccount:  model.VM_USER_ACCOUNT,
 				UserPassword: "",
 				Description:  "",
 				Credential:   sshKey.PrivateKey,
@@ -161,74 +158,52 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 			}
 
 			// vm 생성
-			logger.Infof("start create VM (mcisname=%s, nodename=%s)", mcisName, tvm.VM.Name)
-			err := tvm.POST()
-			if err != nil {
-				logger.Warnf("create VM error (mcisname=%s, nodename=%s)", mcisName, tvm.VM.Name)
+			logger.Infof("start create VM (namespace=%s, cluster=%s, node=%s)", namespace, clusterName, tvm.VM.Name)
+			if err := tvm.POST(); err != nil {
+				logger.Warnf("create VM error (namespace=%s, cluster=%s, node=%s)", namespace, clusterName, tvm.VM.Name)
 				deleteVMs(namespace, clusterName, sTVMs)
 				return nil, err
 			}
-			logger.Infof("create VM OK.. (mcisname=%s, nodename=%s)", mcisName, tvm.VM.Name)
+			logger.Infof("create VM OK (namespace=%s, cluster=%s, node=%s)", namespace, clusterName, tvm.VM.Name)
 
 			TVMs = append(TVMs, *tvm)
 			sTVMs = append(sTVMs, *tvm)
 		}
 	}
 
-	logger.Infoln("start connect VMs")
+	logger.Infof("start connect VMs (namespace=%s, cluster=%s)", namespace, clusterName)
 	eg, _ := errgroup.WithContext(context.Background())
 
 	for _, tvm := range TVMs {
 		vm := tvm.VM
 		eg.Go(func() error {
-			sshInfo := ssh.SSHInfo{
-				UserName:   VM_USER_ACCOUNT,
-				PrivateKey: []byte(vm.Credential),
-				ServerPort: fmt.Sprintf("%s:22", vm.PublicIP),
-			}
 
 			if vm.Status != config.Running || vm.PublicIP == "" {
 				return errors.New(fmt.Sprintf("Cannot do ssh, VM IP is not Running (name=%s, ip=%s, systemMessage=%s)", vm.Name, vm.PublicIP, vm.SystemMessage))
 			}
-
-			err := vm.ConnectionTest(&sshInfo)
-			if err != nil {
+			if err := vm.ConnectionTest(); err != nil {
 				return err
 			}
-
-			err = vm.CopyScripts(&sshInfo, networkCni)
-			if err != nil {
+			if err = vm.CopyScripts(networkCni); err != nil {
 				return err
 			}
-
-			logger.Infof("set systemd service (vm=%s)", vm.Name)
-			err = vm.SetSystemd(&sshInfo, networkCni)
-			if err != nil {
+			if err = vm.SetSystemd(networkCni); err != nil {
 				return err
 			}
-
-			logger.Infof("bootstrap (vm=%s)", vm.Name)
-			err = vm.Bootstrap(&sshInfo)
-			if err != nil {
+			if err = vm.Bootstrap(); err != nil {
 				return err
 			}
-
-			logger.Infof("join (vm=%s)", vm.Name)
-			err = vm.WorkerJoin(&sshInfo, &workerJoinCmd)
-			if err != nil {
+			if err = vm.WorkerJoin(&workerJoinCmd); err != nil {
 				return err
 			}
-
-			logger.Infof("add labels (vm=%s)", vm.Name)
-			err = vm.AddNodeLabels(&sshInfo)
-			if err != nil {
-				logger.Warnf("failed to add node labels (vm=%s, cause= %s)", vm.Name, err)
+			if err = vm.AddNodeLabels(); err != nil {
+				logger.Warnf("failed to add node labels (namespace=%s, cluster=%s, node=%s, cause= %s)", namespace, clusterName, vm.Name, err)
 			}
 			return nil
 		})
 	}
 	if err := eg.Wait(); err != nil {
-		logger.Warnf("worker join error (cause=%v)", err)
+		logger.Warnf("worker join error (namespace=%s, cluster=%s, cause=%v)", namespace, clusterName, err)
 		deleteVMs(namespace, clusterName, TVMs)
 		return nil, err
 	}
@@ -248,19 +223,16 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 }
 
 func RemoveNode(namespace string, clusterName string, nodeName string) (*model.Status, error) {
-	err := CheckNamespace(namespace)
-	if err != nil {
+	if err := CheckNamespace(namespace); err != nil {
 		return nil, err
 	}
 
-	err = CheckMcis(namespace, clusterName)
-	if err != nil {
+	if err := CheckMcis(namespace, clusterName); err != nil {
 		return nil, err
 	}
 
 	node := model.NewNode(namespace, clusterName, nodeName)
-	err = node.Select()
-	if err != nil {
+	if err := node.Select(); err != nil {
 		return nil, err
 	}
 
@@ -281,19 +253,19 @@ func RemoveNode(namespace string, clusterName string, nodeName string) (*model.S
 
 	// drain node
 	sshInfo := ssh.SSHInfo{
-		UserName:   VM_USER_ACCOUNT,
+		UserName:   model.VM_USER_ACCOUNT,
 		PrivateKey: []byte(cpNode.Credential),
 		ServerPort: fmt.Sprintf("%s:22", cpNode.PublicIP),
 	}
 	cmd := fmt.Sprintf("sudo kubectl drain %s --kubeconfig=/etc/kubernetes/admin.conf --ignore-daemonsets --force --delete-local-data", hostName)
-	logger.Infof("[RemoveNode] %s $ %s", cpNode.Name, cmd)
+	logger.Infof("kubectl drain node (namespace=%s, cluster=%s, node=%s)", namespace, clusterName, nodeName)
 	result, err := ssh.SSHRun(sshInfo, cmd)
 	if err != nil {
 		status.Message = "kubectl drain failed"
 		return status, errors.New(fmt.Sprintf("%s (cause=%v)", status.Message, err))
 	}
 	if strings.Contains(result, fmt.Sprintf("node/%s drained", hostName)) || strings.Contains(result, fmt.Sprintf("node/%s evicted", hostName)) {
-		logger.Infoln("drain node success")
+		logger.Infof("drain node success (namespace=%s, cluster=%s, node=%s)", namespace, clusterName, nodeName)
 	} else {
 		status.Message = "kubectl drain failed"
 		return status, errors.New(fmt.Sprintf("%s (cause=%v)", status.Message, err))
@@ -301,14 +273,14 @@ func RemoveNode(namespace string, clusterName string, nodeName string) (*model.S
 
 	// delete node
 	cmd = fmt.Sprintf("sudo kubectl delete node %s --kubeconfig=/etc/kubernetes/admin.conf", hostName)
-	logger.Infof("[RemoveNode] %s $ %s", cpNode.Name, cmd)
+	logger.Infof("kubectl delete node (namespace=%s, cluster=%s, node=%s)", namespace, clusterName, nodeName)
 	result, err = ssh.SSHRun(sshInfo, cmd)
 	if err != nil {
 		status.Message = "kubectl delete node failed"
 		return status, errors.New(fmt.Sprintf("%s (cause=%v)", status.Message, err))
 	}
 	if strings.Contains(result, "deleted") {
-		logger.Infoln("delete node success")
+		logger.Infof("delete node success (namespace=%s, cluster=%s, node=%s)", namespace, clusterName, nodeName)
 	} else {
 		status.Message = "kubectl delete node failed"
 		return status, errors.New("kubectl delete node failed")
@@ -376,7 +348,7 @@ func getClusterNetworkCNI(namespace string, clusterName string) (string, error) 
 
 func getHostName(node *model.Node) (string, error) {
 	sshInfo := ssh.SSHInfo{
-		UserName:   VM_USER_ACCOUNT,
+		UserName:   model.VM_USER_ACCOUNT,
 		PrivateKey: []byte(node.Credential),
 		ServerPort: fmt.Sprintf("%s:22", node.PublicIP),
 	}
@@ -395,12 +367,12 @@ func getWorkerJoinCmdForAddNode(namespace string, clusterName string) (string, e
 		return "", err
 	}
 	sshInfo := ssh.SSHInfo{
-		UserName:   VM_USER_ACCOUNT,
+		UserName:   model.VM_USER_ACCOUNT,
 		PrivateKey: []byte(cpNode.Credential),
 		ServerPort: fmt.Sprintf("%s:22", cpNode.PublicIP),
 	}
 	cmd := "sudo kubeadm token create --print-join-command"
-	logger.Infof("[getWorkerJoinCmdForAddNode] %s $ %s", cpNode.Name, cmd)
+	logger.Infof("get a worker node join command 9namespace=%s, cluster=%s)", namespace, clusterName)
 	joinCommand, err := ssh.SSHRun(sshInfo, cmd)
 	if err != nil {
 		return "", err
@@ -441,12 +413,12 @@ func getMaxIdx(namespace string, clusterName string) (maxCpIdx int, maxWkIdx int
 }
 
 func deleteVMs(namespace string, clusterName string, TVMs []tumblebug.TVM) error {
-	logger.Infof("delete VMs")
+	logger.Infof("delete VMs (namespace=%s, cluster=%s)", namespace, clusterName)
 	for _, tvm := range TVMs {
 		vm := tumblebug.NewTVm(namespace, clusterName)
 		vm.VM.Name = tvm.VM.Name
 		if err := vm.DELETE(); err != nil {
-			logger.Errorf("failed to delete vm (nodeName=%s, cause=%v)", tvm.VM.Name, err)
+			logger.Errorf("failed to delete vm (namespace=%s, cluster=%s, node=%s, cause=%v)", namespace, clusterName, tvm.VM.Name, err)
 			continue
 		}
 	}

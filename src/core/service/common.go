@@ -10,6 +10,8 @@ import (
 	"github.com/cloud-barista/cb-mcks/src/core/model/tumblebug"
 	"github.com/cloud-barista/cb-mcks/src/utils/config"
 	"github.com/cloud-barista/cb-mcks/src/utils/lang"
+
+	logger "github.com/sirupsen/logrus"
 )
 
 type NodeConfigInfo struct {
@@ -24,16 +26,16 @@ func SetNodeConfigInfos(nodeConfigs []model.NodeConfig, role string) ([]NodeConf
 
 	for _, nodeConfig := range nodeConfigs {
 		if nodeConfig.Count < 1 {
-			return nil, errors.New(fmt.Sprintf("%s count must be at least one (connectionName=%s)", role, nodeConfig.Connection))
+			logger.Errorf("node count must be at least one (role=%s, count=%d)", role, nodeConfig.Count)
+			return nil, errors.New(fmt.Sprintf("Node count must be at least one. (role=%s, count=%d)", role, nodeConfig.Count))
 		}
 
 		conn := tumblebug.NewConnection(nodeConfig.Connection)
-		exists, err := conn.GET()
-		if err != nil {
-			return nil, errors.New(fmt.Sprintf("%s Connection connect error (connectionName=%s)", role, nodeConfig.Connection))
-		}
-		if !exists {
-			return nil, errors.New(fmt.Sprintf("%s Connection does not exist (connectionName=%s)", role, nodeConfig.Connection))
+		if exists, err := conn.GET(); err != nil {
+			return nil, errors.New(fmt.Sprintf("Connection connect error. (role=%s, connection=%s)", role, nodeConfig.Connection))
+		} else if !exists {
+			logger.Errorf("connection does not exist (role=%s, connection=%s)", role, nodeConfig.Connection)
+			return nil, errors.New(fmt.Sprintf("Connection does not exist. (role=%s, connection=%s)", role, nodeConfig.Connection))
 		}
 		csp, err := GetCSPName(conn.ProviderName)
 		if err != nil {
@@ -41,12 +43,11 @@ func SetNodeConfigInfos(nodeConfigs []model.NodeConfig, role string) ([]NodeConf
 		}
 
 		region := tumblebug.NewRegion(conn.RegionName)
-		exists, err = region.GET()
-		if err != nil {
-			return nil, errors.New(fmt.Sprintf("%s Region connect error (connectionName=%s)", role, nodeConfig.Connection))
-		}
-		if !exists {
-			return nil, errors.New(fmt.Sprintf("%s Region does not exist (connectionName=%s)", role, nodeConfig.Connection))
+		if exists, err := region.GET(); err != nil {
+			return nil, errors.New(fmt.Sprintf("Region connect error. (role=%s, connection=%s)", role, nodeConfig.Connection))
+		} else if !exists {
+			logger.Errorf("region does not exist (role=%s, connection=%s, region=%s)", role, nodeConfig.Connection, conn.RegionName)
+			return nil, errors.New(fmt.Sprintf("Region does not exist. (region=%s, connection=%s)", role, nodeConfig.Connection))
 		}
 
 		imageId, err := GetVmImageId(csp, nodeConfig.Connection, region)
@@ -54,8 +55,7 @@ func SetNodeConfigInfos(nodeConfigs []model.NodeConfig, role string) ([]NodeConf
 			return nil, err
 		}
 
-		err = CheckSpec(csp, nodeConfig.Connection, nodeConfig.Spec, role)
-		if err != nil {
+		if err = CheckSpec(csp, nodeConfig.Connection, nodeConfig.Spec, role); err != nil {
 			return nil, err
 		}
 
@@ -91,65 +91,67 @@ func GetVmImageName(name string) string {
 
 func CheckNamespace(namespace string) error {
 	ns := tumblebug.NewNS(namespace)
-	exists, err := ns.GET()
-	if err != nil {
+	if exists, err := ns.GET(); err != nil {
 		return err
-	}
-	if !exists {
-		return errors.New(fmt.Sprintf("namespace does not exist (name=%s)", namespace))
+	} else if !exists {
+		logger.Errorf("namespace does not exist (namespace=%s)", namespace)
+		return errors.New(fmt.Sprintf("Namespace does not exist. (namespace=%s)", namespace))
 	}
 	return nil
 }
 
 func CheckMcis(namespace string, mcisName string) error {
 	mcis := tumblebug.NewMCIS(namespace, mcisName)
-	exists, err := mcis.GET()
-	if err != nil {
+	if exists, err := mcis.GET(); err != nil {
 		return err
-	}
-	if !exists {
-		return errors.New(fmt.Sprintf("MCIS does not exist (name=%s)", mcisName))
+	} else if !exists {
+		logger.Errorf("MCIS does not exist (namespace=%s, mcis=%s)", namespace, mcisName)
+		return errors.New(fmt.Sprintf("MCIS does not exist. (mcis=%s)", mcisName))
 	}
 	return nil
 }
 
 func CheckClusterStatus(namespace string, clusterName string) error {
 	cluster := model.NewCluster(namespace, clusterName)
-	exists, err := cluster.Select()
-	if err != nil {
+	if exists, err := cluster.Select(); err != nil {
 		return err
 	} else if exists == false {
-		return errors.New(fmt.Sprintf("Cluster not found (namespace=%s, cluster=%s)", namespace, clusterName))
+		logger.Errorf("cluster not found(namespace=%s, mcis=%s)", namespace, clusterName)
+		return errors.New(fmt.Sprintf("Cluster not found. (namespace=%s, cluster=%s)", namespace, clusterName))
 	} else if cluster.Status.Phase != model.ClusterPhaseProvisioned {
-		return errors.New(fmt.Sprintf("cannot add node. status is '%s'", cluster.Status.Phase))
+		logger.Errorf("cannot add node. cluster status is %s (namespace=%s, mcis=%s)", cluster.Status.Phase, namespace, clusterName)
+		return errors.New(fmt.Sprintf("cannot add node. status is '%s'.", cluster.Status.Phase))
 	}
 	return nil
 }
 
 func CheckSpec(csp config.CSP, configName string, specName string, role string) error {
 	lookupSpec := tumblebug.NewLookupSpec(configName, specName)
-	err := lookupSpec.LookupSpec()
-	if err != nil {
-		return errors.New(fmt.Sprintf("failed to lookup spec (connection='%s', cause=%v)", configName, err))
+	if err := lookupSpec.LookupSpec(); err != nil {
+		return errors.New(fmt.Sprintf("Failed to lookup spec. (csp='%s', spec='%s', cause=%v)", csp, specName, err))
 	}
 
 	if lookupSpec.SpiderSpecInfo.Name == "" {
-		return errors.New(fmt.Sprintf("failed to find spec (connection='%s', specName='%s')", configName, specName))
+		logger.Errorf("spec '%s' not found (csp=%s)", csp, configName)
+		return errors.New(fmt.Sprintf("Failed to find spec. (csp='%s', spec='%s')", csp, specName))
 	}
 
 	if role == config.CONTROL_PLANE {
 		vCpuCount, err := strconv.Atoi(lookupSpec.SpiderSpecInfo.VCpu.Count)
 		if err != nil {
-			return errors.New(fmt.Sprintf("failed to convert vCpu count (connection='%s', specName='%s', vCpu.Count=%s)", configName, specName, lookupSpec.SpiderSpecInfo.VCpu.Count))
+			logger.Errorf("failed to convert vCpu count (csp=%s, spec=%s, cpu=%s)", csp, configName, specName, lookupSpec.SpiderSpecInfo.VCpu.Count)
+			return errors.New(fmt.Sprintf("Failed to convert vCpu count. (csp='%s', spec='%s', vCpu.Count=%s)", csp, specName, lookupSpec.SpiderSpecInfo.VCpu.Count))
 		}
 		if vCpuCount < 2 {
-			return errors.New(fmt.Sprintf("kubernetes control plane node needs 2 vCPU at least (connection='%s', specName='%s', vCpu.Count=%d)", configName, specName, vCpuCount))
+			logger.Errorf("kubernetes control plane node needs 2 vCPU at least (csp=%s, spec=%s, cpu=%d)", csp, configName, specName, vCpuCount)
+			return errors.New(fmt.Sprintf("Kubernetes control plane node needs 2 vCPU at least. (csp='%s', spec='%s', cpu=%d)", csp, specName, vCpuCount))
 		}
 	}
 
 	mem, err := strconv.Atoi(lookupSpec.SpiderSpecInfo.Mem)
 	if err != nil {
-		return errors.New(fmt.Sprintf("failed to convert memory (connection='%s', specName='%s', Mem=%s)", configName, specName, lookupSpec.SpiderSpecInfo.Mem))
+		logger.Errorf("Failed to convert memory (csp=%s, spec=%s, memory=%s)", csp, specName, lookupSpec.SpiderSpecInfo.Mem)
+		return errors.New(fmt.Sprintf("Failed to convert memory. (csp='%s', spec='%s', memory=%s)", csp, specName, lookupSpec.SpiderSpecInfo.Mem))
 	}
 
 	gbMem := mem
@@ -157,7 +159,8 @@ func CheckSpec(csp config.CSP, configName string, specName string, role string) 
 		gbMem = mem / 1024
 	}
 	if gbMem < 2 {
-		return errors.New(fmt.Sprintf("kubernetes node needs 2 GiB or more of RAM (connection='%s', specName='%s', mem=%dGB)", configName, specName, gbMem))
+		logger.Errorf("kubernetes node needs 2 GiB or more of RAM (csp=%s, spec=%s, memory=%dGB)", csp, specName, gbMem)
+		return errors.New(fmt.Sprintf("kubernetes node needs 2 GiB or more of RAM. (csp='%s', spec='%s', memory=%dGB)", csp, specName, gbMem))
 	}
 
 	return nil

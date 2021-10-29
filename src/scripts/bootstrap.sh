@@ -2,6 +2,10 @@
 K8S_VERSION="1.18.9-00"  # curl https://packages.cloud.google.com/apt/dists/kubernetes-xenial/main/binary-amd64/Packages
 # K8S_VERSION="1.17.8-00"
 
+# hostname
+sudo hostnamectl set-hostname $1
+
+# packages
 sudo killall apt apt-get > /dev/null 2>&1
 sudo rm -vf /var/lib/apt/lists/lock
 sudo rm -vf /var/cache/apt/archives/lock
@@ -45,4 +49,4 @@ sudo apt-get install -y wireguard
 
 # public ip nic up
 IFACE="$(ip route get 8.8.8.8 | awk '{ print $5; exit }')"
-sudo ifconfig ${IFACE}:1 $1 netmask 255.255.255.255  broadcast 0.0.0.0 up
+sudo ifconfig ${IFACE}:1 $2 netmask 255.255.255.255  broadcast 0.0.0.0 up
