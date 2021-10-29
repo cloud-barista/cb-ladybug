@@ -154,10 +154,7 @@ func CheckSpec(csp config.CSP, configName string, specName string, role string) 
 		return errors.New(fmt.Sprintf("Failed to convert memory. (csp='%s', spec='%s', memory=%s)", csp, specName, lookupSpec.SpiderSpecInfo.Mem))
 	}
 
-	gbMem := mem
-	if csp != config.CSP_TENCENT {
-		gbMem = mem / 1024
-	}
+	gbMem := mem / 1024
 	if gbMem < 2 {
 		logger.Errorf("kubernetes node needs 2 GiB or more of RAM (csp=%s, spec=%s, memory=%dGB)", csp, specName, gbMem)
 		return errors.New(fmt.Sprintf("kubernetes node needs 2 GiB or more of RAM. (csp='%s', spec='%s', memory=%dGB)", csp, specName, gbMem))

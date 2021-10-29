@@ -6,7 +6,6 @@ import (
 
 	"github.com/cloud-barista/cb-mcks/src/core/model"
 	"github.com/cloud-barista/cb-mcks/src/core/model/tumblebug"
-	"github.com/cloud-barista/cb-mcks/src/utils/config"
 	logger "github.com/sirupsen/logrus"
 )
 
@@ -52,9 +51,6 @@ func (nodeConfigInfo *NodeConfigInfo) CreateFirewall(namespace string) (*tumbleb
 
 func (nodeConfigInfo *NodeConfigInfo) CreateSshKey(namespace string) (*tumblebug.SSHKey, error) {
 	sshkeyName := fmt.Sprintf("%s-sshkey", getConfigName(nodeConfigInfo.Connection))
-	if nodeConfigInfo.Csp == config.CSP_TENCENT {
-		sshkeyName = strings.ReplaceAll(sshkeyName, "-", "") //Tencent is not allowed charactor '-'
-	}
 	logger.Infof("start create ssh key (name=%s)", sshkeyName)
 	sshKey := tumblebug.NewSSHKey(namespace, sshkeyName, nodeConfigInfo.Connection)
 	sshKey.Username = model.VM_USER_ACCOUNT
