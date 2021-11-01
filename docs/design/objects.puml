@@ -34,6 +34,17 @@ object alibabaCredential #WhiteSmoke {
 	client_id
 	client_secret
 }
+object tencentCredential #WhiteSmoke {
+	client_id
+	client_secret
+}
+object openstackCredential #WhiteSmoke {
+	identity_endpoint
+	username
+	password
+	domain_name
+	project_id
+}
 
 object config #WhiteSmoke {
 }
@@ -44,6 +55,8 @@ awsCredential	--|>	credential
 gcpCredential	--|>	credential
 azureCredential	--|>	credential
 alibabaCredential	--|>	credential
+tencentCredential	--|>	credential
+openstackCredential	--|>	credential
 config			-->		credential
 config			-->		region
 
@@ -84,6 +97,9 @@ object cluster {
 	+clusterConfig
 	+cpLeader
 	+networkCni
+	+label
+	+description
+	+createdTime
 }
 object kubernetesCluster {
 	kubernetesConfiguration
@@ -105,6 +121,7 @@ object node  {
 	+role
 	+spec
 	+csp
+	+createdTime
 	cluster-name
 }
 object controlPlane  {
