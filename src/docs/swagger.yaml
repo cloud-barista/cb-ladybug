@@ -12,7 +12,14 @@ definitions:
         type: string
       cpLeader:
         type: string
+      createdTime:
+        example: "2022-01-02 12:00:00"
+        type: string
+      description:
+        type: string
       kind:
+        type: string
+      label:
         type: string
       mcis:
         type: string
@@ -62,6 +69,10 @@ definitions:
         items:
           $ref: '#/definitions/model.NodeConfig'
         type: array
+      description:
+        type: string
+      label:
+        type: string
       name:
         example: cluster-01
         type: string
@@ -96,6 +107,9 @@ definitions:
     type: object
   model.Node:
     properties:
+      createdTime:
+        example: "2022-01-02 12:00:00"
+        type: string
       credential:
         type: string
       csp:

@@ -64,7 +64,9 @@ message ClusterInfo {
 	string cluster_config = 6 [json_name="clusterConfig", (gogoproto.jsontag) = "clusterConfig", (gogoproto.moretags) = "yaml:\"clusterConfig\""];
 	string cp_leader = 7 [json_name="cpLeader", (gogoproto.jsontag) = "cpLeader", (gogoproto.moretags) = "yaml:\"cpLeader\""];
 	string network_cni = 8 [json_name="networkCni", (gogoproto.jsontag) = "networkCni", (gogoproto.moretags) = "yaml:\"networkCni\""];
-	repeated NodeInfo nodes = 9 [json_name="nodes", (gogoproto.jsontag) = "nodes", (gogoproto.moretags) = "yaml:\"nodes\""];     
+	string label = 9 [json_name="label", (gogoproto.jsontag) = "label", (gogoproto.moretags) = "yaml:\"label\""];
+	string description = 10 [json_name="description", (gogoproto.jsontag) = "description", (gogoproto.moretags) = "yaml:\"description\""];
+	repeated NodeInfo nodes = 11 [json_name="nodes", (gogoproto.jsontag) = "nodes", (gogoproto.moretags) = "yaml:\"nodes\""];     
 }
 
 message ClusterCreateRequest {
@@ -77,6 +79,9 @@ message ClusterCreateInfo {
 	repeated NodeConfig control_plane = 2 [json_name="controlPlane", (gogoproto.jsontag) = "controlPlane", (gogoproto.moretags) = "yaml:\"controlPlane\""];  
 	repeated NodeConfig worker = 3 [json_name="worker", (gogoproto.jsontag) = "worker", (gogoproto.moretags) = "yaml:\"worker\""];  
 	Config config = 4 [json_name="config", (gogoproto.jsontag) = "config", (gogoproto.moretags) = "yaml:\"config\""];  
+	string label = 5 [json_name="label", (gogoproto.jsontag) = "label", (gogoproto.moretags) = "yaml:\"label\""];  
+	string description = 6 [json_name="description", (gogoproto.jsontag) = "description", (gogoproto.moretags) = "yaml:\"description\""];  
+	string createdTime = 7 [json_name="createdTime", (gogoproto.jsontag) = "createdTime", (gogoproto.moretags) = "yaml:\"createdTime\""];  
 }
 
 message NodeConfig {
@@ -132,6 +137,7 @@ message NodeInfo {
 	string role = 5 [json_name="role", (gogoproto.jsontag) = "role", (gogoproto.moretags) = "yaml:\"role\""];
 	string spec = 6 [json_name="spec", (gogoproto.jsontag) = "spec", (gogoproto.moretags) = "yaml:\"spec\""];
 	string csp = 7 [json_name="csp", (gogoproto.jsontag) = "csp", (gogoproto.moretags) = "yaml:\"csp\""];
+	string createdTime = 8 [json_name="createdTime", (gogoproto.jsontag) = "createdTime", (gogoproto.moretags) = "yaml:\"createdTime\""];  
 }
 
 message NodeCreateRequest {

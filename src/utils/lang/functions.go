@@ -121,3 +121,8 @@ func GetOnlyLettersAndNumbers(name string) string {
 
 	return val
 }
+
+func GetNowUTC() string {
+	t := time.Now().UTC()
+	return t.Format(time.RFC3339)
+}

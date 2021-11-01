@@ -20,6 +20,9 @@
     clusterConfig: "",
     cpLeader: "",
     networkCni: "",
+    label: "",
+    description: "",
+    createdTime: "",
     nodes: [
       {
         name: "",
@@ -28,6 +31,7 @@
         role: "control-plane",
         spec: "",
         csp: "",
+        createdTime: "",
       },
       {
         name: "",
@@ -36,6 +40,7 @@
         role: "worker",
         spec: "",
         csp: "",
+        createdTime: "",
       },
       ...
     ]
@@ -59,6 +64,9 @@
 |clusterConfig  |클러스터 연결정보            |string |Kubernetes 인 경우 kubeconfig.yaml       |
 |cpLeader       |control plane leader 노드명  |string |                                         |
 |networkCni     |network CNI 정보             |string |                                         |
+|label          |label                       |string |                                         |
+|description    |description                 |string |                                         |
+|createdTime    |생성일자                      |string |                                         |
 
 ### ClusterPhase
 > 프로비저닝 단계
@@ -101,3 +109,4 @@
 |role           |역할               |string |control-plane/worker |
 |spec           |spec               |string |                     |
 |csp            |csp 정보           |string |                     |
+|createdTime    |생성일자            |string |                    |

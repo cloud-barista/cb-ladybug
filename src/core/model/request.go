@@ -5,6 +5,8 @@ type ClusterReq struct {
 	ControlPlane []NodeConfig `json:"controlPlane"`
 	Worker       []NodeConfig `json:"worker"`
 	Config       Config       `json:"config"`
+	Label        string       `json:"label"`
+	Description  string       `json:"description"`
 }
 
 type NodeReq struct {

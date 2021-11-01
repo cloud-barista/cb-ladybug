@@ -490,7 +490,17 @@ var doc = `{
                 "cpLeader": {
                     "type": "string"
                 },
+                "createdTime": {
+                    "type": "string",
+                    "example": "2022-01-02 12:00:00"
+                },
+                "description": {
+                    "type": "string"
+                },
                 "kind": {
+                    "type": "string"
+                },
+                "label": {
                     "type": "string"
                 },
                 "mcis": {
@@ -564,6 +574,12 @@ var doc = `{
                         "$ref": "#/definitions/model.NodeConfig"
                     }
                 },
+                "description": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string",
                     "example": "cluster-01"
@@ -613,6 +629,10 @@ var doc = `{
         "model.Node": {
             "type": "object",
             "properties": {
+                "createdTime": {
+                    "type": "string",
+                    "example": "2022-01-02 12:00:00"
+                },
                 "credential": {
                     "type": "string"
                 },

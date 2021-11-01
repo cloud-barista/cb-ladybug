@@ -19,6 +19,7 @@ type Node struct {
 	Role        string     `json:"role" enums:"control-plane,worker"`
 	Spec        string     `json:"spec"`
 	Csp         config.CSP `json:"csp" enums:"aws,gcp,azure,alibaba"`
+	CreatedTime string     `json:"createdTime" example:"2022-01-02 12:00:00" default:""`
 }
 
 type NodeList struct {

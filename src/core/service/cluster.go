@@ -81,6 +81,8 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 	// start creating a cluster
 	cluster = model.NewCluster(namespace, clusterName)
 	cluster.NetworkCni = req.Config.Kubernetes.NetworkCni
+	cluster.Label = req.Label
+	cluster.Description = req.Description
 
 	//update phase(provisioning)
 	if err := cluster.UpdatePhase(model.ClusterPhaseProvisioning); err != nil {
@@ -334,7 +336,9 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 	logger.Infof("end add node labels (namespace=%s, cluster=%s)", namespace, clusterName)
 
 	cluster.UpdatePhase(model.ClusterPhaseProvisioned)
-	cluster.Nodes = nodes
+
+	nodeList, _ := updateNodesCreatedTime(namespace, clusterName, &nodes)
+	cluster.Nodes = nodeList
 
 	return cluster, nil
 }
@@ -385,6 +389,7 @@ func DeleteCluster(namespace string, clusterName string) (*model.Status, error) 
 	status.Message = fmt.Sprintf("cluster %s has been deleted", mcisName)
 	return status, nil
 }
+
 func cleanMCIS(mcis *tumblebug.MCIS, nodesModel *[]model.Node) error {
 
 	logger.Infof("clean MCIS (mcis=%s)", mcis.Name)
@@ -430,4 +435,24 @@ func deleteMCIS(mcis *tumblebug.MCIS) error {
 
 	logger.Infof("delete MCIS OK.. (mcis=%s)", mcisName)
 	return nil
+}
+
+func updateNodesCreatedTime(namespace string, clusterName string, nodesModel *[]model.Node) ([]model.Node, error) {
+	for _, node := range *nodesModel {
+		node.CreatedTime = lang.GetNowUTC()
+		if err := node.Insert(); err != nil {
+			logger.Warnf("failed to update node's createdtime (mcis=%s, cause=%v)", clusterName, err)
+		}
+	}
+
+	var nodes []model.Node
+	nodeList := model.NewNodeList(namespace, clusterName)
+	err := nodeList.SelectList()
+	if err != nil {
+		logger.Warnf("failed to select node list (mcis=%s, cause=%v)", clusterName, err)
+		nodes = *nodesModel
+	}
+	nodes = nodeList.Items
+
+	return nodes, nil
 }

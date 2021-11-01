@@ -51,6 +51,8 @@ create() {
 		resp=$(curl -sX POST ${c_URL_MCKS_NS}/clusters -H "${c_CT}" -d @- <<EOF
 		{
 			"name": "${v_CLUSTER_NAME}",
+			"label": "mcks label test",
+			"description": "mcks description test",
 			"config": {
 				"kubernetes": {
 					"networkCni": "kilo",
@@ -84,6 +86,8 @@ EOF
 			"namespace":  "'${v_NAMESPACE}'",
 			"ReqInfo": {
 					"name": "'${v_CLUSTER_NAME}'",
+					"label": "mcks label test",
+					"description": "mcks description test",
 					"config": {
 						"kubernetes": {
 							"networkCni": "kilo",

@@ -53,6 +53,9 @@ type Cluster struct {
 	ClusterConfig string `json:"clusterConfig"`
 	CpLeader      string `json:"cpLeader"`
 	NetworkCni    string `json:"networkCni" enums:"kilo,canal"`
+	Label         string `json:"label"`
+	Description   string `json:"description"`
+	CreatedTime   string `json:"createdTime" example:"2022-01-02 12:00:00" default:""`
 	Nodes         []Node `json:"nodes"`
 }
 
@@ -88,6 +91,9 @@ func (self *Cluster) UpdatePhase(phase ClusterPhase) error {
 	if phase != ClusterPhaseFailed {
 		self.Status.Reason = ""
 		self.Status.Message = ""
+	}
+	if phase == ClusterPhaseProvisioned {
+		self.CreatedTime = lang.GetNowUTC()
 	}
 	return self.putStore()
 }
