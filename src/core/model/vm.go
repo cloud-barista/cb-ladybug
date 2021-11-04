@@ -340,12 +340,6 @@ func (self *VM) AddNodeLabels() error {
 
 	logger.Infof("[%s] start the process of 'set node label'", self.Name)
 
-	hostName, err := self.SSHRun("/bin/hostname")
-	if err != nil {
-		return errors.New(fmt.Sprintf("Failed to get the hostname. (vm=%s)", self.Name))
-	}
-	hostName = strings.ToLower(hostName)
-
 	configFile := "admin.conf"
 	if self.Role == config.WORKER {
 		configFile = "kubelet.conf"
@@ -364,7 +358,7 @@ func (self *VM) AddNodeLabels() error {
 		labels += fmt.Sprintf("%s=%s ", key, value)
 	}
 
-	if _, err = self.SSHRun("sudo kubectl label nodes %s %s --kubeconfig=/etc/kubernetes/%s;", hostName, labels, configFile); err != nil {
+	if _, err := self.SSHRun("sudo kubectl label nodes %s %s --kubeconfig=/etc/kubernetes/%s;", self.Name, labels, configFile); err != nil {
 		return errors.New(fmt.Sprintf("Failed to set label. (node=%s, label=%s)", self.Name, labels))
 	}
 

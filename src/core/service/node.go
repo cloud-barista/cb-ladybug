@@ -246,26 +246,20 @@ func RemoveNode(namespace string, clusterName string, nodeName string) (*model.S
 		return status, errors.New(fmt.Sprintf("%s (cause=%v)", status.Message, err))
 	}
 
-	hostName, err := getHostName(node)
-	if err != nil {
-		status.Message = "failed to get hostname"
-		return status, errors.New(fmt.Sprintf("%s (cause=%v)", status.Message, err))
-	}
-
 	// drain node
 	sshInfo := ssh.SSHInfo{
 		UserName:   model.VM_USER_ACCOUNT,
 		PrivateKey: []byte(cpNode.Credential),
 		ServerPort: fmt.Sprintf("%s:22", cpNode.PublicIP),
 	}
-	cmd := fmt.Sprintf("sudo kubectl drain %s --kubeconfig=/etc/kubernetes/admin.conf --ignore-daemonsets --force --delete-local-data", hostName)
+	cmd := fmt.Sprintf("sudo kubectl drain %s --kubeconfig=/etc/kubernetes/admin.conf --ignore-daemonsets --force --delete-local-data", node.Name)
 	logger.Infof("kubectl drain node (namespace=%s, cluster=%s, node=%s)", namespace, clusterName, nodeName)
 	result, err := ssh.SSHRun(sshInfo, cmd)
 	if err != nil {
 		status.Message = "kubectl drain failed"
 		return status, errors.New(fmt.Sprintf("%s (cause=%v)", status.Message, err))
 	}
-	if strings.Contains(result, fmt.Sprintf("node/%s drained", hostName)) || strings.Contains(result, fmt.Sprintf("node/%s evicted", hostName)) {
+	if strings.Contains(result, fmt.Sprintf("node/%s drained", node.Name)) || strings.Contains(result, fmt.Sprintf("node/%s evicted", node.Name)) {
 		logger.Infof("drain node success (namespace=%s, cluster=%s, node=%s)", namespace, clusterName, nodeName)
 	} else {
 		status.Message = "kubectl drain failed"
@@ -273,7 +267,7 @@ func RemoveNode(namespace string, clusterName string, nodeName string) (*model.S
 	}
 
 	// delete node
-	cmd = fmt.Sprintf("sudo kubectl delete node %s --kubeconfig=/etc/kubernetes/admin.conf", hostName)
+	cmd = fmt.Sprintf("sudo kubectl delete node %s --kubeconfig=/etc/kubernetes/admin.conf", node.Name)
 	logger.Infof("kubectl delete node (namespace=%s, cluster=%s, node=%s)", namespace, clusterName, nodeName)
 	result, err = ssh.SSHRun(sshInfo, cmd)
 	if err != nil {
@@ -345,21 +339,6 @@ func getClusterNetworkCNI(namespace string, clusterName string) (string, error) 
 	}
 
 	return networkCni, nil
-}
-
-func getHostName(node *model.Node) (string, error) {
-	sshInfo := ssh.SSHInfo{
-		UserName:   model.VM_USER_ACCOUNT,
-		PrivateKey: []byte(node.Credential),
-		ServerPort: fmt.Sprintf("%s:22", node.PublicIP),
-	}
-	cmd := "/bin/hostname"
-	hostName, err := ssh.SSHRun(sshInfo, cmd)
-	if err != nil {
-		return "", err
-	}
-	hostName = strings.ToLower(hostName)
-	return hostName, nil
 }
 
 func getWorkerJoinCmdForAddNode(namespace string, clusterName string) (string, error) {
