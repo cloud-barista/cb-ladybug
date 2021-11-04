@@ -121,7 +121,7 @@ func (self *Cluster) Select() (bool, error) {
 	key := lang.GetStoreClusterKey(self.Namespace, self.Name)
 	keyValue, err := common.CBStore.Get(key)
 	if err != nil {
-		logger.Errorf("cluster could not be found in the metadata (key=%s, cuase=%v)", key, err)
+		logger.Errorf("cluster could not be found in the metadata (key=%s, cause=%v)", key, err)
 		return exists, errors.New(fmt.Sprintf("The cluster could not be found in the metadata. (namespace=%s, cluster=%s)", self.Namespace, self.Name))
 	}
 	exists = (keyValue != nil)
@@ -129,7 +129,7 @@ func (self *Cluster) Select() (bool, error) {
 		json.Unmarshal([]byte(keyValue.Value), &self)
 		err = getClusterNodes(self)
 		if err != nil {
-			logger.Errorf("node could not be found in the metadata. (key=%s, cuase=%v)", key, err)
+			logger.Errorf("node could not be found in the metadata. (key=%s, cause=%v)", key, err)
 			return exists, errors.New(fmt.Sprintf("The nodes could not be found in the metadata. (namespace=%s, cluster=%s)", self.Namespace, self.Name))
 
 		}
@@ -142,14 +142,14 @@ func (self *Cluster) Delete() error {
 	// delete node
 	keyValues, err := common.CBStore.GetList(lang.GetStoreNodeKey(self.Namespace, self.Name, ""), true)
 	if err != nil {
-		logger.Errorf("nodes could not be found in the metadata (keys=%v, cuase=%v)", keyValues, err)
+		logger.Errorf("nodes could not be found in the metadata (keys=%v, cause=%v)", keyValues, err)
 		return errors.New(fmt.Sprintf("The nodes could not be found in the metadata. (namespace=%s, cluster=%s)", self.Namespace, self.Name))
 
 	}
 	for _, keyValue := range keyValues {
 		err = common.CBStore.Delete(keyValue.Key)
 		if err != nil {
-			logger.Errorf("failed to delete the node in the metadata (key=%v, cuase=%v)", keyValue.Key, err)
+			logger.Errorf("failed to delete the node in the metadata (key=%v, cause=%v)", keyValue.Key, err)
 			return errors.New(fmt.Sprintf("Failed to delete the node in the metadata (namespace=%s, cluster=%s)", self.Namespace, self.Name))
 		}
 	}
@@ -158,7 +158,7 @@ func (self *Cluster) Delete() error {
 	key := lang.GetStoreClusterKey(self.Namespace, self.Name)
 	err = common.CBStore.Delete(key)
 	if err != nil {
-		logger.Errorf("failed to delete the cluster in the metadata. (key=%v, cuase=%v)", key, err)
+		logger.Errorf("failed to delete the cluster in the metadata. (key=%v, cause=%v)", key, err)
 		return errors.New(fmt.Sprintf("Failed to delete the cluster in the metadata. (namespace=%s, cluster=%s)", self.Namespace, self.Name))
 	}
 
@@ -168,7 +168,7 @@ func (self *Cluster) Delete() error {
 func (self *ClusterList) SelectList() error {
 	keyValues, err := common.CBStore.GetList(lang.GetStoreClusterKey(self.namespace, ""), true)
 	if err != nil {
-		logger.Errorf("clusters could not be found in the metadata (keys=%v, cuase=%v)", keyValues, err)
+		logger.Errorf("clusters could not be found in the metadata (keys=%v, cause=%v)", keyValues, err)
 		return errors.New(fmt.Sprintf("The clusters could not be found in the metadata. (namespace=%s)", self.namespace))
 	}
 	self.Items = []Cluster{}

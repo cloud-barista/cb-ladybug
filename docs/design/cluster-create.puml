@@ -34,7 +34,7 @@ activate webtool
 			'-- 1.2. MCIS
 			provider	->	tumblebug	: GET /ns/:ns/mcis/:mcis
 			tumblebug	-->	provider	: {mcis}
-			provider	->	webtool		: [if mics does exist] error 
+			provider	->	webtool		: [if mcis does exist] error 
 
 			'-- 
 			provider	->	db			: insert {cluster}

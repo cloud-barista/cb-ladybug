@@ -19,7 +19,7 @@ activate webtool
 
 		provider	->	tumblebug	: GET\n/ns/:ns/mcis/:mcis
 		tumblebug	-->	provider	: {mcis}
-		provider	->	webtool		: [if mics does exist]\nerror 
+		provider	->	webtool		: [if mcis does exist]\nerror 
 
 		'-- 1. join command
 		provider	<->	db			: select {control-plane}

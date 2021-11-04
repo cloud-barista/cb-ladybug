@@ -352,7 +352,7 @@ func getWorkerJoinCmdForAddNode(namespace string, clusterName string) (string, e
 		ServerPort: fmt.Sprintf("%s:22", cpNode.PublicIP),
 	}
 	cmd := "sudo kubeadm token create --print-join-command"
-	logger.Infof("get a worker node join command 9namespace=%s, cluster=%s)", namespace, clusterName)
+	logger.Infof("get a worker node join command (namespace=%s, cluster=%s)", namespace, clusterName)
 	joinCommand, err := ssh.SSHRun(sshInfo, cmd)
 	if err != nil {
 		return "", err
