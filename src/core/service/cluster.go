@@ -204,7 +204,7 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 
 	// MCIS 생성
 	mcis.Label = "mcks"
-	logger.Infof("start create MCIS (namespace=%s, cluster=%s, mics=%s)", namespace, clusterName, mcisName)
+	logger.Infof("start create MCIS (namespace=%s, cluster=%s, mcis=%s)", namespace, clusterName, mcisName)
 	if err = mcis.POST(); err != nil {
 		cluster.FailReason(model.CreateMCISFailedReason, fmt.Sprintf("Failed to create MCIS. (cause=%v)", err))
 		return nil, err
@@ -426,10 +426,10 @@ func deleteMCIS(mcis *tumblebug.MCIS) error {
 			}
 			logger.Infof("delete MCIS (mcis=%s)", mcisName)
 			if err = mcis.DELETE(); err != nil {
-				return errors.New(fmt.Sprintf("Failed to delete MCIS (cuase=%v)", err))
+				return errors.New(fmt.Sprintf("Failed to delete MCIS (cause=%v)", err))
 			}
 		} else {
-			return errors.New(fmt.Sprintf("Failed to delete MCIS (cuase=%v)", err))
+			return errors.New(fmt.Sprintf("Failed to delete MCIS (cause=%v)", err))
 		}
 	}
 
