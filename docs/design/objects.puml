@@ -122,6 +122,9 @@ object node  {
 	+spec
 	+csp
 	+createdTime
+	+cspLabel
+	+regionLabel
+	+zoneLabel
 	cluster-name
 }
 object controlPlane  {

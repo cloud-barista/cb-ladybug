@@ -13,7 +13,7 @@ definitions:
       cpLeader:
         type: string
       createdTime:
-        example: "2022-01-02 12:00:00"
+        example: "2022-01-02T12:00:00Z"
         type: string
       description:
         type: string
@@ -108,7 +108,7 @@ definitions:
   model.Node:
     properties:
       createdTime:
-        example: "2022-01-02 12:00:00"
+        example: "2022-01-02T12:00:00Z"
         type: string
       credential:
         type: string
@@ -118,6 +118,10 @@ definitions:
         - gcp
         - azure
         - alibaba
+        - tencent
+        - openstack
+        type: string
+      cspLabel:
         type: string
       kind:
         type: string
@@ -125,12 +129,16 @@ definitions:
         type: string
       publicIp:
         type: string
+      regionLabel:
+        type: string
       role:
         enum:
         - control-plane
         - worker
         type: string
       spec:
+        type: string
+      zoneLabel:
         type: string
     type: object
   model.NodeConfig:

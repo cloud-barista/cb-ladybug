@@ -492,7 +492,7 @@ var doc = `{
                 },
                 "createdTime": {
                     "type": "string",
-                    "example": "2022-01-02 12:00:00"
+                    "example": "2022-01-02T12:00:00Z"
                 },
                 "description": {
                     "type": "string"
@@ -631,7 +631,7 @@ var doc = `{
             "properties": {
                 "createdTime": {
                     "type": "string",
-                    "example": "2022-01-02 12:00:00"
+                    "example": "2022-01-02T12:00:00Z"
                 },
                 "credential": {
                     "type": "string"
@@ -642,8 +642,13 @@ var doc = `{
                         "aws",
                         "gcp",
                         "azure",
-                        "alibaba"
+                        "alibaba",
+                        "tencent",
+                        "openstack"
                     ]
+                },
+                "cspLabel": {
+                    "type": "string"
                 },
                 "kind": {
                     "type": "string"
@@ -654,6 +659,9 @@ var doc = `{
                 "publicIp": {
                     "type": "string"
                 },
+                "regionLabel": {
+                    "type": "string"
+                },
                 "role": {
                     "type": "string",
                     "enum": [
@@ -662,6 +670,9 @@ var doc = `{
                     ]
                 },
                 "spec": {
+                    "type": "string"
+                },
+                "zoneLabel": {
                     "type": "string"
                 }
             }

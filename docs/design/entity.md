@@ -32,6 +32,9 @@
         spec: "",
         csp: "",
         createdTime: "",
+        cspLabel: "",
+        regionLabel: "",
+        zoneLabel: "",
       },
       {
         name: "",
@@ -41,6 +44,9 @@
         spec: "",
         csp: "",
         createdTime: "",
+        cspLabel: "",
+        regionLabel: "",
+        zoneLabel: "",
       },
       ...
     ]
@@ -110,3 +116,6 @@
 |spec           |spec               |string |                     |
 |csp            |csp 정보           |string |                     |
 |createdTime    |생성일자            |string |                    |
+|cspLabel       |CSP Label         |string |<label_key>=<label_value> |
+|regionLabel    |Region Label      |string |<label_key>=<label_value> |
+|zoneLabel      |Zone Label        |string |<label_key>=<label_value> |
