@@ -43,4 +43,8 @@ const (
 	Terminated  VMStatus = "Terminated"
 	NotExist    VMStatus = "NotExist" // VM does not exist
 	Failed      VMStatus = "Failed"
+
+	LABEL_KEY_CSP    = "topology.cloud-barista.github.io/csp"
+	LABEL_KEY_REGION = "topology.kubernetes.io/region"
+	LABEL_KEY_ZONE   = "topology.kubernetes.io/zone"
 )

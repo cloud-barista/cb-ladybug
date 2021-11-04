@@ -18,8 +18,11 @@ type Node struct {
 	PublicIP    string     `json:"publicIp"`
 	Role        string     `json:"role" enums:"control-plane,worker"`
 	Spec        string     `json:"spec"`
-	Csp         config.CSP `json:"csp" enums:"aws,gcp,azure,alibaba"`
-	CreatedTime string     `json:"createdTime" example:"2022-01-02 12:00:00" default:""`
+	Csp         config.CSP `json:"csp" enums:"aws,gcp,azure,alibaba,tencent,openstack"`
+	CreatedTime string     `json:"createdTime" example:"2022-01-02T12:00:00Z" default:""`
+	CspLabel    string     `json:"cspLabel"`
+	RegionLabel string     `json:"regionLabel"`
+	ZoneLabel   string     `json:"zoneLabel"`
 }
 
 type NodeList struct {
@@ -39,6 +42,9 @@ func NewNodeVM(namespace string, clusterName string, vm VM) *Node {
 		Csp:         vm.Csp,
 		namespace:   namespace,
 		clusterName: clusterName,
+		CspLabel:    lang.GetNodeLabel(config.LABEL_KEY_CSP, string(vm.Csp)),
+		RegionLabel: lang.GetNodeLabel(config.LABEL_KEY_REGION, vm.Region.Region),
+		ZoneLabel:   lang.GetNodeLabel(config.LABEL_KEY_ZONE, vm.Region.Zone),
 	}
 }
 

@@ -55,7 +55,7 @@ type Cluster struct {
 	NetworkCni    string `json:"networkCni" enums:"kilo,canal"`
 	Label         string `json:"label"`
 	Description   string `json:"description"`
-	CreatedTime   string `json:"createdTime" example:"2022-01-02 12:00:00" default:""`
+	CreatedTime   string `json:"createdTime" example:"2022-01-02T12:00:00Z" default:""`
 	Nodes         []Node `json:"nodes"`
 }
 

@@ -58,62 +58,62 @@ message ListClusterInfoResponse {
 message ClusterInfo {
 	string name = 1 [json_name="name", (gogoproto.jsontag) = "name", (gogoproto.moretags) = "yaml:\"name\""];
 	string kind = 2 [json_name="kind", (gogoproto.jsontag) = "kind", (gogoproto.moretags) = "yaml:\"kind\""];
-	ClusterStatusInfo status = 3 [json_name="status", (gogoproto.jsontag) = "status", (gogoproto.moretags) = "yaml:\"status\""];     
-	string mcis = 4 [json_name="mcis", (gogoproto.jsontag) = "mcis", (gogoproto.moretags) = "yaml:\"mcis\""];     
-	string namespace = 5 [json_name="namespace", (gogoproto.jsontag) = "namespace", (gogoproto.moretags) = "yaml:\"namespace\""];     
+	ClusterStatusInfo status = 3 [json_name="status", (gogoproto.jsontag) = "status", (gogoproto.moretags) = "yaml:\"status\""];
+	string mcis = 4 [json_name="mcis", (gogoproto.jsontag) = "mcis", (gogoproto.moretags) = "yaml:\"mcis\""];
+	string namespace = 5 [json_name="namespace", (gogoproto.jsontag) = "namespace", (gogoproto.moretags) = "yaml:\"namespace\""];
 	string cluster_config = 6 [json_name="clusterConfig", (gogoproto.jsontag) = "clusterConfig", (gogoproto.moretags) = "yaml:\"clusterConfig\""];
 	string cp_leader = 7 [json_name="cpLeader", (gogoproto.jsontag) = "cpLeader", (gogoproto.moretags) = "yaml:\"cpLeader\""];
 	string network_cni = 8 [json_name="networkCni", (gogoproto.jsontag) = "networkCni", (gogoproto.moretags) = "yaml:\"networkCni\""];
 	string label = 9 [json_name="label", (gogoproto.jsontag) = "label", (gogoproto.moretags) = "yaml:\"label\""];
 	string description = 10 [json_name="description", (gogoproto.jsontag) = "description", (gogoproto.moretags) = "yaml:\"description\""];
-	repeated NodeInfo nodes = 11 [json_name="nodes", (gogoproto.jsontag) = "nodes", (gogoproto.moretags) = "yaml:\"nodes\""];     
+	repeated NodeInfo nodes = 11 [json_name="nodes", (gogoproto.jsontag) = "nodes", (gogoproto.moretags) = "yaml:\"nodes\""];
 }
 
 message ClusterCreateRequest {
-	string namespace = 1 [json_name="namespace", (gogoproto.jsontag) = "namespace", (gogoproto.moretags) = "yaml:\"namespace\""];   
-	ClusterCreateInfo item = 2 [json_name="ReqInfo", (gogoproto.jsontag) = "ReqInfo", (gogoproto.moretags) = "yaml:\"ReqInfo\""]; 
+	string namespace = 1 [json_name="namespace", (gogoproto.jsontag) = "namespace", (gogoproto.moretags) = "yaml:\"namespace\""];
+	ClusterCreateInfo item = 2 [json_name="ReqInfo", (gogoproto.jsontag) = "ReqInfo", (gogoproto.moretags) = "yaml:\"ReqInfo\""];
 }
 
 message ClusterCreateInfo {
-	string name = 1 [json_name="name", (gogoproto.jsontag) = "name", (gogoproto.moretags) = "yaml:\"name\""];  
-	repeated NodeConfig control_plane = 2 [json_name="controlPlane", (gogoproto.jsontag) = "controlPlane", (gogoproto.moretags) = "yaml:\"controlPlane\""];  
-	repeated NodeConfig worker = 3 [json_name="worker", (gogoproto.jsontag) = "worker", (gogoproto.moretags) = "yaml:\"worker\""];  
-	Config config = 4 [json_name="config", (gogoproto.jsontag) = "config", (gogoproto.moretags) = "yaml:\"config\""];  
-	string label = 5 [json_name="label", (gogoproto.jsontag) = "label", (gogoproto.moretags) = "yaml:\"label\""];  
-	string description = 6 [json_name="description", (gogoproto.jsontag) = "description", (gogoproto.moretags) = "yaml:\"description\""];  
-	string createdTime = 7 [json_name="createdTime", (gogoproto.jsontag) = "createdTime", (gogoproto.moretags) = "yaml:\"createdTime\""];  
+	string name = 1 [json_name="name", (gogoproto.jsontag) = "name", (gogoproto.moretags) = "yaml:\"name\""];
+	repeated NodeConfig control_plane = 2 [json_name="controlPlane", (gogoproto.jsontag) = "controlPlane", (gogoproto.moretags) = "yaml:\"controlPlane\""];
+	repeated NodeConfig worker = 3 [json_name="worker", (gogoproto.jsontag) = "worker", (gogoproto.moretags) = "yaml:\"worker\""];
+	Config config = 4 [json_name="config", (gogoproto.jsontag) = "config", (gogoproto.moretags) = "yaml:\"config\""];
+	string label = 5 [json_name="label", (gogoproto.jsontag) = "label", (gogoproto.moretags) = "yaml:\"label\""];
+	string description = 6 [json_name="description", (gogoproto.jsontag) = "description", (gogoproto.moretags) = "yaml:\"description\""];
+	string createdTime = 7 [json_name="createdTime", (gogoproto.jsontag) = "createdTime", (gogoproto.moretags) = "yaml:\"createdTime\""];
 }
 
 message NodeConfig {
-	string connection = 1 [json_name="connection", (gogoproto.jsontag) = "connection", (gogoproto.moretags) = "yaml:\"connection\""];  
-	int32 count = 2 [json_name="count", (gogoproto.jsontag) = "count", (gogoproto.moretags) = "yaml:\"count\""];  
-	string spec = 3 [json_name="spec", (gogoproto.jsontag) = "spec", (gogoproto.moretags) = "yaml:\"spec\""];  
+	string connection = 1 [json_name="connection", (gogoproto.jsontag) = "connection", (gogoproto.moretags) = "yaml:\"connection\""];
+	int32 count = 2 [json_name="count", (gogoproto.jsontag) = "count", (gogoproto.moretags) = "yaml:\"count\""];
+	string spec = 3 [json_name="spec", (gogoproto.jsontag) = "spec", (gogoproto.moretags) = "yaml:\"spec\""];
 }
 
 message Config {
-	Kubernetes kubernetes = 1 [json_name="kubernetes", (gogoproto.jsontag) = "kubernetes", (gogoproto.moretags) = "yaml:\"kubernetes\""];  
+	Kubernetes kubernetes = 1 [json_name="kubernetes", (gogoproto.jsontag) = "kubernetes", (gogoproto.moretags) = "yaml:\"kubernetes\""];
 }
 
 message Kubernetes {
-	string network_cni = 1 [json_name="networkCni", (gogoproto.jsontag) = "networkCni", (gogoproto.moretags) = "yaml:\"networkCni\""];  
-	string pod_cidr = 2 [json_name="podCidr", (gogoproto.jsontag) = "podCidr", (gogoproto.moretags) = "yaml:\"podCidr\""];  
-	string service_cidr = 3 [json_name="serviceCidr", (gogoproto.jsontag) = "serviceCidr", (gogoproto.moretags) = "yaml:\"serviceCidr\""];  
-	string servic_dns_domain = 4 [json_name="serviceDnsDomain", (gogoproto.jsontag) = "serviceDnsDomain", (gogoproto.moretags) = "yaml:\"serviceDnsDomain\""];  
+	string network_cni = 1 [json_name="networkCni", (gogoproto.jsontag) = "networkCni", (gogoproto.moretags) = "yaml:\"networkCni\""];
+	string pod_cidr = 2 [json_name="podCidr", (gogoproto.jsontag) = "podCidr", (gogoproto.moretags) = "yaml:\"podCidr\""];
+	string service_cidr = 3 [json_name="serviceCidr", (gogoproto.jsontag) = "serviceCidr", (gogoproto.moretags) = "yaml:\"serviceCidr\""];
+	string servic_dns_domain = 4 [json_name="serviceDnsDomain", (gogoproto.jsontag) = "serviceDnsDomain", (gogoproto.moretags) = "yaml:\"serviceDnsDomain\""];
 }
 
 message ClusterAllQryRequest {
-	string namespace = 1 [json_name="namespace", (gogoproto.jsontag) = "namespace", (gogoproto.moretags) = "yaml:\"namespace\""];     
+	string namespace = 1 [json_name="namespace", (gogoproto.jsontag) = "namespace", (gogoproto.moretags) = "yaml:\"namespace\""];
 }
 
 message ClusterQryRequest {
-	string namespace = 1 [json_name="namespace", (gogoproto.jsontag) = "namespace", (gogoproto.moretags) = "yaml:\"namespace\""]; 
-	string cluster = 2 [json_name="cluster", (gogoproto.jsontag) = "cluster", (gogoproto.moretags) = "yaml:\"cluster\""]; 
+	string namespace = 1 [json_name="namespace", (gogoproto.jsontag) = "namespace", (gogoproto.moretags) = "yaml:\"namespace\""];
+	string cluster = 2 [json_name="cluster", (gogoproto.jsontag) = "cluster", (gogoproto.moretags) = "yaml:\"cluster\""];
 }
 
 message ClusterStatusInfo {
-	string phase = 1 [json_name="phase", (gogoproto.jsontag) = "phase", (gogoproto.moretags) = "yaml:\"phase\""];  
-	string reason = 2 [json_name="reason", (gogoproto.jsontag) = "reason", (gogoproto.moretags) = "yaml:\"reason\""];  
-	string message = 3 [json_name="message", (gogoproto.jsontag) = "message", (gogoproto.moretags) = "yaml:\"message\""];  
+	string phase = 1 [json_name="phase", (gogoproto.jsontag) = "phase", (gogoproto.moretags) = "yaml:\"phase\""];
+	string reason = 2 [json_name="reason", (gogoproto.jsontag) = "reason", (gogoproto.moretags) = "yaml:\"reason\""];
+	string message = 3 [json_name="message", (gogoproto.jsontag) = "message", (gogoproto.moretags) = "yaml:\"message\""];
 }
 
 //////////////////////////////////
@@ -132,32 +132,35 @@ message ListNodeInfoResponse {
 message NodeInfo {
 	string name = 1 [json_name="name", (gogoproto.jsontag) = "name", (gogoproto.moretags) = "yaml:\"name\""];
 	string kind = 2 [json_name="kind", (gogoproto.jsontag) = "kind", (gogoproto.moretags) = "yaml:\"kind\""];
-	string credential = 3 [json_name="credential", (gogoproto.jsontag) = "credential", (gogoproto.moretags) = "yaml:\"credential\""]; 
+	string credential = 3 [json_name="credential", (gogoproto.jsontag) = "credential", (gogoproto.moretags) = "yaml:\"credential\""];
 	string public_ip = 4 [json_name="publicIp", (gogoproto.jsontag) = "publicIp", (gogoproto.moretags) = "yaml:\"publicIp\""];
 	string role = 5 [json_name="role", (gogoproto.jsontag) = "role", (gogoproto.moretags) = "yaml:\"role\""];
 	string spec = 6 [json_name="spec", (gogoproto.jsontag) = "spec", (gogoproto.moretags) = "yaml:\"spec\""];
 	string csp = 7 [json_name="csp", (gogoproto.jsontag) = "csp", (gogoproto.moretags) = "yaml:\"csp\""];
-	string createdTime = 8 [json_name="createdTime", (gogoproto.jsontag) = "createdTime", (gogoproto.moretags) = "yaml:\"createdTime\""];  
+	string createdTime = 8 [json_name="createdTime", (gogoproto.jsontag) = "createdTime", (gogoproto.moretags) = "yaml:\"createdTime\""];
+	string cspLabel = 9 [json_name="cspLabel", (gogoproto.jsontag) = "cspLabel", (gogoproto.moretags) = "yaml:\"cspLabel\""];
+	string regionLabel = 10 [json_name="regionLabel", (gogoproto.jsontag) = "regionLabel", (gogoproto.moretags) = "yaml:\"regionLabel\""];
+	string zoneLabel = 11 [json_name="zoneLabel", (gogoproto.jsontag) = "zoneLabel", (gogoproto.moretags) = "yaml:\"zoneLabel\""];
 }
 
 message NodeCreateRequest {
-	string namespace = 1 [json_name="namespace", (gogoproto.jsontag) = "namespace", (gogoproto.moretags) = "yaml:\"namespace\""];   
-	string cluster = 2 [json_name="cluster", (gogoproto.jsontag) = "cluster", (gogoproto.moretags) = "yaml:\"cluster\""];   
-	NodeCreateInfo item = 3 [json_name="ReqInfo", (gogoproto.jsontag) = "ReqInfo", (gogoproto.moretags) = "yaml:\"ReqInfo\""]; 
+	string namespace = 1 [json_name="namespace", (gogoproto.jsontag) = "namespace", (gogoproto.moretags) = "yaml:\"namespace\""];
+	string cluster = 2 [json_name="cluster", (gogoproto.jsontag) = "cluster", (gogoproto.moretags) = "yaml:\"cluster\""];
+	NodeCreateInfo item = 3 [json_name="ReqInfo", (gogoproto.jsontag) = "ReqInfo", (gogoproto.moretags) = "yaml:\"ReqInfo\""];
 }
 
 message NodeCreateInfo {
-	repeated NodeConfig control_plane = 1 [json_name="controlPlane", (gogoproto.jsontag) = "controlPlane", (gogoproto.moretags) = "yaml:\"controlPlane\""];  
-	repeated NodeConfig worker = 2 [json_name="worker", (gogoproto.jsontag) = "worker", (gogoproto.moretags) = "yaml:\"worker\""];  
+	repeated NodeConfig control_plane = 1 [json_name="controlPlane", (gogoproto.jsontag) = "controlPlane", (gogoproto.moretags) = "yaml:\"controlPlane\""];
+	repeated NodeConfig worker = 2 [json_name="worker", (gogoproto.jsontag) = "worker", (gogoproto.moretags) = "yaml:\"worker\""];
 }
 
 message NodeAllQryRequest {
-	string namespace = 1 [json_name="namespace", (gogoproto.jsontag) = "namespace", (gogoproto.moretags) = "yaml:\"namespace\""];     
+	string namespace = 1 [json_name="namespace", (gogoproto.jsontag) = "namespace", (gogoproto.moretags) = "yaml:\"namespace\""];
 	string cluster = 2 [json_name="cluster", (gogoproto.jsontag) = "cluster", (gogoproto.moretags) = "yaml:\"cluster\""];
 }
 
 message NodeQryRequest {
-	string namespace = 1 [json_name="namespace", (gogoproto.jsontag) = "namespace", (gogoproto.moretags) = "yaml:\"namespace\""]; 
-	string cluster = 2 [json_name="cluster", (gogoproto.jsontag) = "cluster", (gogoproto.moretags) = "yaml:\"cluster\""]; 
-	string node = 3 [json_name="node", (gogoproto.jsontag) = "node", (gogoproto.moretags) = "yaml:\"node\""]; 
+	string namespace = 1 [json_name="namespace", (gogoproto.jsontag) = "namespace", (gogoproto.moretags) = "yaml:\"namespace\""];
+	string cluster = 2 [json_name="cluster", (gogoproto.jsontag) = "cluster", (gogoproto.moretags) = "yaml:\"cluster\""];
+	string node = 3 [json_name="node", (gogoproto.jsontag) = "node", (gogoproto.moretags) = "yaml:\"node\""];
 }

@@ -477,7 +477,7 @@
                 },
                 "createdTime": {
                     "type": "string",
-                    "example": "2022-01-02 12:00:00"
+                    "example": "2022-01-02T12:00:00Z"
                 },
                 "description": {
                     "type": "string"
@@ -616,7 +616,7 @@
             "properties": {
                 "createdTime": {
                     "type": "string",
-                    "example": "2022-01-02 12:00:00"
+                    "example": "2022-01-02T12:00:00Z"
                 },
                 "credential": {
                     "type": "string"
@@ -627,8 +627,13 @@
                         "aws",
                         "gcp",
                         "azure",
-                        "alibaba"
+                        "alibaba",
+                        "tencent",
+                        "openstack"
                     ]
+                },
+                "cspLabel": {
+                    "type": "string"
                 },
                 "kind": {
                     "type": "string"
@@ -639,6 +644,9 @@
                 "publicIp": {
                     "type": "string"
                 },
+                "regionLabel": {
+                    "type": "string"
+                },
                 "role": {
                     "type": "string",
                     "enum": [
@@ -647,6 +655,9 @@
                     ]
                 },
                 "spec": {
+                    "type": "string"
+                },
+                "zoneLabel": {
                     "type": "string"
                 }
             }

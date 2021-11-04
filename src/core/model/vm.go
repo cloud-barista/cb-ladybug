@@ -346,11 +346,11 @@ func (self *VM) AddNodeLabels() error {
 	}
 
 	infos := map[string]interface{}{
-		"topology.cloud-barista.github.io/csp": self.Csp,
-		"topology.kubernetes.io/region":        self.Region.Region,
+		config.LABEL_KEY_CSP:    self.Csp,
+		config.LABEL_KEY_REGION: self.Region.Region,
 	}
 	if self.Region.Zone != "" {
-		infos["topology.kubernetes.io/zone"] = self.Region.Zone
+		infos[config.LABEL_KEY_ZONE] = self.Region.Zone
 	}
 
 	labels := ""

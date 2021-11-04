@@ -126,3 +126,11 @@ func GetNowUTC() string {
 	t := time.Now().UTC()
 	return t.Format(time.RFC3339)
 }
+
+func GetNodeLabel(key string, value string) string {
+	result := ""
+	if value != "" {
+		result = fmt.Sprintf("%s=%s", key, value)
+	}
+	return result
+}
