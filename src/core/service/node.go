@@ -12,7 +12,6 @@ import (
 	"github.com/cloud-barista/cb-mcks/src/utils/lang"
 	"golang.org/x/sync/errgroup"
 
-	ssh "github.com/cloud-barista/cb-spider/cloud-control-manager/vm-ssh"
 	logger "github.com/sirupsen/logrus"
 )
 
@@ -240,45 +239,24 @@ func RemoveNode(namespace string, clusterName string, nodeName string) (*model.S
 	status := model.NewStatus()
 	status.Code = model.STATUS_UNKNOWN
 
-	cpNode, err := getCPLeaderNode(namespace, clusterName)
+	cpNodeInfo, err := getCPLeaderNodeInfo(namespace, clusterName)
 	if err != nil {
 		status.Message = "failed to find control-plane node"
 		return status, errors.New(fmt.Sprintf("%s (cause=%v)", status.Message, err))
 	}
 
 	// drain node
-	sshInfo := ssh.SSHInfo{
-		UserName:   model.VM_USER_ACCOUNT,
-		PrivateKey: []byte(cpNode.Credential),
-		ServerPort: fmt.Sprintf("%s:22", cpNode.PublicIP),
-	}
-	cmd := fmt.Sprintf("sudo kubectl drain %s --kubeconfig=/etc/kubernetes/admin.conf --ignore-daemonsets --force --delete-local-data", node.Name)
-	logger.Infof("kubectl drain node (namespace=%s, cluster=%s, node=%s)", namespace, clusterName, nodeName)
-	result, err := ssh.SSHRun(sshInfo, cmd)
+	msg, err := drainNode(namespace, clusterName, nodeName, cpNodeInfo)
 	if err != nil {
-		status.Message = "kubectl drain failed"
-		return status, errors.New(fmt.Sprintf("%s (cause=%v)", status.Message, err))
-	}
-	if strings.Contains(result, fmt.Sprintf("node/%s drained", node.Name)) || strings.Contains(result, fmt.Sprintf("node/%s evicted", node.Name)) {
-		logger.Infof("drain node success (namespace=%s, cluster=%s, node=%s)", namespace, clusterName, nodeName)
-	} else {
-		status.Message = "kubectl drain failed"
-		return status, errors.New(fmt.Sprintf("%s (cause=%v)", status.Message, err))
+		status.Message = msg
+		return status, err
 	}
 
 	// delete node
-	cmd = fmt.Sprintf("sudo kubectl delete node %s --kubeconfig=/etc/kubernetes/admin.conf", node.Name)
-	logger.Infof("kubectl delete node (namespace=%s, cluster=%s, node=%s)", namespace, clusterName, nodeName)
-	result, err = ssh.SSHRun(sshInfo, cmd)
+	msg, err = deleteNode(namespace, clusterName, nodeName, cpNodeInfo)
 	if err != nil {
-		status.Message = "kubectl delete node failed"
-		return status, errors.New(fmt.Sprintf("%s (cause=%v)", status.Message, err))
-	}
-	if strings.Contains(result, "deleted") {
-		logger.Infof("delete node success (namespace=%s, cluster=%s, node=%s)", namespace, clusterName, nodeName)
-	} else {
-		status.Message = "kubectl delete node failed"
-		return status, errors.New("kubectl delete node failed")
+		status.Message = msg
+		return status, err
 	}
 
 	// delete vm
@@ -302,7 +280,7 @@ func RemoveNode(namespace string, clusterName string, nodeName string) (*model.S
 	return status, nil
 }
 
-func getCPLeaderNode(namespace string, clusterName string) (*model.Node, error) {
+func getCPLeaderNodeInfo(namespace string, clusterName string) (*model.VM, error) {
 	cluster := model.NewCluster(namespace, clusterName)
 	exists, err := cluster.Select()
 	if err != nil {
@@ -320,8 +298,13 @@ func getCPLeaderNode(namespace string, clusterName string) (*model.Node, error) 
 	if err != nil {
 		return nil, err
 	}
+	vm := model.VM{
+		Name:       cpNode.Name,
+		Credential: cpNode.Credential,
+		PublicIP:   cpNode.PublicIP,
+	}
 
-	return cpNode, nil
+	return &vm, nil
 }
 
 func getClusterNetworkCNI(namespace string, clusterName string) (string, error) {
@@ -342,18 +325,13 @@ func getClusterNetworkCNI(namespace string, clusterName string) (string, error) 
 }
 
 func getWorkerJoinCmdForAddNode(namespace string, clusterName string) (string, error) {
-	cpNode, err := getCPLeaderNode(namespace, clusterName)
+	cpNodeInfo, err := getCPLeaderNodeInfo(namespace, clusterName)
 	if err != nil {
 		return "", err
 	}
-	sshInfo := ssh.SSHInfo{
-		UserName:   model.VM_USER_ACCOUNT,
-		PrivateKey: []byte(cpNode.Credential),
-		ServerPort: fmt.Sprintf("%s:22", cpNode.PublicIP),
-	}
-	cmd := "sudo kubeadm token create --print-join-command"
+
 	logger.Infof("get a worker node join command (namespace=%s, cluster=%s)", namespace, clusterName)
-	joinCommand, err := ssh.SSHRun(sshInfo, cmd)
+	joinCommand, err := cpNodeInfo.SSHRun("sudo kubeadm token create --print-join-command")
 	if err != nil {
 		return "", err
 	}
@@ -386,7 +364,6 @@ func getMaxIdx(namespace string, clusterName string) (maxCpIdx int, maxWkIdx int
 			arrWk = append(arrWk, lang.GetIdxToInt(slice[idx]))
 		}
 	}
-	fmt.Println(maxCpIdx, maxWkIdx)
 	maxCpIdx = lang.GetMaxNumber(arrCp)
 	maxWkIdx = lang.GetMaxNumber(arrWk)
 	return
@@ -394,7 +371,20 @@ func getMaxIdx(namespace string, clusterName string) (maxCpIdx int, maxWkIdx int
 
 func deleteVMs(namespace string, clusterName string, TVMs []tumblebug.TVM) error {
 	logger.Infof("delete VMs (namespace=%s, cluster=%s)", namespace, clusterName)
+
+	cpNodeInfo, err := getCPLeaderNodeInfo(namespace, clusterName)
+	if err != nil {
+		logger.Warnf("failed to find control-plane node (cause=%v)", err)
+	}
+
 	for _, tvm := range TVMs {
+		node := model.NewNode(namespace, clusterName, tvm.VM.Name)
+		if _, err := drainNode(namespace, clusterName, node.Name, cpNodeInfo); err != nil {
+			logger.Warnf("failed to drain node (namespace=%s, cluster=%s, node=%s, cause=%v)", namespace, clusterName, tvm.VM.Name, err)
+		}
+		if _, err := deleteNode(namespace, clusterName, node.Name, cpNodeInfo); err != nil {
+			logger.Warnf("failed to delete node (namespace=%s, cluster=%s, node=%s, cause=%v)", namespace, clusterName, tvm.VM.Name, err)
+		}
 		vm := tumblebug.NewTVm(namespace, clusterName)
 		vm.VM.Name = tvm.VM.Name
 		if err := vm.DELETE(); err != nil {
@@ -403,4 +393,40 @@ func deleteVMs(namespace string, clusterName string, TVMs []tumblebug.TVM) error
 		}
 	}
 	return nil
+}
+
+func drainNode(namespace string, clusterName string, nodeName string, cpNode *model.VM) (string, error) {
+	logger.Infof("kubectl drain node (namespace=%s, cluster=%s, node=%s)", namespace, clusterName, nodeName)
+
+	msg := ""
+	result, err := cpNode.SSHRun("sudo kubectl drain %s --kubeconfig=/etc/kubernetes/admin.conf --ignore-daemonsets --force --delete-local-data", nodeName)
+	if err != nil {
+		msg = "kubectl drain failed"
+		return msg, errors.New(fmt.Sprintf("%s (cause=%v)", msg, err))
+	}
+	if strings.Contains(result, fmt.Sprintf("node/%s drained", nodeName)) || strings.Contains(result, fmt.Sprintf("node/%s evicted", nodeName)) {
+		logger.Infof("drain node success (namespace=%s, cluster=%s, node=%s)", namespace, clusterName, nodeName)
+	} else {
+		msg = "kubectl drain failed"
+		return msg, errors.New(fmt.Sprintf("%s (cause=%v)", msg, err))
+	}
+	return "", nil
+}
+
+func deleteNode(namespace string, clusterName string, nodeName string, cpNode *model.VM) (string, error) {
+	logger.Infof("kubectl delete node (namespace=%s, cluster=%s, node=%s)", namespace, clusterName, nodeName)
+
+	msg := ""
+	result, err := cpNode.SSHRun("sudo kubectl delete node %s --kubeconfig=/etc/kubernetes/admin.conf", nodeName)
+	if err != nil {
+		msg = "kubectl delete node failed"
+		return msg, errors.New(fmt.Sprintf("%s (cause=%v)", msg, err))
+	}
+	if strings.Contains(result, "deleted") {
+		logger.Infof("delete node success (namespace=%s, cluster=%s, node=%s)", namespace, clusterName, nodeName)
+	} else {
+		msg = "kubectl delete node failed"
+		return msg, errors.New("kubectl delete node failed")
+	}
+	return "", nil
 }
