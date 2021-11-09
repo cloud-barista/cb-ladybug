@@ -30,13 +30,13 @@ echo "- (Name of namespace)        is '${v_NAMESPACE}'"
 # ------------------------------------------------------------------------------
 # delete
 delete() {
-	curl -sX DELETE ${c_URL_TUMBLEBUG}/ns -H "${c_AUTH}" -H "${c_CT}" -o /dev/null -w "NAMESPACE.delete():%{http_code}\n"
+	curl -sX DELETE ${c_URL_TUMBLEBUG}/ns/${v_NAMESPACE} -H "${c_AUTH}" -H "${c_CT}" -o /dev/null -w "NAMESPACE.delete():%{http_code}\n"
 }
 
 # ------------------------------------------------------------------------------
 # show
 show() {
-	echo "NAMESPACE";  curl -sX GET ${c_URL_TUMBLEBUG}/ns          -H "${c_AUTH}" -H "${c_CT}" | jq
+	echo "NAMESPACE_LIST";  curl -sX GET ${c_URL_TUMBLEBUG}/ns          -H "${c_AUTH}" -H "${c_CT}" | jq
 }
 
 # ------------------------------------------------------------------------------
