@@ -33,7 +33,6 @@ echo "- (Name of namespace)        is '${v_NAMESPACE}'"
 create() {
 
 	# namespace
-	curl -sX DELETE ${c_URL_TUMBLEBUG}/ns -H "${c_AUTH}" -H "${c_CT}" -o /dev/null -w "NAMESPACE.delete():%{http_code}\n"
 	curl -sX POST   ${c_URL_TUMBLEBUG}/ns -H "${c_AUTH}" -H "${c_CT}" -o /dev/null -w "NAMESPACE.regist():%{http_code}\n" -d @- <<EOF
 	{
 	"name"        : "${v_NAMESPACE}",
@@ -47,7 +46,7 @@ EOF
 # ------------------------------------------------------------------------------
 # show
 show() {
-	echo "NAMESPACE";  curl -sX GET ${c_URL_TUMBLEBUG}/ns/${v_NAMESPACE}          -H "${c_AUTH}" -H "${c_CT}" | jq
+	echo "NAMESPACE_LIST";  curl -sX GET ${c_URL_TUMBLEBUG}/ns          -H "${c_AUTH}" -H "${c_CT}" | jq
 }
 
 # ------------------------------------------------------------------------------
