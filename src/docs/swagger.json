@@ -500,8 +500,8 @@
                 "networkCni": {
                     "type": "string",
                     "enum": [
-                        "kilo",
-                        "canal"
+                        "canal",
+                        "kilo"
                     ]
                 },
                 "nodes": {
@@ -592,10 +592,10 @@
                 "networkCni": {
                     "type": "string",
                     "enum": [
-                        "kilo",
-                        "canal"
+                        "canal",
+                        "kilo"
                     ],
-                    "example": "kilo"
+                    "example": "canal"
                 },
                 "podCidr": {
                     "type": "string",

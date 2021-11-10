@@ -52,7 +52,7 @@ type Cluster struct {
 	Namespace     string `json:"namespace"`
 	ClusterConfig string `json:"clusterConfig"`
 	CpLeader      string `json:"cpLeader"`
-	NetworkCni    string `json:"networkCni" enums:"kilo,canal"`
+	NetworkCni    string `json:"networkCni" enums:"canal,kilo"`
 	Label         string `json:"label"`
 	Description   string `json:"description"`
 	CreatedTime   string `json:"createdTime" example:"2022-01-02T12:00:00Z" default:""`
