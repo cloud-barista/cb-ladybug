@@ -25,7 +25,7 @@ type Config struct {
 }
 
 type Kubernetes struct {
-	NetworkCni       string `json:"networkCni" example:"kilo" enums:"kilo,canal"`
+	NetworkCni       string `json:"networkCni" example:"canal" enums:"canal,kilo"`
 	PodCidr          string `json:"podCidr" example:"10.244.0.0/16"`
 	ServiceCidr      string `json:"serviceCidr" example:"10.96.0.0/12"`
 	ServiceDnsDomain string `json:"serviceDnsDomain" example:"cluster.local"`

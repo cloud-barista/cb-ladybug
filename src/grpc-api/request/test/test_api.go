@@ -365,7 +365,7 @@ func CreateClusterApiTest() {
 			},
 			Config: lb_api.Config{
 				Kubernetes: lb_api.Kubernetes{
-					NetworkCni:       "kilo",
+					NetworkCni:       "canal",
 					PodCidr:          "10.244.0.0/16",
 					ServiceCidr:      "10.96.0.0/12",
 					ServiceDnsDomain: "cluster.local",

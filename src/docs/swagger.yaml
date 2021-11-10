@@ -29,8 +29,8 @@ definitions:
         type: string
       networkCni:
         enum:
-        - kilo
         - canal
+        - kilo
         type: string
       nodes:
         items:
@@ -91,9 +91,9 @@ definitions:
     properties:
       networkCni:
         enum:
-        - kilo
         - canal
-        example: kilo
+        - kilo
+        example: canal
         type: string
       podCidr:
         example: 10.244.0.0/16

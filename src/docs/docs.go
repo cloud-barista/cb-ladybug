@@ -515,8 +515,8 @@ var doc = `{
                 "networkCni": {
                     "type": "string",
                     "enum": [
-                        "kilo",
-                        "canal"
+                        "canal",
+                        "kilo"
                     ]
                 },
                 "nodes": {
@@ -607,10 +607,10 @@ var doc = `{
                 "networkCni": {
                     "type": "string",
                     "enum": [
-                        "kilo",
-                        "canal"
+                        "canal",
+                        "kilo"
                     ],
-                    "example": "kilo"
+                    "example": "canal"
                 },
                 "podCidr": {
                     "type": "string",
