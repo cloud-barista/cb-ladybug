@@ -13,6 +13,7 @@ type MCIS struct {
 	Model
 	Description string     `json:"description"`
 	Label       string     `json:"label"`
+	SystemLabel string     `json:"systemLabel"`
 	VMs         []model.VM `json:"vm"` // output
 }
 

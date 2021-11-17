@@ -203,7 +203,8 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 	}
 
 	// MCIS 생성
-	mcis.Label = "mcks"
+	mcis.Label = config.MCIS_LABEL
+	mcis.SystemLabel = config.MCIS_SYSTEMLABEL
 	logger.Infof("start create MCIS (namespace=%s, cluster=%s, mcis=%s)", namespace, clusterName, mcisName)
 	if err = mcis.POST(); err != nil {
 		cluster.FailReason(model.CreateMCISFailedReason, fmt.Sprintf("Failed to create MCIS. (cause=%v)", err))
