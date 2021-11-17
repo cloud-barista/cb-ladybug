@@ -47,4 +47,7 @@ const (
 	LABEL_KEY_CSP    = "topology.cloud-barista.github.io/csp"
 	LABEL_KEY_REGION = "topology.kubernetes.io/region"
 	LABEL_KEY_ZONE   = "topology.kubernetes.io/zone"
+
+	MCIS_LABEL       = "mcks"
+	MCIS_SYSTEMLABEL = "Managed by MCKS"
 )
