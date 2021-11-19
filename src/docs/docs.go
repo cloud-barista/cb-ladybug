@@ -497,6 +497,11 @@ var doc = `{
                 "description": {
                     "type": "string"
                 },
+                "installMonAgent": {
+                    "type": "string",
+                    "default": "yes",
+                    "example": "no"
+                },
                 "kind": {
                     "type": "string"
                 },
@@ -565,7 +570,6 @@ var doc = `{
             "type": "object",
             "properties": {
                 "config": {
-                    "type": "object",
                     "$ref": "#/definitions/model.Config"
                 },
                 "controlPlane": {
@@ -576,6 +580,11 @@ var doc = `{
                 },
                 "description": {
                     "type": "string"
+                },
+                "installMonAgent": {
+                    "type": "string",
+                    "default": "yes",
+                    "example": "no"
                 },
                 "label": {
                     "type": "string"
@@ -596,7 +605,6 @@ var doc = `{
             "type": "object",
             "properties": {
                 "kubernetes": {
-                    "type": "object",
                     "$ref": "#/definitions/model.Kubernetes"
                 }
             }

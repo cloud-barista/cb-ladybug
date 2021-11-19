@@ -52,6 +52,7 @@ create() {
 		{
 			"name": "${v_CLUSTER_NAME}",
 			"label": "",
+			"installMonAgent": "no",
 			"description": "",
 			"config": {
 				"kubernetes": {
@@ -87,6 +88,7 @@ EOF
 			"ReqInfo": {
 					"name": "'${v_CLUSTER_NAME}'",
 					"label": "",
+					"installMonAgent": "no",
 					"description": "",
 					"config": {
 						"kubernetes": {

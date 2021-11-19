@@ -1,12 +1,13 @@
 package model
 
 type ClusterReq struct {
-	Name         string       `json:"name" example:"cluster-01"`
-	ControlPlane []NodeConfig `json:"controlPlane"`
-	Worker       []NodeConfig `json:"worker"`
-	Config       Config       `json:"config"`
-	Label        string       `json:"label"`
-	Description  string       `json:"description"`
+	Name            string       `json:"name" example:"cluster-01"`
+	ControlPlane    []NodeConfig `json:"controlPlane"`
+	Worker          []NodeConfig `json:"worker"`
+	Config          Config       `json:"config"`
+	Label           string       `json:"label"`
+	InstallMonAgent string       `json:"installMonAgent" example:"no" default:"yes"`
+	Description     string       `json:"description"`
 }
 
 type NodeReq struct {
