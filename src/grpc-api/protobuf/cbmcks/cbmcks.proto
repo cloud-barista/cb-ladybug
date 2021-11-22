@@ -65,8 +65,10 @@ message ClusterInfo {
 	string cp_leader = 7 [json_name="cpLeader", (gogoproto.jsontag) = "cpLeader", (gogoproto.moretags) = "yaml:\"cpLeader\""];
 	string network_cni = 8 [json_name="networkCni", (gogoproto.jsontag) = "networkCni", (gogoproto.moretags) = "yaml:\"networkCni\""];
 	string label = 9 [json_name="label", (gogoproto.jsontag) = "label", (gogoproto.moretags) = "yaml:\"label\""];
-	string description = 10 [json_name="description", (gogoproto.jsontag) = "description", (gogoproto.moretags) = "yaml:\"description\""];
-	repeated NodeInfo nodes = 11 [json_name="nodes", (gogoproto.jsontag) = "nodes", (gogoproto.moretags) = "yaml:\"nodes\""];
+	string install_mon_agent = 10 [json_name="installMonAgent", (gogoproto.jsontag) = "installMonAgent", (gogoproto.moretags) = "yaml:\"installMonAgent\""];
+	string description = 11 [json_name="description", (gogoproto.jsontag) = "description", (gogoproto.moretags) = "yaml:\"description\""];
+	string created_time = 12 [json_name="createdTime", (gogoproto.jsontag) = "createdTime", (gogoproto.moretags) = "yaml:\"createdTime\""];
+	repeated NodeInfo nodes = 13 [json_name="nodes", (gogoproto.jsontag) = "nodes", (gogoproto.moretags) = "yaml:\"nodes\""];
 }
 
 message ClusterCreateRequest {
@@ -80,8 +82,8 @@ message ClusterCreateInfo {
 	repeated NodeConfig worker = 3 [json_name="worker", (gogoproto.jsontag) = "worker", (gogoproto.moretags) = "yaml:\"worker\""];
 	Config config = 4 [json_name="config", (gogoproto.jsontag) = "config", (gogoproto.moretags) = "yaml:\"config\""];
 	string label = 5 [json_name="label", (gogoproto.jsontag) = "label", (gogoproto.moretags) = "yaml:\"label\""];
-	string description = 6 [json_name="description", (gogoproto.jsontag) = "description", (gogoproto.moretags) = "yaml:\"description\""];
-	string createdTime = 7 [json_name="createdTime", (gogoproto.jsontag) = "createdTime", (gogoproto.moretags) = "yaml:\"createdTime\""];
+	string install_mon_agent = 6 [json_name="installMonAgent", (gogoproto.jsontag) = "installMonAgent", (gogoproto.moretags) = "yaml:\"installMonAgent\""];
+	string description = 7 [json_name="description", (gogoproto.jsontag) = "description", (gogoproto.moretags) = "yaml:\"description\""];
 }
 
 message NodeConfig {
@@ -137,10 +139,10 @@ message NodeInfo {
 	string role = 5 [json_name="role", (gogoproto.jsontag) = "role", (gogoproto.moretags) = "yaml:\"role\""];
 	string spec = 6 [json_name="spec", (gogoproto.jsontag) = "spec", (gogoproto.moretags) = "yaml:\"spec\""];
 	string csp = 7 [json_name="csp", (gogoproto.jsontag) = "csp", (gogoproto.moretags) = "yaml:\"csp\""];
-	string createdTime = 8 [json_name="createdTime", (gogoproto.jsontag) = "createdTime", (gogoproto.moretags) = "yaml:\"createdTime\""];
-	string cspLabel = 9 [json_name="cspLabel", (gogoproto.jsontag) = "cspLabel", (gogoproto.moretags) = "yaml:\"cspLabel\""];
-	string regionLabel = 10 [json_name="regionLabel", (gogoproto.jsontag) = "regionLabel", (gogoproto.moretags) = "yaml:\"regionLabel\""];
-	string zoneLabel = 11 [json_name="zoneLabel", (gogoproto.jsontag) = "zoneLabel", (gogoproto.moretags) = "yaml:\"zoneLabel\""];
+	string created_time = 8 [json_name="createdTime", (gogoproto.jsontag) = "createdTime", (gogoproto.moretags) = "yaml:\"createdTime\""];
+	string csp_label = 9 [json_name="cspLabel", (gogoproto.jsontag) = "cspLabel", (gogoproto.moretags) = "yaml:\"cspLabel\""];
+	string region_label = 10 [json_name="regionLabel", (gogoproto.jsontag) = "regionLabel", (gogoproto.moretags) = "yaml:\"regionLabel\""];
+	string zone_label = 11 [json_name="zoneLabel", (gogoproto.jsontag) = "zoneLabel", (gogoproto.moretags) = "yaml:\"zoneLabel\""];
 }
 
 message NodeCreateRequest {

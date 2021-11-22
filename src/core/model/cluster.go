@@ -48,15 +48,16 @@ type Cluster struct {
 		Reason  ClusterReason `json:"reason"`
 		Message string        `json:"message"`
 	} `json:"status"`
-	MCIS          string `json:"mcis"`
-	Namespace     string `json:"namespace"`
-	ClusterConfig string `json:"clusterConfig"`
-	CpLeader      string `json:"cpLeader"`
-	NetworkCni    string `json:"networkCni" enums:"canal,kilo"`
-	Label         string `json:"label"`
-	Description   string `json:"description"`
-	CreatedTime   string `json:"createdTime" example:"2022-01-02T12:00:00Z" default:""`
-	Nodes         []Node `json:"nodes"`
+	MCIS            string `json:"mcis"`
+	Namespace       string `json:"namespace"`
+	ClusterConfig   string `json:"clusterConfig"`
+	CpLeader        string `json:"cpLeader"`
+	NetworkCni      string `json:"networkCni" enums:"canal,kilo"`
+	Label           string `json:"label"`
+	InstallMonAgent string `json:"installMonAgent" example:"no" default:"yes"`
+	Description     string `json:"description"`
+	CreatedTime     string `json:"createdTime" example:"2022-01-02T12:00:00Z" default:""`
+	Nodes           []Node `json:"nodes"`
 }
 
 type ClusterList struct {

@@ -82,6 +82,7 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 	cluster = model.NewCluster(namespace, clusterName)
 	cluster.NetworkCni = req.Config.Kubernetes.NetworkCni
 	cluster.Label = req.Label
+	cluster.InstallMonAgent = req.InstallMonAgent
 	cluster.Description = req.Description
 
 	//update phase(provisioning)
@@ -204,6 +205,7 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 
 	// MCIS 생성
 	mcis.Label = config.MCIS_LABEL
+	mcis.InstallMonAgent = cluster.InstallMonAgent
 	mcis.SystemLabel = config.MCIS_SYSTEMLABEL
 	logger.Infof("start create MCIS (namespace=%s, cluster=%s, mcis=%s)", namespace, clusterName, mcisName)
 	if err = mcis.POST(); err != nil {

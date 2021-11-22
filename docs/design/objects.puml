@@ -98,6 +98,7 @@ object cluster {
 	+cpLeader
 	+networkCni
 	+label
+	+installMonAgent
 	+description
 	+createdTime
 }

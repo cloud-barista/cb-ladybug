@@ -11,10 +11,11 @@ import (
 
 type MCIS struct {
 	Model
-	Description string     `json:"description"`
-	Label       string     `json:"label"`
-	SystemLabel string     `json:"systemLabel"`
-	VMs         []model.VM `json:"vm"` // output
+	Description     string     `json:"description"`
+	Label           string     `json:"label"`
+	SystemLabel     string     `json:"systemLabel"`
+	InstallMonAgent string     `json:"installMonAgent"`
+	VMs             []model.VM `json:"vm"` // output
 }
 
 func NewMCIS(ns string, name string) *MCIS {

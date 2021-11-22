@@ -21,6 +21,7 @@
     cpLeader: "",
     networkCni: "",
     label: "",
+    installMonAgent: "",
     description: "",
     createdTime: "",
     nodes: [
@@ -57,22 +58,23 @@
 ## Cluster
 > 클러스터 정보
 
-|속성           |이름                         |타입   |비고                                     |
-|---            |---                          |---    |---                                      |
-|kind           |종류                         |string |Cluster                                  |
-|name           |클러스터 명                  |string |                                         |
-|status         |프로비저닝 상태              |object |                                         |
-|status.phase   |프로비저닝 단계              |string |아래 "ClusterPhase" 참조                 |
-|status.reason  |프로비저닝 오류              |string |아래 "ClusterReason" 참조                |
-|status.message |프로비저닝 오류 메시지       |string |                                         |
-|mcis           |MCIS 명                      |string |                                         |
-|namespace      |MCIS 네임스페이스            |string |                                         |
-|clusterConfig  |클러스터 연결정보            |string |Kubernetes 인 경우 kubeconfig.yaml       |
-|cpLeader       |control plane leader 노드명  |string |                                         |
-|networkCni     |network CNI 정보             |string |                                         |
-|label          |label                       |string |                                         |
-|description    |description                 |string |                                         |
-|createdTime    |생성일자                      |string |                                         |
+|속성               |이름                          |타입   |비고                                   |
+|---                |---                         |---    |---                                  |
+|kind               |종류                         |string |Cluster                              |
+|name               |클러스터 명                    |string |                                     |
+|status             |프로비저닝 상태                 |object |                                     |
+|status.phase       |프로비저닝 단계                 |string |아래 "ClusterPhase" 참조               |
+|status.reason      |프로비저닝 오류                 |string |아래 "ClusterReason" 참조              |
+|status.message     |프로비저닝 오류 메시지            |string |                                     |
+|mcis               |MCIS 명                      |string |                                     |
+|namespace          |MCIS 네임스페이스               |string |                                     |
+|clusterConfig      |클러스터 연결정보                |string |Kubernetes 인 경우 kubeconfig.yaml     |
+|cpLeader           |control plane leader 노드명   |string |                                     |
+|networkCni         |network CNI 정보             |string |                                     |
+|label              |label                       |string |                                     |
+|installMonAgent    |모니터링 에이전트 설치 여부        |string | yes/no (no가 아니면 설치)              |
+|description        |description                 |string |                                     |
+|createdTime        |생성일자                      |string |                                     |
 
 ### ClusterPhase
 > 프로비저닝 단계
