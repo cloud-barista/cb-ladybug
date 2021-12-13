@@ -570,6 +570,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "config": {
+                    "type": "object",
                     "$ref": "#/definitions/model.Config"
                 },
                 "controlPlane": {
@@ -605,6 +606,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "kubernetes": {
+                    "type": "object",
                     "$ref": "#/definitions/model.Kubernetes"
                 }
             }
