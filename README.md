@@ -12,7 +12,7 @@
 
 ```
 [NOTE]
-CB-MCKS is currently under development. (the latest release is v0.4.0)
+CB-MCKS is currently under development. (the latest version is 0.5.0 affogato)
 So, we do not recommend using the current release in production.
 Please note that the functionalities of CB-MCKS are not stable and secure yet.
 If you have any difficulties in using CB-MCKS, please let us know.
@@ -27,8 +27,8 @@ If you have any difficulties in using CB-MCKS, please let us know.
 
 ### Dependencies
 
-* CB-Tumblebug [v0.4.0](https://github.com/cloud-barista/cb-tumblebug/releases/tag/v0.4.0)
-* CB-Spider [v0.4.0](https://github.com/cloud-barista/cb-spider/releases/tag/v0.4.0)
+* CB-Tumblebug [v0.5.0](https://github.com/cloud-barista/cb-tumblebug/releases/tag/v0.5.0)
+* CB-Spider [v0.5.0](https://github.com/cloud-barista/cb-spider/releases/tag/v0.5.0)
 
 
 ### Clone
