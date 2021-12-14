@@ -25,6 +25,7 @@ const (
 	CSP_ALIBABA   CSP = "alibaba"
 	CSP_TENCENT   CSP = "tencent"
 	CSP_OPENSTACK CSP = "openstack"
+	CSP_IBM       CSP = "ibm"
 
 	NETWORKCNI_KILO  = "kilo"
 	NETWORKCNI_CANAL = "canal"
