@@ -1,6 +1,6 @@
 # Cloud-Barista Multi-Cloud Kubernetes Service Framework (CB-MCKS) ChangeLog
 
-## v0.5.0-Affogato (2021.12.16.)
+## v0.5.0 (Affogato, 2021.12.16.)
 
 ### Tested with
 
@@ -45,7 +45,7 @@
 
 ***
 
-## v0.4.0-CafeMocha (2021.06.30.)
+## v0.4.0 (Cafe Mocha, 2021.06.30.)
 
 ### API Change
 - Add some parametes in Cluster and Node Management APIs to support multi-cloud regions and high availability (#36)

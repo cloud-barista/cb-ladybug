@@ -12,7 +12,7 @@
 
 ```
 [NOTE]
-CB-MCKS is currently under development. (the latest version is 0.5.0 affogato)
+CB-MCKS is currently under development. (The latest version is v0.5.0 (Affogato))
 So, we do not recommend using the current release in production.
 Please note that the functionalities of CB-MCKS are not stable and secure yet.
 If you have any difficulties in using CB-MCKS, please let us know.
