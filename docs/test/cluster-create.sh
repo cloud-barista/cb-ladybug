@@ -64,14 +64,14 @@ create() {
 			},
 			"controlPlane": [
 				{
-					"connection": "config-alibaba-ap-northeast-1",
+					"connection": "config-azure-koreacentral",
 					"count": 3,
-					"spec": "ecs.t5-lc1m2.large"
+					"spec": "Standard_B2s"
 				}
 			],
 			"worker": [
 				{
-					"connection": "config-ibm-us-south",
+					"connection": "config-ibm-jp-tok",
 					"count": 1,
 					"spec": "bx2-2x8"
 				}

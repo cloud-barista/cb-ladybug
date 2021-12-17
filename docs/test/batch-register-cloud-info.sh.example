@@ -72,7 +72,7 @@ export OS_ZONE="RegionOne"
 # Ibm
 export IBM_API_KEY="key_id"
 
-export IBM_REGION="jp-tok-2"
-export IBM_ZONE="jp-tok-2a"
+export IBM_REGION="jp-tok"
+export IBM_ZONE="jp-tok-1"
 
 ./connectioninfo-create.sh IBM
