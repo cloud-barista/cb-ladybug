@@ -46,8 +46,7 @@ object openstackCredential #WhiteSmoke {
 	project_id
 }
 object ibmCredential #WhiteSmoke {
-	client_id
-	client_secret
+	api_key
 }
 
 object config #WhiteSmoke {

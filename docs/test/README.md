@@ -213,8 +213,7 @@ $ ./connectioninfo-create.sh OPENSTACK
 * 환경변수 : 클라우드별 연결정보
 
 ```
-$ export IBM_KEY="<ibm_access_key_id>"
-$ export IBM_SECRET="<ibm_access_key_secret>"
+$ export IBM_API_KEY="<ibm_api_key>"
 ```
 
 * 환경변수 : IBM_REGION, IBM_ZONE
@@ -223,9 +222,9 @@ $ export IBM_SECRET="<ibm_access_key_secret>"
 $ export IBM_REGION="<region name>" 
 $ export IBM_ZONE="<zone name>"
 
-# 예: ap-seoul (도쿄리전)
-$ export IBM_REGION="jp-tok-1"
-$ export IBM_ZONE="jp-tok-1a"
+# 예: jp-tok (도쿄리전)
+$ export IBM_REGION="jp-tok"
+$ export IBM_ZONE="jp-tok-1"
 ```
 
 * Cloud Connection Info. 등록

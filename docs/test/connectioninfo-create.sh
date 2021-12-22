@@ -283,7 +283,7 @@ if [ "${v_OPTION}" != "add" ]; then
 		v_IBM_API_KEY="${IBM_API_KEY}"
 		if [ "${v_IBM_API_KEY}" == "" ]; then 
 			read -e -p "API Key ? [예:AH24UUA2ZGNOP6DKKIA6] : "  v_IBM_API_KEY
-			if [ "${v_IBM_API_KEY}" == "" ]; then echo "[ERROR] missing <ibm_api_key_id>"; exit -1;fi
+			if [ "${v_IBM_API_KEY}" == "" ]; then echo "[ERROR] missing <ibm_api_key>"; exit -1;fi
 		fi
 
 		# region
@@ -347,8 +347,8 @@ elif [ "${v_CSP}" == "OPENSTACK" ]; then
 	echo "- openstack_domainname		is '${v_OPENSTACK_DOMAINNAME}'"
 	echo "- openstack_projectid		 	is '${v_OPENSTACK_PROJECTID}'"
 elif [ "${v_CSP}" == "IBM" ]; then 
-	echo "- Zone                   		is '${v_ZONE}'"
- 	echo "- ibm_api_key_id      		is '${v_IBM_API_KEY}'"
+	echo "- Zone		    	     is '${v_ZONE}'"
+ 	echo "- ibm_api_key  	     is '${v_IBM_API_KEY}'"
 fi
 echo "- (Name of credential)       is '${NM_CREDENTIAL}'"
 echo "- (Name of region)           is '${NM_REGION}'"
