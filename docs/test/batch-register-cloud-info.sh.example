@@ -67,3 +67,12 @@ export OS_REGION="RegionOne"
 export OS_ZONE="RegionOne"
 
 ./connectioninfo-create.sh OPENSTACK
+
+
+# Ibm
+export IBM_API_KEY="key_id"
+
+export IBM_REGION="jp-tok"
+export IBM_ZONE="jp-tok-1"
+
+./connectioninfo-create.sh IBM

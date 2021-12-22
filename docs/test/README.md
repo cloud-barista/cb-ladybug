@@ -208,12 +208,37 @@ $ export OS_ZONE="RegionOne"
 $ ./connectioninfo-create.sh OPENSTACK
 ```
 
+#### IBM
+
+* 환경변수 : 클라우드별 연결정보
+
+```
+$ export IBM_API_KEY="<ibm_api_key>"
+```
+
+* 환경변수 : IBM_REGION, IBM_ZONE
+
+```
+$ export IBM_REGION="<region name>" 
+$ export IBM_ZONE="<zone name>"
+
+# 예: jp-tok (도쿄리전)
+$ export IBM_REGION="jp-tok"
+$ export IBM_ZONE="jp-tok-1"
+```
+
+* Cloud Connection Info. 등록
+
+```
+$ ./connectioninfo-create.sh IBM
+```
+
 #### Cloud Connection Info 추가
 
 ```
-# AWS/GCP/ALIBABA/TENCENT/OPENSTACK
-$ export [AWS/GCP/ALIBABA/TENCENT/OS]_REGION="<region name>"
-$ export [AWS/GCP/ALIBABA/TENCENT/OS]_ZONE="<zone name>"
+# AWS/GCP/ALIBABA/TENCENT/OPENSTACK/IBM
+$ export [AWS/GCP/ALIBABA/TENCENT/OS/IBM]_REGION="<region name>"
+$ export [AWS/GCP/ALIBABA/TENCENT/OS/IBM]_ZONE="<zone name>"
 
 # AZURE
 $ export AZURE_REGION="<region name>"

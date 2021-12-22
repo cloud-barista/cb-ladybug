@@ -2,7 +2,7 @@
 # ------------------------------------------------------------------------------
 # usage
 if [ "$#" -lt 1 ]; then 
-	echo "./connectioninfo-create.sh [AWS/GCP/AZURE/ALIBABA/TENCENT/OPENSTACK] <option>"
+	echo "./connectioninfo-create.sh [AWS/GCP/AZURE/ALIBABA/TENCENT/OPENSTACK/IBM] <option>"
 	echo "./connectioninfo-create.sh GCP"
 	echo "./connectioninfo-create.sh AWS add"
 	exit 0
@@ -21,11 +21,11 @@ source ./conf.env
 # 1. CSP
 if [ "$#" -gt 0 ]; then v_CSP="$1"; else	v_CSP="${CSP}"; fi
 if [ "${v_CSP}" == "" ]; then 
-	read -e -p "Cloud ? [AWS(default) or GCP or AZURE or ALIBABA or TENCENT or OPENSTACK] : "  v_CSP
+	read -e -p "Cloud ? [AWS(default) or GCP or AZURE or ALIBABA or TENCENT or OPENSTACK or IBM] : "  v_CSP
 fi
 
 if [ "${v_CSP}" == "" ]; then v_CSP="AWS"; fi
-if [ "${v_CSP}" != "GCP" ] && [ "${v_CSP}" != "AWS" ] && [ "${v_CSP}" != "AZURE" ] && [ "${v_CSP}" != "ALIBABA" ] && [ "${v_CSP}" != "TENCENT" ] && [ "${v_CSP}" != "OPENSTACK" ]; then echo "[ERROR] missing <cloud>"; exit -1;fi
+if [ "${v_CSP}" != "GCP" ] && [ "${v_CSP}" != "AWS" ] && [ "${v_CSP}" != "AZURE" ] && [ "${v_CSP}" != "ALIBABA" ] && [ "${v_CSP}" != "TENCENT" ] && [ "${v_CSP}" != "OPENSTACK" ] && [ "${v_CSP}" != "IBM" ]; then echo "[ERROR] missing <cloud>"; exit -1;fi
 
 v_CSP_LOWER="$(echo ${v_CSP} | tr [:upper:] [:lower:])"
 
@@ -46,6 +46,8 @@ elif [ "${v_CSP}" == "TENCENT" ]; then
 	v_DRIVER="${c_TENCENT_DRIVER}"
 elif [ "${v_CSP}" == "OPENSTACK" ]; then 
 	v_DRIVER="${c_OPENSTACK_DRIVER}"
+elif [ "${v_CSP}" == "IBM" ]; then 
+	v_DRIVER="${c_IBM_DRIVER}"
 fi
 
 if [ "${v_OPTION}" != "add" ]; then 
@@ -275,6 +277,30 @@ if [ "${v_OPTION}" != "add" ]; then
 		fi
 	fi
 
+	# IBM
+	if [ "${v_CSP}" == "IBM" ]; then 
+	
+		v_IBM_API_KEY="${IBM_API_KEY}"
+		if [ "${v_IBM_API_KEY}" == "" ]; then 
+			read -e -p "API Key ? [예:AH24UUA2ZGNOP6DKKIA6] : "  v_IBM_API_KEY
+			if [ "${v_IBM_API_KEY}" == "" ]; then echo "[ERROR] missing <ibm_api_key>"; exit -1;fi
+		fi
+
+		# region
+		v_REGION="${IBM_REGION}"
+		if [ "${v_REGION}" == "" ]; then 
+			read -e -p "region ? [예:jp-tok] : "  v_REGION
+			if [ "${v_REGION}" == "" ]; then echo "[ERROR] missing region"; exit -1;fi
+		fi
+
+		# zone
+		v_ZONE="${IBM_ZONE}"
+		if [ "${v_ZONE}" == "" ]; then 
+			read -e -p "zone ? [예:jp-tok-1] : "  v_ZONE
+			if [ "${v_ZONE}" == "" ]; then v_ZONE="${v_REGION}a";fi
+		fi
+	fi
+
 fi
 
 v_REGION_LOWER="$(echo ${v_REGION} | tr [:upper:] [:lower:])"
@@ -316,10 +342,13 @@ elif [ "${v_CSP}" == "TENCENT" ]; then
 elif [ "${v_CSP}" == "OPENSTACK" ]; then 
 	echo "- Zone                        is '${v_ZONE}'"
  	echo "- openstack_identity_endpoint is '${v_OPENSTACK_ENDPOINT}'"
-	echo "- openstack_username  			  is '${v_OPENSTACK_USERNAME}'"
-	echo "- openstack_password  			  is '${v_OPENSTACK_PASSWORD}'"
-	echo "- openstack_domainname			  is '${v_OPENSTACK_DOMAINNAME}'"
-	echo "- openstack_projectid		 	    is '${v_OPENSTACK_PROJECTID}'"
+	echo "- openstack_username  		is '${v_OPENSTACK_USERNAME}'"
+	echo "- openstack_password  		is '${v_OPENSTACK_PASSWORD}'"
+	echo "- openstack_domainname		is '${v_OPENSTACK_DOMAINNAME}'"
+	echo "- openstack_projectid		 	is '${v_OPENSTACK_PROJECTID}'"
+elif [ "${v_CSP}" == "IBM" ]; then 
+	echo "- Zone		    	     is '${v_ZONE}'"
+ 	echo "- ibm_api_key  	     is '${v_IBM_API_KEY}'"
 fi
 echo "- (Name of credential)       is '${NM_CREDENTIAL}'"
 echo "- (Name of region)           is '${NM_REGION}'"
@@ -418,6 +447,17 @@ EOF
 				{"Key" : "Password",					"Value" : "${v_OPENSTACK_PASSWORD}"},
 				{"Key" : "DomainName",				"Value" : "${v_OPENSTACK_DOMAINNAME}"},
 				{"Key" : "ProjectID",					"Value" : "${v_OPENSTACK_PROJECTID}"}
+			]
+			}
+EOF
+		elif [ "${v_CSP}" == "IBM" ]; then
+			curl -sX DELETE ${c_URL_SPIDER}/credential/${NM_CREDENTIAL} -H "${c_CT}" -o /dev/null -w "CREDENTIAL.delete():%{http_code}\n"
+			curl -sX POST   ${c_URL_SPIDER}/credential                  -H "${c_CT}" -o /dev/null -w "CREDENTIAL.regist():%{http_code}\n" -d @- <<EOF
+			{
+			"CredentialName"   : "${NM_CREDENTIAL}",
+			"ProviderName"     : "${v_CSP}",
+			"KeyValueInfoList" : [
+				{"Key" : "ApiKey",       "Value" : "${v_IBM_API_KEY}"}
 			]
 			}
 EOF

@@ -42,6 +42,18 @@ var imageMap = map[string]string{
 	"sa-east-1":      "ami-0fd2c3d373788b726", //남아메리카 (상파울루)
 }
 
+var ibmImageMap = map[string]string{
+	"us-south": "r006-9de77234-3189-42f8-982d-f2266477cfe0", //미국 남부
+	"br-sao":   "r042-92d1cd12-f014-4b9a-abf8-c5ca6494a9e5", //브라질
+	"us-east":  "r014-dc446598-a1b5-41c3-a1d6-add3afaf264e", //미국 동부
+	"eu-de":    "r010-1f68eb2d-f35c-4959-8f4b-2b2f9cf78102", //독일
+	"ca-tor":   "r038-e92647cf-8be9-438a-b94c-251cc86bc99a", //캐나다
+	"eu-gb":    "r018-1d7417c6-893e-49d4-b14d-9643d6b29812", //영국
+	"au-syd":   "r026-a8c25ce6-0ca1-43e9-9b41-411c6217b8b8", //호주
+	"jp-osa":   "r034-522c639c-52e1-4cab-8dfb-bc0fb9f6f577", //일본 (오사카)
+	"jp-tok":   "r022-61fdadec-6b03-4bd2-bfca-62cd16f5673f", //일본 (도쿄)
+}
+
 // get vm image-id
 func GetVmImageId(csp config.CSP, configName string, region *tumblebug.Region) (string, error) {
 
@@ -100,6 +112,28 @@ func GetVmImageId(csp config.CSP, configName string, region *tumblebug.Region) (
 		logger.Infof("AMI find OK (ami='%s', region='%s')", imageId, regionName)
 		return imageId, nil
 
+	} else if csp == config.CSP_IBM {
+		// IBM : 리전별 image 가져오기
+		regionName := ""
+		for _, info := range region.KeyValueInfoList {
+			if info.Key == "Region" {
+				regionName = info.Value //get region name
+				break
+			}
+		}
+
+		if regionName == "" {
+			return "", errors.New(fmt.Sprintf("request not found image on IBM (cause = region name is empty, connection='%s', region name='%s')", configName, region.RegionName))
+		}
+
+		// TODO [update/hard-coding] region별 image id
+		imageId := ibmImageMap[regionName]
+		if imageId == "" {
+			return "", errors.New(fmt.Sprintf("request not found image on IBM image map (connection='%s', region='%s')", configName, regionName))
+		}
+
+		logger.Infof("image find OK (ami='%s', region='%s')", imageId, regionName)
+		return imageId, nil
 	} else {
 		return "", errors.New(fmt.Sprintf("CSP '%s' is not supported (Not found \"vm-machine-image\")", csp))
 	}
@@ -122,6 +156,8 @@ func GetCSPName(providerName string) (config.CSP, error) {
 		return config.CSP_TENCENT, nil
 	case string(config.CSP_OPENSTACK):
 		return config.CSP_OPENSTACK, nil
+	case string(config.CSP_IBM):
+		return config.CSP_IBM, nil
 	}
 	return "", errors.New(providerName + "is not supported")
 }
