@@ -15,7 +15,12 @@ import (
 )
 
 const (
-	VM_USER_ACCOUNT = "cb-user"
+	VM_USER_ACCOUNT       = "cb-user"
+	REMOTE_TARGET_PATH    = "/tmp"
+	CNI_CANAL_FILE        = "addons/canal/canal_v3.20.0.yaml"
+	CNI_KILO_CRDS_FILE    = "addons/kilo/crds_v0.3.0.yaml"
+	CNI_KILO_KUBEADM_FILE = "addons/kilo/kilo-kubeadm-flannel_v0.3.0.yaml"
+	CNI_KILO_FLANNEL_FILE = "addons/kilo/kube-flannel_v0.14.0.yaml"
 )
 
 type VM struct {
@@ -59,10 +64,6 @@ type VMDetail struct {
 	VMSpecName string
 }
 
-const (
-	remoteTargetPath = "/tmp"
-)
-
 func (self *VM) SSHRun(format string, a ...interface{}) (string, error) {
 
 	address := fmt.Sprintf("%s:22", self.PublicIP)
@@ -75,9 +76,9 @@ func (self *VM) SSHRun(format string, a ...interface{}) (string, error) {
 			ServerPort: address,
 		}, command)
 	if err != nil {
-		logger.Errorf("[%s] failed to run SSH command (server=%s, cause=%v) \ncommand=%s", self.Name, address, err, command)
+		logger.Errorf("[%s] failed to run SSH command (server=%s, cause=%v, command=%s, output=%s)", self.Name, address, err, command, output)
 	} else {
-		logger.Infof("[%s] ssh execute is completed (server=%s) \ncommand=%s \noutput=%s", self.Name, address, command, output)
+		logger.Infof("[%s] ssh execute is completed (server=%s, command=%s)", self.Name, address, command)
 	}
 	return output, err
 }
@@ -119,15 +120,6 @@ func (self *VM) checkConnectivity() error {
 	return errors.New(fmt.Sprintf("Check connectivity failed. (vm=%s, cause=connection is nil)", self.Name))
 }
 
-func (self *VM) createAddonsDirectory(networkCni string) error {
-
-	addonsPath := fmt.Sprintf("%s/addons/%s", remoteTargetPath, networkCni)
-	if _, err := self.SSHRun("mkdir -p %s", addonsPath); err != nil {
-		return errors.New(fmt.Sprintf("Failed to create a addon directory. (node=%s, path=%s)", self.Name, addonsPath))
-	}
-	return nil
-}
-
 func (self *VM) CheckConnectSSH() error {
 	if _, err := self.SSHRun("/bin/hostname"); err != nil {
 		return errors.New(fmt.Sprintf("Failed to check connect VM. (vm=%s)", self.Name))
@@ -157,78 +149,54 @@ func (self *VM) ConnectionTest() error {
 	return nil
 }
 
-func (self *VM) CopyScripts(networkCni string) error {
+/* bootstrap */
+func (self *VM) Bootstrap(networkCni string) error {
 
-	logger.Infof("[%s] start the process of 'copy script files'", self.Name)
+	logger.Infof("[%s] Start copying files. of 'bootstrap'", self.Name)
 
+	// 1. copy files
+	//  - list-up copy bootstrap files
 	sourcePath := fmt.Sprintf("%s/src/scripts", *config.Config.AppRootPath)
-	sourceFiles := []string{config.BOOTSTRAP_FILE, config.SYSTEMD_SERVICE_FILE}
+	sourceFiles := []string{"bootstrap.sh"}
+
+	//  - list-up for leader-node
 	if self.Role == config.CONTROL_PLANE && self.IsCPLeader {
-		sourceFiles = append(sourceFiles, config.INIT_FILE)
-		sourceFiles = append(sourceFiles, config.HA_PROXY_FILE)
-
-		if err := self.createAddonsDirectory(networkCni); err != nil {
-			return err
+		sourceFiles = append(sourceFiles, "haproxy.sh", "k8s-init.sh")
+		if _, err := self.SSHRun("mkdir -p %s/addons/%s", REMOTE_TARGET_PATH, networkCni); err != nil {
+			return errors.New(fmt.Sprintf("Failed to create a addon directory. (node=%s, path=%s)", self.Name, "addons/"+networkCni))
 		}
-		cniFiles := getCniFiles(networkCni)
-		sourceFiles = append(sourceFiles, cniFiles...)
-	}
-	if networkCni == config.NETWORKCNI_CANAL {
-		sourceFiles = append(sourceFiles, config.MCKS_BOOTSTRAP_CANAL_FILE)
-	} else {
-		sourceFiles = append(sourceFiles, config.MCKS_BOOTSTRAP_KILO_FILE)
+		if networkCni == config.NETWORKCNI_CANAL {
+			sourceFiles = append(sourceFiles, CNI_CANAL_FILE)
+		} else {
+			sourceFiles = append(sourceFiles, CNI_KILO_CRDS_FILE, CNI_KILO_KUBEADM_FILE, CNI_KILO_FLANNEL_FILE)
+		}
 	}
 
+	//  - copy list-up files
+	logger.Infof("[%s] Start copying files. (files=%v)", self.Name, sourceFiles)
 	for _, f := range sourceFiles {
 		src := fmt.Sprintf("%s/%s", sourcePath, f)
-		dest := fmt.Sprintf("%s/%s", remoteTargetPath, f)
+		dest := fmt.Sprintf("%s/%s", REMOTE_TARGET_PATH, f)
 		if err := self.SSHCopy(src, dest); err != nil {
-			return err
+			logger.Errorf("[%s] Failed to copy bootstrap files (source=%s, destination=%s, cause=%v)", self.Name, src, dest, err)
+			return errors.New(fmt.Sprintf("Failed to copy bootstrap files. (vm=%s, file=%s)", self.Name, f))
 		}
 	}
-	logger.Infof("[%s] completed the 'copy script files' process", self.Name)
-	return nil
-}
 
-func (self *VM) SetSystemd(networkCni string) error {
-
-	logger.Infof("[%s] start the process of 'set systemd'", self.Name)
-
-	var bsFile string
-	if networkCni == config.NETWORKCNI_CANAL {
-		bsFile = config.MCKS_BOOTSTRAP_CANAL_FILE
-	} else {
-		bsFile = config.MCKS_BOOTSTRAP_KILO_FILE
-	}
-
-	if _, err := self.SSHRun("cd %s;./%s %s", remoteTargetPath, bsFile, self.PublicIP); err != nil {
-		return errors.New(fmt.Sprintf("Failed to execute bootstrap shell. (vm=%s, shell=%s)", self.Name, bsFile))
-	}
-
-	if _, err := self.SSHRun("cd %s;./%s", remoteTargetPath, config.SYSTEMD_SERVICE_FILE); err != nil {
-		return errors.New(fmt.Sprintf("Failed to execute systemd shell. (vm=%s, shell=%s)", self.Name, bsFile))
-	}
-
-	logger.Infof("[%s] completed the 'set systemd' process", self.Name)
-	return nil
-}
-
-func (self *VM) Bootstrap() error {
-
-	logger.Infof("[%s] start the process of 'bootstrap'", self.Name)
-
-	if output, err := self.SSHRun("cd %s;./%s %s %s", remoteTargetPath, config.BOOTSTRAP_FILE, self.Name, self.PublicIP); err != nil {
-		return errors.New(fmt.Sprintf("Failed to execute bootstrap shell. (vm=%s, shell=%s)", self.Name, config.BOOTSTRAP_FILE))
+	// 2. execute bootstrap.sh
+	if output, err := self.SSHRun("%s/bootstrap.sh %s %s %s %s %s", REMOTE_TARGET_PATH, self.Csp, self.Region.Region, self.Name, self.PublicIP, networkCni); err != nil {
+		return errors.New(fmt.Sprintf("Failed to execute bootstrap.sh (vm=%s)", self.Name))
 	} else if !strings.Contains(output, "kubectl set on hold") {
-		logger.Errorf("[%s] failed to execute bootstrap shell (cause='kubectl not set on hold')", self.Name)
-		return errors.New(fmt.Sprintf("Failed to execute bootstrap shell. (vm=%s, cause='kubectl not set on hold', cause=kubectl set on hold)", self.Name))
+		logger.Errorf("[%s] failed to execute bootstrap.sh (cause='kubectl not set on hold')", self.Name)
+		return errors.New(fmt.Sprintf("Failed to execute bootstrap.sh shell. (vm=%s, cause='kubectl not set on hold')", self.Name))
 	}
 
-	logger.Infof("[%s] complted the'bootstrap process", self.Name)
+	logger.Infof("[%s] completed the'bootstrap process", self.Name)
 	return nil
 
 }
 
+/* setup haproxy */
 func (self *VM) InstallHAProxy(IPs []string) error {
 
 	logger.Infof("[%s] start the process of 'set up HA'", self.Name)
@@ -241,8 +209,8 @@ func (self *VM) InstallHAProxy(IPs []string) error {
 		}
 	}
 
-	if output, err := self.SSHRun("sudo sed 's/^{{SERVERS}}/%s/g' %s/%s", servers, remoteTargetPath, config.HA_PROXY_FILE); err != nil {
-		return errors.New(fmt.Sprintf("Failed to set up haproxy. (vm=%s, shell=%s)", self.Name, config.HA_PROXY_FILE))
+	if output, err := self.SSHRun("sudo sed 's/^{{SERVERS}}/%s/g' %s/%s", servers, REMOTE_TARGET_PATH, "haproxy.sh"); err != nil {
+		return errors.New(fmt.Sprintf("Failed to set up haproxy. (vm=%s, shell=%s)", self.Name, "haproxy.sh"))
 	} else {
 		if _, err = self.SSHRun(output); err != nil {
 			return errors.New(fmt.Sprintf("Failed to set up haproxy. (vm=%s, command='%s')", self.Name, output))
@@ -253,14 +221,15 @@ func (self *VM) InstallHAProxy(IPs []string) error {
 	return nil
 }
 
+// coantrol-plane init
 func (self *VM) ControlPlaneInit(reqKubernetes Kubernetes) ([]string, string, error) {
 
 	logger.Infof("[%s] start the process of 'control-plane init.'", self.Name)
 
 	var joinCmd []string
 
-	if output, err := self.SSHRun("cd %s;./%s %s %s %s %s", remoteTargetPath, config.INIT_FILE, reqKubernetes.PodCidr, reqKubernetes.ServiceCidr, reqKubernetes.ServiceDnsDomain, self.PublicIP); err != nil {
-		return nil, "", errors.New(fmt.Sprintf("Failed to initialize control-plane. (vm=%s, shell=%s)", self.Name, config.INIT_FILE))
+	if output, err := self.SSHRun("cd %s;./%s %s %s %s %s", REMOTE_TARGET_PATH, "k8s-init.sh", reqKubernetes.PodCidr, reqKubernetes.ServiceCidr, reqKubernetes.ServiceDnsDomain, self.PublicIP); err != nil {
+		return nil, "", errors.New(fmt.Sprintf("Failed to initialize control-plane. (vm=%s, shell=%s)", self.Name, "k8s-init.sh"))
 	} else if strings.Contains(output, "Your Kubernetes control-plane has initialized successfully") {
 		joinCmd = getJoinCmd(output)
 	} else {
@@ -274,22 +243,23 @@ func (self *VM) ControlPlaneInit(reqKubernetes Kubernetes) ([]string, string, er
 	return joinCmd, ouput, nil
 }
 
+/* install network-cni */
 func (self *VM) InstallNetworkCNI(networkCni string) error {
 
-	logger.Infof("[%s] start the process of 'set up network-cni'", self.Name)
+	logger.Infof("[%s] start the process of 'install network-cni'", self.Name)
 
 	var cmd string
 	cniFiles := getCniFiles(networkCni)
 
 	for _, file := range cniFiles {
-		cmd += fmt.Sprintf("sudo kubectl apply -f %s/%s --kubeconfig=/etc/kubernetes/admin.conf;\n", remoteTargetPath, file)
+		cmd += fmt.Sprintf("sudo kubectl apply -f %s/%s --kubeconfig=/etc/kubernetes/admin.conf;\n", REMOTE_TARGET_PATH, file)
 	}
 
 	if _, err := self.SSHRun(cmd); err != nil {
-		return errors.New(fmt.Sprintf("Failed to set up network-cni plug-in. (node=%s, command='%s')", self.Name, cmd))
+		return err
 	}
 
-	logger.Infof("[%s] completed the 'set up network-cni' process", self.Name)
+	logger.Infof("[%s] completed the 'install network-cni' process", self.Name)
 	return nil
 }
 
@@ -338,8 +308,6 @@ func (self *VM) WorkerJoin(workerJoinCmd *string) error {
 
 func (self *VM) AddNodeLabels() error {
 
-	logger.Infof("[%s] start the process of 'set node label'", self.Name)
-
 	configFile := "admin.conf"
 	if self.Role == config.WORKER {
 		configFile = "kubelet.conf"
@@ -362,7 +330,7 @@ func (self *VM) AddNodeLabels() error {
 		return errors.New(fmt.Sprintf("Failed to set label. (node=%s, label=%s)", self.Name, labels))
 	}
 
-	logger.Infof("[%s] completed the 'set node label' process", self.Name)
+	logger.Infof("[%s] set node label (label=%s)", self.Name, labels)
 	return nil
 }
 
@@ -387,11 +355,11 @@ func getJoinCmd(cpInitResult string) []string {
 
 func getCniFiles(cni string) (cniFiles []string) {
 	if cni == config.NETWORKCNI_CANAL {
-		cniFiles = append(cniFiles, config.CNI_CANAL_FILE)
+		cniFiles = append(cniFiles, CNI_CANAL_FILE)
 	} else {
-		cniFiles = append(cniFiles, config.CNI_KILO_CRDS_FILE)
-		cniFiles = append(cniFiles, config.CNI_KILO_KUBEADM_FILE)
-		cniFiles = append(cniFiles, config.CNI_KILO_FLANNEL_FILE)
+		cniFiles = append(cniFiles, CNI_KILO_CRDS_FILE)
+		cniFiles = append(cniFiles, CNI_KILO_KUBEADM_FILE)
+		cniFiles = append(cniFiles, CNI_KILO_FLANNEL_FILE)
 	}
 	return
 }

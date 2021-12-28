@@ -183,13 +183,7 @@ func AddNode(namespace string, clusterName string, req *model.NodeReq) (*model.N
 			if err := vm.ConnectionTest(); err != nil {
 				return err
 			}
-			if err = vm.CopyScripts(networkCni); err != nil {
-				return err
-			}
-			if err = vm.SetSystemd(networkCni); err != nil {
-				return err
-			}
-			if err = vm.Bootstrap(); err != nil {
+			if err = vm.Bootstrap(networkCni); err != nil {
 				return err
 			}
 			if err = vm.WorkerJoin(&workerJoinCmd); err != nil {

@@ -1,9 +1,17 @@
 #!/bin/bash
 K8S_VERSION="1.18.9-00"  # curl https://packages.cloud.google.com/apt/dists/kubernetes-xenial/main/binary-amd64/Packages
-# K8S_VERSION="1.17.8-00"
+CSP="$1"
+REGION="$2"
+HOSTNAME="$3"
+PUBLIC_IP="$4"
+NETWORK_CNI="$5"
+LOCATION="${CSP}-${REGION}"
+
+# ---------------------------------------------------------------------------------
+# packages
 
 # hostname
-sudo hostnamectl set-hostname $1
+sudo hostnamectl set-hostname ${HOSTNAME}
 
 # packages
 sudo killall apt apt-get > /dev/null 2>&1
@@ -42,11 +50,78 @@ sudo apt-get update
 sudo apt-get install -y kubeadm=$K8S_VERSION kubelet=$K8S_VERSION kubectl=$K8S_VERSION
 sudo apt-mark hold kubeadm kubelet kubectl
 
+
+# ---------------------------------------------------------------------------------
+# System deamon (mcks-bootstrap)
+
+
+if [ "${CSP}" != "openstack" ]; then 
+	PUBLIC_IP='$(dig +short myip.opendns.com @resolver1.opendns.com)'
+fi
+
+if [ "${NETWORK_CNI}" == "kilo" ]; then 
 # install wireguard
 sudo add-apt-repository -y ppa:wireguard/wireguard
 sudo apt-get update
 sudo apt-get install -y wireguard
+# mcks-bootstrap
+echo -e '#!/bin/sh
+IFACE="$(ip route get 8.8.8.8 | awk \047{ print $5; exit }\047)"
+PUBLIC_IP="{{PUBLIC_IP}}"
+ifconfig ${IFACE}:1 ${PUBLIC_IP} netmask 255.255.255.255  broadcast 0.0.0.0 up
+echo "KUBELET_EXTRA_ARGS=-\"-node-ip=${PUBLIC_IP}\"" > /etc/default/kubelet
+if [ -f "/etc/kubernetes/kubelet.conf" ]; then
+  systemctl restart kubelet
+  kubectl --kubeconfig=/etc/kubernetes/kubelet.conf annotate node {{HOSTNAME}} kilo.squat.ai/location={{LOCATION}} --overwrite
+  kubectl --kubeconfig=/etc/kubernetes/kubelet.conf annotate node {{HOSTNAME}} kilo.squat.ai/force-endpoint=${PUBLIC_IP}:51820 --overwrite
+  kubectl --kubeconfig=/etc/kubernetes/kubelet.conf annotate node {{HOSTNAME}} kilo.squat.ai/persistent-keepalive=25 --overwrite
+  kubectl --kubeconfig=/etc/kubernetes/kubelet.conf annotate node {{HOSTNAME}} flannel.alpha.coreos.com/public-ip-overwrite=${PUBLIC_IP} --overwrite
+fi
+exit 0
+fi' | sed "s/{{HOSTNAME}}/${HOSTNAME}/g" | sed "s/{{PUBLIC_IP}}/${PUBLIC_IP}/g" | sed "s/{{LOCATION}}/${LOCATION}/g" | sudo tee /lib/systemd/system/mcks-bootstrap > /dev/null
+sudo chmod +x /lib/systemd/system/mcks-bootstrap
+fi
 
-# public ip nic up
-IFACE="$(ip route get 8.8.8.8 | awk '{ print $5; exit }')"
-sudo ifconfig ${IFACE}:1 $2 netmask 255.255.255.255  broadcast 0.0.0.0 up
+if [ "${NETWORK_CNI}" == "canal" ]; then 
+# mcks-bootstrap
+echo -e '#!/bin/sh
+IFACE="$(ip route get 8.8.8.8 | awk \047{ print $5; exit }\047)"
+PUBLIC_IP="{{PUBLIC_IP}}"
+ifconfig ${IFACE}:1 ${PUBLIC_IP} netmask 255.255.255.255  broadcast 0.0.0.0 up
+echo "KUBELET_EXTRA_ARGS=-\"-node-ip=${PUBLIC_IP}\"" > /etc/default/kubelet
+if [ -f "/etc/kubernetes/kubelet.conf" ]; then
+  systemctl restart kubelet
+  R="$(kubectl --kubeconfig=/etc/kubernetes/kubelet.conf annotate node {{HOSTNAME}} flannel.alpha.coreos.com/public-ip-overwrite=${PUBLIC_IP} --overwrite)"
+  if echo "$R" | grep "annotated"; then
+    R=$(kubectl --kubeconfig=/etc/kubernetes/kubelet.conf get nodes --no-headers | awk \047END { print NR }\047)
+    echo "nodes count = ${R}"
+    if [ "$R" != "1" ]; then
+      systemctl restart docker
+      echo "docker daemon restarted"
+    fi
+    exit 0
+  else
+    exit 1
+  fi
+fi
+exit 0
+fi' | sed "s/{{HOSTNAME}}/${HOSTNAME}/g" | sed "s/{{PUBLIC_IP}}/${PUBLIC_IP}/g" | sudo tee /lib/systemd/system/mcks-bootstrap > /dev/null
+sudo chmod +x /lib/systemd/system/mcks-bootstrap
+fi
+
+# setup bootstrap service deamon
+sudo bash -c 'cat > /lib/systemd/system/mcks-bootstrap.service <<EOF
+[Unit]
+Description=MCKS bootstrap script
+After=multi-user.target
+StartLimitIntervalSec=60
+StartLimitBurst=3
+[Service]
+ExecStart=/lib/systemd/system/mcks-bootstrap
+Restart=on-failure
+RestartSec=10s
+[Install]
+WantedBy=kubelet.service
+EOF'
+sudo systemctl daemon-reload
+sudo systemctl enable mcks-bootstrap
