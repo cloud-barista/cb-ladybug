@@ -7,18 +7,6 @@ const (
 	CONTROL_PLANE = "control-plane"
 	WORKER        = "worker"
 
-	BOOTSTRAP_FILE            = "bootstrap.sh"
-	INIT_FILE                 = "k8s-init.sh"
-	MCKS_BOOTSTRAP_CANAL_FILE = "mcks-bootstrap-canal.sh"
-	MCKS_BOOTSTRAP_KILO_FILE  = "mcks-bootstrap-kilo.sh"
-	SYSTEMD_SERVICE_FILE      = "systemd-service.sh"
-	HA_PROXY_FILE             = "haproxy.sh"
-
-	CNI_CANAL_FILE        = "addons/canal/canal_v3.20.0.yaml"
-	CNI_KILO_CRDS_FILE    = "addons/kilo/crds_v0.3.0.yaml"
-	CNI_KILO_KUBEADM_FILE = "addons/kilo/kilo-kubeadm-flannel_v0.3.0.yaml"
-	CNI_KILO_FLANNEL_FILE = "addons/kilo/kube-flannel_v0.14.0.yaml"
-
 	CSP_AWS       CSP = "aws"
 	CSP_GCP       CSP = "gcp"
 	CSP_AZURE     CSP = "azure"

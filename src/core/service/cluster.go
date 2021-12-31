@@ -257,13 +257,7 @@ func CreateCluster(namespace string, req *model.ClusterReq) (*model.Cluster, err
 			if err := vm.ConnectionTest(); err != nil {
 				return err
 			}
-			if err = vm.CopyScripts(cluster.NetworkCni); err != nil {
-				return err
-			}
-			if err = vm.SetSystemd(cluster.NetworkCni); err != nil {
-				return err
-			}
-			if err = vm.Bootstrap(); err != nil {
+			if err = vm.Bootstrap(cluster.NetworkCni); err != nil {
 				return err
 			}
 			return nil
