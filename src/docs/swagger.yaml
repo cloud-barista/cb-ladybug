@@ -1,7 +1,83 @@
 basePath: /mcks
 definitions:
+  app.ClusterConfigKubernetesReq:
+    properties:
+      networkCni:
+        enum:
+        - canal
+        - kilo
+        example: canal
+        type: string
+      podCidr:
+        example: 10.244.0.0/16
+        type: string
+      serviceCidr:
+        example: 10.96.0.0/12
+        type: string
+      serviceDnsDomain:
+        example: cluster.local
+        type: string
+    type: object
+  app.ClusterConfigReq:
+    properties:
+      kubernetes:
+        $ref: '#/definitions/app.ClusterConfigKubernetesReq'
+        type: object
+    type: object
+  app.ClusterReq:
+    properties:
+      config:
+        $ref: '#/definitions/app.ClusterConfigReq'
+        type: object
+      controlPlane:
+        items:
+          $ref: '#/definitions/app.NodeSetReq'
+        type: array
+      description:
+        type: string
+      installMonAgent:
+        default: "yes"
+        example: "no"
+        type: string
+      label:
+        type: string
+      name:
+        example: cluster-01
+        type: string
+      worker:
+        items:
+          $ref: '#/definitions/app.NodeSetReq'
+        type: array
+    type: object
+  app.NodeReq:
+    properties:
+      controlPlane:
+        items:
+          $ref: '#/definitions/app.NodeSetReq'
+        type: array
+      worker:
+        items:
+          $ref: '#/definitions/app.NodeSetReq'
+        type: array
+    type: object
+  app.NodeSetReq:
+    properties:
+      connection:
+        example: config-aws-ap-northeast-2
+        type: string
+      count:
+        example: 3
+        type: integer
+      spec:
+        example: t2.medium
+        type: string
+    type: object
   app.Status:
     properties:
+      code:
+        type: integer
+      kind:
+        type: string
       message:
         example: Any message
         type: string
@@ -64,55 +140,6 @@ definitions:
       kind:
         type: string
     type: object
-  model.ClusterReq:
-    properties:
-      config:
-        $ref: '#/definitions/model.Config'
-        type: object
-      controlPlane:
-        items:
-          $ref: '#/definitions/model.NodeConfig'
-        type: array
-      description:
-        type: string
-      installMonAgent:
-        default: "yes"
-        example: "no"
-        type: string
-      label:
-        type: string
-      name:
-        example: cluster-01
-        type: string
-      worker:
-        items:
-          $ref: '#/definitions/model.NodeConfig'
-        type: array
-    type: object
-  model.Config:
-    properties:
-      kubernetes:
-        $ref: '#/definitions/model.Kubernetes'
-        type: object
-    type: object
-  model.Kubernetes:
-    properties:
-      networkCni:
-        enum:
-        - canal
-        - kilo
-        example: canal
-        type: string
-      podCidr:
-        example: 10.244.0.0/16
-        type: string
-      serviceCidr:
-        example: 10.96.0.0/12
-        type: string
-      serviceDnsDomain:
-        example: cluster.local
-        type: string
-    type: object
   model.Node:
     properties:
       createdTime:
@@ -149,18 +176,6 @@ definitions:
       zoneLabel:
         type: string
     type: object
-  model.NodeConfig:
-    properties:
-      connection:
-        example: config-aws-ap-northeast-2
-        type: string
-      count:
-        example: 3
-        type: integer
-      spec:
-        example: t2.medium
-        type: string
-    type: object
   model.NodeList:
     properties:
       items:
@@ -168,26 +183,6 @@ definitions:
           $ref: '#/definitions/model.Node'
         type: array
       kind:
-        type: string
-    type: object
-  model.NodeReq:
-    properties:
-      controlPlane:
-        items:
-          $ref: '#/definitions/model.NodeConfig'
-        type: array
-      worker:
-        items:
-          $ref: '#/definitions/model.NodeConfig'
-        type: array
-    type: object
-  model.Status:
-    properties:
-      code:
-        type: integer
-      kind:
-        type: string
-      message:
         type: string
     type: object
 host: localhost:1470
@@ -261,7 +256,7 @@ paths:
         name: ClusterReq
         required: true
         schema:
-          $ref: '#/definitions/model.ClusterReq'
+          $ref: '#/definitions/app.ClusterReq'
       produces:
       - application/json
       responses:
@@ -303,7 +298,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Status'
+            $ref: '#/definitions/app.Status'
         "400":
           description: Bad Request
           schema:
@@ -401,7 +396,7 @@ paths:
         name: nodeReq
         required: true
         schema:
-          $ref: '#/definitions/model.NodeReq'
+          $ref: '#/definitions/app.NodeReq'
       produces:
       - application/json
       responses:
@@ -448,7 +443,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Status'
+            $ref: '#/definitions/app.Status'
         "400":
           description: Bad Request
           schema:
