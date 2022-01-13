@@ -30,7 +30,6 @@ type MCIR struct {
 	specName     string
 	region       string
 	zone         string
-	//IsCPLeader bool
 }
 
 func NewMCIR(namespace string, role app.ROLE, nodeSetReq app.NodeSetReq) *MCIR {
@@ -109,7 +108,7 @@ func (self *MCIR) CreateIfNotExist() (model.ClusterReason, string) {
 		if err = vpc.POST(); err != nil {
 			return model.CreateVpcFailedReason, fmt.Sprintf("Failed to create a VPC. (cause='%v')", err)
 		}
-		logger.Infof("[%s] VPC creation has been completed. (%s)", self.config, self.firewallName)
+		logger.Infof("[%s] VPC creation has been completed. (%s)", self.config, self.vpcName)
 	}
 	self.subnetName = vpc.Subnets[0].Name
 
@@ -204,7 +203,7 @@ func (self *MCIR) verifySpec() error {
 	if exist, err := lookupSpec.GET(); err != nil {
 		return errors.New(fmt.Sprintf("Failed to lookup spec. (csp=%s, spec=%s, cause='%v')", self.csp, self.spec, err))
 	} else if !exist {
-		return errors.New(fmt.Sprintf("Could not be found a spec '%s'. (csp=%s)", self.spec, self.csp))
+		return errors.New(fmt.Sprintf("Could not be found a spec '%s'. (connection=%s, csp=%s)", self.spec, self.config, self.csp))
 	}
 
 	if self.role == app.CONTROL_PLANE {

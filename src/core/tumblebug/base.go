@@ -31,7 +31,10 @@ func (self *Model) execute(method string, url string, body interface{}, result i
 	}
 
 	// response check
-	if resp.StatusCode() > 300 && resp.StatusCode() != http.StatusNotFound {
+	if resp.StatusCode() == http.StatusNotFound {
+		logger.Infof("[%s] Could not be found data. (method=%s, url='%s')", self.Name, method, url)
+		return false, nil
+	} else if resp.StatusCode() > 300 {
 		logger.Warnf("[%s] Received error data from the Tumblebug (statusCode=%d, url='%s', body='%v')", self.Name, resp.StatusCode(), resp.Request.URL, resp)
 		status := app.Status{}
 		json.Unmarshal(resp.Body(), &status)
@@ -40,11 +43,6 @@ func (self *Model) execute(method string, url string, body interface{}, result i
 			json.Unmarshal([]byte(status.Message), &status)
 		}
 		return false, errors.New(status.Message)
-	}
-
-	if method == http.MethodGet && resp.StatusCode() == http.StatusNotFound {
-		logger.Infof("[%s] Could not be found data. (method=%s, url='%s')", self.Name, method, url)
-		return false, nil
 	}
 
 	return true, nil

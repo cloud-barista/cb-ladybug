@@ -106,7 +106,7 @@ func AddNode(c echo.Context) error {
 		return app.SendMessage(c, http.StatusInternalServerError, err.Error())
 	}
 
-	logger.Info("(AddNode) Duration := ", time.Since(start))
+	logger.Info("(AddNode) Duration = ", time.Since(start))
 	return app.Send(c, http.StatusOK, node)
 }
 
@@ -139,7 +139,7 @@ func RemoveNode(c echo.Context) error {
 		if status.Code == app.STATUS_NOTFOUND {
 			return app.Send(c, http.StatusNotFound, status)
 		} else {
-			logger.Info("(RemoveNode) Duration := ", time.Since(start))
+			logger.Info("(RemoveNode) Duration = ", time.Since(start))
 			return app.Send(c, http.StatusOK, status)
 		}
 	}

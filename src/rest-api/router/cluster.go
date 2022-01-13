@@ -91,11 +91,11 @@ func CreateCluster(c echo.Context) error {
 
 	cluster, err := service.CreateCluster(c.Param("namespace"), clusterReq)
 	if err != nil {
-		logger.Warnf("(CreateCluster) %s'", err.Error())
+		logger.Warnf("(CreateCluster) %s", err.Error())
 		return app.SendMessage(c, http.StatusInternalServerError, err.Error())
 	}
 
-	logger.Info("(CreateCluster) duration := ", time.Since(start))
+	logger.Info("(CreateCluster) Duration = ", time.Since(start))
 	return app.Send(c, http.StatusOK, cluster)
 }
 
@@ -126,6 +126,6 @@ func DeleteCluster(c echo.Context) error {
 		return app.SendMessage(c, http.StatusInternalServerError, err.Error())
 	}
 
-	logger.Info("(DeleteCluster) Duration := ", time.Since(start))
+	logger.Info("(DeleteCluster) Duration = ", time.Since(start))
 	return app.Send(c, http.StatusOK, status)
 }

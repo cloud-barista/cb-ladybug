@@ -71,7 +71,7 @@ func GetVmImageId(csp app.CSP, configName string, region *tumblebug.Region) (str
 		if exist, err := lookupImages.GET(); err != nil {
 			return "", errors.New(fmt.Sprintf("Failed to lookup a images on openstack. (connection=%s, cause='%v')", configName, err))
 		} else if !exist {
-			return "", errors.New(fmt.Sprintf("Couldn't found a image on openstack. (connection=%s)", configName))
+			return "", errors.New(fmt.Sprintf("Could not be found a image on openstack. (connection=%s)", configName))
 		}
 
 		for _, image := range lookupImages.Images {
@@ -81,7 +81,7 @@ func GetVmImageId(csp app.CSP, configName string, region *tumblebug.Region) (str
 			}
 		}
 
-		return "", errors.New(fmt.Sprintf("Couldn't be found a ubuntu 18.04 image on openstack. please create an image based on Ubuntu 18.04 The image name must include 'ubuntu' and '18.04'. (connection=%s)", configName))
+		return "", errors.New(fmt.Sprintf("Could not be found a ubuntu 18.04 image on openstack. please create an image based on Ubuntu 18.04 The image name must include 'ubuntu' and '18.04'. (connection=%s)", configName))
 
 	} else if csp == app.CSP_AWS {
 		// AWS : 리전별 AMI 가져오기
@@ -94,13 +94,13 @@ func GetVmImageId(csp app.CSP, configName string, region *tumblebug.Region) (str
 		}
 
 		if regionName == "" {
-			return "", errors.New(fmt.Sprintf("Couldn't be found a AMI on AWS. (cause = region name is empty, connection=%s, region=%s)", configName, region.RegionName))
+			return "", errors.New(fmt.Sprintf("Could not be found a AMI on AWS. (cause = region name is empty, connection=%s, region=%s)", configName, region.RegionName))
 		}
 
 		// TODO [update/hard-coding] region별 image id
 		imageId := imageMap[regionName]
 		if imageId == "" {
-			return "", errors.New(fmt.Sprintf("Couldn't be found a AMI on AWS image map. (connection=%s, region=%s)", configName, regionName))
+			return "", errors.New(fmt.Sprintf("Could not be found a AMI on AWS image map. (connection=%s, region=%s)", configName, regionName))
 		}
 
 		return imageId, nil
@@ -116,13 +116,13 @@ func GetVmImageId(csp app.CSP, configName string, region *tumblebug.Region) (str
 		}
 
 		if regionName == "" {
-			return "", errors.New(fmt.Sprintf("Couldn't be found a image on IBM. (cause = region name is empty, connection=%s, region=%s)", configName, region.RegionName))
+			return "", errors.New(fmt.Sprintf("Could not be found a image on IBM. (cause = region name is empty, connection=%s, region=%s)", configName, region.RegionName))
 		}
 
 		// TODO [update/hard-coding] region별 image id
 		imageId := ibmImageMap[regionName]
 		if imageId == "" {
-			return "", errors.New(fmt.Sprintf("Couldn't be found a image on IBM image map. (connection=%s, region=%s)", configName, regionName))
+			return "", errors.New(fmt.Sprintf("Could not be found a image on IBM image map. (connection=%s, region=%s)", configName, regionName))
 		}
 
 		return imageId, nil

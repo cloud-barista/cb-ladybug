@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"os"
 	"strings"
 	"time"
 
@@ -20,6 +21,7 @@ func (self *Machine) executeSSH(format string, a ...interface{}) (string, error)
 	address := fmt.Sprintf("%s:22", self.PublicIP)
 	command := fmt.Sprintf(format, a...)
 
+	logger.Infof("[%s] SSH executing. (server=%s, command='%s')", self.Name, address, command)
 	output, err := ssh.SSHRun(
 		ssh.SSHInfo{
 			UserName:   self.Username,
@@ -27,15 +29,18 @@ func (self *Machine) executeSSH(format string, a ...interface{}) (string, error)
 			ServerPort: address,
 		}, command)
 	if err != nil {
-		logger.Warnf("[%s] Failed to run SSH command. (server='%s', cause='%v', command='%s', output='%s')", self.Name, address, err, command, output)
-	} else {
-		logger.Infof("[%s] SSH execution has been completed. (server='%s', command='%s')", self.Name, address, command)
+		logger.Warnf("[%s] Failed to run SSH command. (server=%s, cause='%v', command='%s', output='%s')", self.Name, address, err, command, output)
 	}
 	return output, err
 }
 
 /* scp execution */
 func (self *Machine) executeSCP(source string, destination string) error {
+
+	//validate files exist
+	if _, err := os.Stat(source); err != nil {
+		return errors.New(fmt.Sprintf("SCP source file does not exist (%s)", source))
+	}
 
 	address := fmt.Sprintf("%s:22", self.PublicIP)
 
@@ -46,9 +51,9 @@ func (self *Machine) executeSCP(source string, destination string) error {
 			ServerPort: address,
 		}, source, destination)
 	if err != nil {
-		logger.Warnf("[%s] Failed to copy files. (server='%s', destination='%s', cause='%v')", self.Name, address, destination, err)
+		logger.Warnf("[%s] Failed to copy files. (server=%s, destination='%s', cause='%v')", self.Name, address, destination, err)
 	} else {
-		logger.Infof("[%s] File copy has been completed. (server='%s', destination='%s')", self.Name, address, destination)
+		logger.Infof("[%s] File copy has been completed. (server=%s, destination='%s')", self.Name, address, destination)
 	}
 	return err
 }
@@ -66,6 +71,7 @@ func (self *Machine) checkConnectivity() error {
 		defer conn.Close()
 		return nil
 	}
+
 	return errors.New("Failed to validate connectivity.")
 }
 
@@ -83,7 +89,7 @@ func (self *Machine) ConnectionTest() error {
 				logger.Infof("[%s] Failed to validate SSH connection. (ip=%s, retry=%d)", self.Name, self.PublicIP, i)
 			}
 		} else {
-			logger.Infof("[%s] Dial timeout. (ip=%s, retry=%d)", self.Name, self.PublicIP, i)
+			logger.Infof("[%s] Dial timeout. (dial=tcp://%s:22, retry=%d)", self.Name, self.PublicIP, i)
 		}
 		if i == retryCheck-1 {
 			return errors.New(fmt.Sprintf("SSH connection retry count has exceeded. (node=%s, ip=%s)", self.Name, self.PublicIP))
@@ -124,7 +130,7 @@ func (self *Machine) bootstrap(networkCni app.NetworkCni) error {
 		src := fmt.Sprintf("%s/%s", sourcePath, f)
 		dest := fmt.Sprintf("%s/%s", REMOTE_TARGET_PATH, f)
 		if err := self.executeSCP(src, dest); err != nil {
-			return errors.New(fmt.Sprintf("Failed to copy bootstrap files. (node=%s, source='%s', destination='%s', cause='%v')", self.Name, src, dest, err))
+			return errors.New(fmt.Sprintf("Failed to copy bootstrap files. (node=%s, destination='%s', cause='%v')", self.Name, dest, err))
 		}
 	}
 

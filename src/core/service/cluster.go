@@ -3,7 +3,6 @@ package service
 import (
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/cloud-barista/cb-mcks/src/core/app"
@@ -279,7 +278,7 @@ func DeleteCluster(namespace string, clusterName string) (*app.Status, error) {
 		if exist, err := mcis.GET(); err != nil {
 			return nil, err
 		} else if exist {
-			if err = cleanUpMCIS(mcis); err != nil {
+			if err = cleanUpMCIS(clusterName, mcis); err != nil {
 				return nil, err
 			} else {
 				logger.Infof("[%s.%s] Clean-up MCIS has been completed.", namespace, clusterName)
@@ -307,7 +306,7 @@ func cleanUpCluster(cluster model.Cluster, mcis *tumblebug.MCIS) {
 		logger.Warnf("[%s.%s] Failed to update a cluster-entity. (cause='%v')", cluster.Namespace, cluster.Name, err)
 	}
 
-	err := cleanUpMCIS(mcis)
+	err := cleanUpMCIS(cluster.Name, mcis)
 	if err != nil {
 		logger.Warnf("[%s.%s] Failed to clean up a MCIS. (cause='%v')", cluster.Namespace, cluster.Name, err)
 	} else {
@@ -316,7 +315,7 @@ func cleanUpCluster(cluster model.Cluster, mcis *tumblebug.MCIS) {
 }
 
 /* clean-up a MCIS  */
-func cleanUpMCIS(mcis *tumblebug.MCIS) error {
+func cleanUpMCIS(clusterName string, mcis *tumblebug.MCIS) error {
 
 	if err := mcis.TERMINATE(); err != nil {
 		return errors.New(fmt.Sprintf("Failed to terminate a MCIS (mcis=%s, cause='%v')", mcis.Name, err))
@@ -324,14 +323,10 @@ func cleanUpMCIS(mcis *tumblebug.MCIS) error {
 	time.Sleep(5 * time.Second)
 
 	if _, err := mcis.DELETE(); err != nil {
-		if strings.Contains(err.Error(), "Deletion is not allowed") {
-			if err = mcis.REFINE(); err != nil {
-				return errors.New(fmt.Sprintf("Failed to refine a MCIS (cause='%v')", err))
-			}
-			if _, err = mcis.DELETE(); err != nil {
-				return errors.New(fmt.Sprintf("Failed to delete a MCIS (cause='%v')", err))
-			}
-		} else {
+		if err = mcis.REFINE(); err != nil {
+			logger.Warnf("[%s.%s] Failed to refine a MCIS. (mcis=%s, cause='%v')", mcis.Namespace, clusterName, mcis.Name, err)
+		}
+		if _, err = mcis.DELETE(); err != nil {
 			return errors.New(fmt.Sprintf("Failed to delete a MCIS (cause='%v')", err))
 		}
 	}
