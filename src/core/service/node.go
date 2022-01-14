@@ -149,7 +149,7 @@ func AddNode(namespace string, clusterName string, req *app.NodeReq) (*model.Nod
 	logger.Infof("[%s.%s] Woker-nodes join has been completed.", namespace, clusterName)
 
 	// assign node labels (topology.cloud-barista.github.io/csp , topology.kubernetes.io/region, topology.kubernetes.io/zone)
-	if err = provisioner.AssignNodeLabels(); err != nil {
+	if err = provisioner.AssignNodeLabelAnnotation(); err != nil {
 		logger.Warnf("[%s.%s] Failed to assign node labels (cause='%v')", namespace, clusterName, err)
 	} else {
 		logger.Infof("[%s.%s] Node label assignment has been completed.", namespace, clusterName)

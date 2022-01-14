@@ -16,6 +16,7 @@ const (
 type Machine struct {
 	Name       string
 	PublicIP   string
+	PrivateIP  string
 	Username   string
 	CSP        app.CSP
 	Role       app.ROLE

@@ -229,6 +229,13 @@ func CreateCluster(namespace string, req *app.ClusterReq) (*model.Cluster, error
 	}
 	logger.Infof("[%s.%s] Woker-nodes join has been completed.", namespace, clusterName)
 
+	// assign node labels (topology.cloud-barista.github.io/csp , topology.kubernetes.io/region, topology.kubernetes.io/zone)
+	if err = provisioner.AssignNodeLabelAnnotation(); err != nil {
+		logger.Warnf("[%s.%s] Failed to assign node labels (cause='%v')", namespace, clusterName, err)
+	} else {
+		logger.Infof("[%s.%s] Node label assignment has been completed.", namespace, clusterName)
+	}
+
 	// kubernetes provisioning : deploy network-cni
 	if err = provisioner.InstallNetworkCni(); err != nil {
 		cluster.FailReason(model.SetupNetworkCNIFailedReason, fmt.Sprintf("Failed to install network-cni. (cni=%s)", req.Config.Kubernetes.NetworkCni))
@@ -236,13 +243,6 @@ func CreateCluster(namespace string, req *app.ClusterReq) (*model.Cluster, error
 		return nil, errors.New(cluster.Status.Message)
 	}
 	logger.Infof("[%s.%s] CNI installation has been completed.", namespace, clusterName)
-
-	// assign node labels (topology.cloud-barista.github.io/csp , topology.kubernetes.io/region, topology.kubernetes.io/zone)
-	if err = provisioner.AssignNodeLabels(); err != nil {
-		logger.Warnf("[%s.%s] Failed to assign node labels (cause='%v')", namespace, clusterName, err)
-	} else {
-		logger.Infof("[%s.%s] Node label assignment has been completed.", namespace, clusterName)
-	}
 
 	// save nodes metadata & update status
 	for _, node := range cluster.Nodes {

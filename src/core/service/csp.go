@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 	"strings"
 
 	"github.com/cloud-barista/cb-mcks/src/core/app"
@@ -54,8 +55,31 @@ var ibmImageMap = map[string]string{
 	"jp-tok":   "r022-61fdadec-6b03-4bd2-bfca-62cd16f5673f", //일본 (도쿄)
 }
 
-// get vm image-id
-func GetVmImageId(csp app.CSP, configName string, region *tumblebug.Region) (string, error) {
+// get a cidr-block
+func getCSPCidrBlock(csp app.CSP) string {
+
+	switch csp {
+	case app.CSP_AWS:
+		return fmt.Sprintf("192.168.%d.0/24", 10+rand.Intn(10))
+	case app.CSP_GCP:
+		return fmt.Sprintf("192.168.%d.0/24", 20+rand.Intn(10))
+	case app.CSP_AZURE:
+		return fmt.Sprintf("192.168.%d.0/24", 30+rand.Intn(10))
+	case app.CSP_ALIBABA:
+		return fmt.Sprintf("192.168.%d.0/24", 40+rand.Intn(10))
+	case app.CSP_TENCENT:
+		return fmt.Sprintf("192.168.%d.0/24", 50+rand.Intn(10))
+	case app.CSP_IBM:
+		return fmt.Sprintf("192.168.%d.0/24", 60+rand.Intn(10))
+	case app.CSP_OPENSTACK:
+		return fmt.Sprintf("192.168.%d.0/24", 70+rand.Intn(10))
+	}
+
+	return fmt.Sprintf("192.168.255.0/24")
+}
+
+// get a vm-image-id
+func getCSPImageId(csp app.CSP, configName string, region *tumblebug.Region) (string, error) {
 
 	if csp == app.CSP_GCP {
 		return GCP_IMAGE_ID, nil
