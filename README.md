@@ -44,6 +44,7 @@ $ go get -v all
 ```
 $ export CBLOG_ROOT="$(pwd)"
 $ export CBSTORE_ROOT="$(pwd)"
+$ export APP_ROOT="$(pwd)"
 $ go run src/main.go
 ```
 
@@ -56,6 +57,7 @@ $ go build -o cb-mcks src/main.go
 ```
 $ export CBLOG_ROOT="$(pwd)"
 $ export CBSTORE_ROOT="$(pwd)"
+$ export APP_ROOT="$(pwd)"
 $ nohup ./cb-mcks & > /dev/null
 ```
 
