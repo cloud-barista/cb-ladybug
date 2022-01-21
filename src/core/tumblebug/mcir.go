@@ -95,7 +95,7 @@ func NewSSHKey(ns string, name string, conf string) *SSHKey {
 /* VPC */
 func (self *VPC) GET() (bool, error) {
 
-	return self.execute(http.MethodGet, fmt.Sprintf("/ns/%s/resources/vNet/%s", self.Namespace, self.Name), fmt.Sprintf(`{"connectionName" : "%s"}`, self.Config), &self)
+	return self.execute(http.MethodGet, fmt.Sprintf("/ns/%s/resources/vNet/%s", self.Namespace, self.Name), nil, &self)
 
 }
 
@@ -129,7 +129,7 @@ func (self *VPC) DELETE() (bool, error) {
 /* Firewall */
 func (self *Firewall) GET() (bool, error) {
 
-	return self.execute(http.MethodGet, fmt.Sprintf("/ns/%s/resources/securityGroup/%s", self.Namespace, self.Name), fmt.Sprintf(`{"connectionName" : "%s"}`, self.Config), &self)
+	return self.execute(http.MethodGet, fmt.Sprintf("/ns/%s/resources/securityGroup/%s", self.Namespace, self.Name), nil, &self)
 
 }
 
@@ -162,7 +162,7 @@ func (self *Firewall) DELETE(ns string) (bool, error) {
 /* VM-Image */
 func (self *Image) GET() (bool, error) {
 
-	return self.execute(http.MethodGet, fmt.Sprintf("/ns/%s/resources/image/%s", self.Namespace, self.Name), fmt.Sprintf(`{"connectionName" : "%s"}`, self.Config), &self)
+	return self.execute(http.MethodGet, fmt.Sprintf("/ns/%s/resources/image/%s", self.Namespace, self.Name), nil, &self)
 }
 
 func (self *Image) POST() error {
@@ -192,7 +192,7 @@ func (self *Image) DELETE(ns string) (bool, error) {
 /* VM-Spec */
 func (self *Spec) GET() (bool, error) {
 
-	return self.execute(http.MethodGet, fmt.Sprintf("/ns/%s/resources/spec/%s", self.Namespace, self.Name), fmt.Sprintf(`{"connectionName" : "%s"}`, self.Config), &self)
+	return self.execute(http.MethodGet, fmt.Sprintf("/ns/%s/resources/spec/%s", self.Namespace, self.Name), nil, &self)
 
 }
 
@@ -233,7 +233,7 @@ func (self *Spec) DELETE(ns string) (bool, error) {
 /* SSH-Key */
 func (self *SSHKey) GET() (bool, error) {
 
-	return self.execute(http.MethodGet, fmt.Sprintf("/ns/%s/resources/sshKey/%s", self.Namespace, self.Name), fmt.Sprintf(`{"connectionName" : "%s"}`, self.Config), &self)
+	return self.execute(http.MethodGet, fmt.Sprintf("/ns/%s/resources/sshKey/%s", self.Namespace, self.Name), nil, &self)
 
 }
 
