@@ -297,7 +297,7 @@ if [ "${v_OPTION}" != "add" ]; then
 		v_ZONE="${IBM_ZONE}"
 		if [ "${v_ZONE}" == "" ]; then 
 			read -e -p "zone ? [예:jp-tok-1] : "  v_ZONE
-			if [ "${v_ZONE}" == "" ]; then v_ZONE="${v_REGION}a";fi
+			if [ "${v_ZONE}" == "" ]; then v_ZONE="${v_REGION}-1";fi
 		fi
 	fi
 
