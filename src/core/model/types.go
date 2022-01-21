@@ -4,12 +4,6 @@ import (
 	"github.com/cloud-barista/cb-mcks/src/core/app"
 )
 
-const (
-	LABEL_KEY_CSP    = "topology.cloud-barista.github.io/csp"
-	LABEL_KEY_REGION = "topology.kubernetes.io/region"
-	LABEL_KEY_ZONE   = "topology.kubernetes.io/zone"
-)
-
 type ClusterPhase string
 type ClusterReason string
 

@@ -106,6 +106,7 @@ func (self *Provisioner) BindVM(vms []tumblebug.VM) ([]*model.Node, error) {
 		}
 		if machine != nil {
 			machine.PublicIP = vm.PublicIP
+			machine.PrivateIP = vm.PrivateIP
 			machine.Username = vm.UserAccount
 			machine.Region = lang.NVL(vm.Region.Region, machine.Region) // region, zone 공백인 경우가 간혹 있음
 			machine.Zone = lang.NVL(vm.Region.Zone, machine.Zone)
@@ -147,9 +148,9 @@ func (self *Provisioner) Bootstrap() error {
 /* setup haproxy */
 func (self *Provisioner) InstallHAProxy() error {
 
-	servers := fmt.Sprintf("  server  %s  %s:6443  check\\n", self.leader.Name, self.leader.PublicIP)
+	var servers string
 	for _, machine := range self.ControlPlaneMachines {
-		servers += fmt.Sprintf("  server  %s  %s:6443  check\\n", machine.Name, machine.PublicIP)
+		servers += fmt.Sprintf("  server  %s  %s:6443  check\\n", machine.Name, machine.PrivateIP)
 	}
 	if output, err := self.leader.executeSSH("sudo sed 's/^{{SERVERS}}/%s/g' %s/%s", servers, REMOTE_TARGET_PATH, "haproxy.sh"); err != nil {
 		return err
@@ -187,9 +188,9 @@ func (self *Provisioner) InstallNetworkCni() error {
 	if self.Cluster.NetworkCni == app.NETWORKCNI_CANAL {
 		cniYamls = append(cniYamls, CNI_CANAL_FILE)
 	} else {
+		cniYamls = append(cniYamls, CNI_KILO_FLANNEL_FILE)
 		cniYamls = append(cniYamls, CNI_KILO_CRDS_FILE)
 		cniYamls = append(cniYamls, CNI_KILO_KUBEADM_FILE)
-		cniYamls = append(cniYamls, CNI_KILO_FLANNEL_FILE)
 	}
 
 	for _, file := range cniYamls {
@@ -202,8 +203,9 @@ func (self *Provisioner) InstallNetworkCni() error {
 }
 
 /* assign node labels */
-func (self *Provisioner) AssignNodeLabels() error {
+func (self *Provisioner) AssignNodeLabelAnnotation() error {
 
+	// commons labels
 	for _, machine := range self.GetMachinesAll() {
 		if _, err := self.Kubectl("label nodes %s %s=%s", machine.Name, app.LABEL_KEY_CSP, machine.CSP); err != nil {
 			return err
@@ -213,6 +215,19 @@ func (self *Provisioner) AssignNodeLabels() error {
 		}
 		if _, err := self.Kubectl("label nodes %s %s=%s", machine.Name, app.LABEL_KEY_ZONE, machine.Zone); err != nil {
 			return err
+		}
+	}
+
+	// network-cni annotations
+	if self.Cluster.NetworkCni == app.NETWORKCNI_KILO {
+		for _, machine := range self.GetMachinesAll() {
+			// use a full mesh network
+			if _, err := self.Kubectl("annotate nodes %s kilo.squat.ai/location=%s", machine.Name, machine.Name); err != nil {
+				return err
+			}
+			if _, err := self.Kubectl("annotate nodes %s kilo.squat.ai/persistent-keepalive=25", machine.Name); err != nil {
+				return err
+			}
 		}
 	}
 

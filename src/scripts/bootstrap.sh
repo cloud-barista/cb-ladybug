@@ -1,11 +1,9 @@
 #!/bin/bash
-K8S_VERSION="1.18.9-00"  # curl https://packages.cloud.google.com/apt/dists/kubernetes-xenial/main/binary-amd64/Packages
+K8S_VERSION="1.18.9-00"	# curl https://packages.cloud.google.com/apt/dists/kubernetes-xenial/main/binary-amd64/Packages
 CSP="$1"
-REGION="$2"
-HOSTNAME="$3"
-PUBLIC_IP="$4"
-NETWORK_CNI="$5"
-LOCATION="${CSP}-${REGION}"
+HOSTNAME="$2"
+PUBLIC_IP="$3"			# openstack
+NETWORK_CNI="$4"
 
 # ---------------------------------------------------------------------------------
 # packages
@@ -14,6 +12,7 @@ LOCATION="${CSP}-${REGION}"
 sudo hostnamectl set-hostname ${HOSTNAME}
 
 # packages
+`echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-selections`
 sudo killall apt apt-get > /dev/null 2>&1
 sudo rm -vf /var/lib/apt/lists/lock
 sudo rm -vf /var/cache/apt/archives/lock
@@ -72,13 +71,10 @@ ifconfig ${IFACE}:1 ${PUBLIC_IP} netmask 255.255.255.255  broadcast 0.0.0.0 up
 echo "KUBELET_EXTRA_ARGS=-\"-node-ip=${PUBLIC_IP}\"" > /etc/default/kubelet
 if [ -f "/etc/kubernetes/kubelet.conf" ]; then
   systemctl restart kubelet
-  kubectl --kubeconfig=/etc/kubernetes/kubelet.conf annotate node {{HOSTNAME}} kilo.squat.ai/location={{LOCATION}} --overwrite
   kubectl --kubeconfig=/etc/kubernetes/kubelet.conf annotate node {{HOSTNAME}} kilo.squat.ai/force-endpoint=${PUBLIC_IP}:51820 --overwrite
-  kubectl --kubeconfig=/etc/kubernetes/kubelet.conf annotate node {{HOSTNAME}} kilo.squat.ai/persistent-keepalive=25 --overwrite
-  kubectl --kubeconfig=/etc/kubernetes/kubelet.conf annotate node {{HOSTNAME}} flannel.alpha.coreos.com/public-ip-overwrite=${PUBLIC_IP} --overwrite
 fi
 exit 0
-fi' | sed "s/{{HOSTNAME}}/${HOSTNAME}/g" | sed "s/{{PUBLIC_IP}}/${PUBLIC_IP}/g" | sed "s/{{LOCATION}}/${LOCATION}/g" | sudo tee /lib/systemd/system/mcks-bootstrap > /dev/null
+fi' | sed "s/{{HOSTNAME}}/${HOSTNAME}/g" | sed "s/{{PUBLIC_IP}}/${PUBLIC_IP}/g" | sudo tee /lib/systemd/system/mcks-bootstrap > /dev/null
 sudo chmod +x /lib/systemd/system/mcks-bootstrap
 fi
 
@@ -91,6 +87,7 @@ ifconfig ${IFACE}:1 ${PUBLIC_IP} netmask 255.255.255.255  broadcast 0.0.0.0 up
 echo "KUBELET_EXTRA_ARGS=-\"-node-ip=${PUBLIC_IP}\"" > /etc/default/kubelet
 if [ -f "/etc/kubernetes/kubelet.conf" ]; then
   systemctl restart kubelet
+  kubectl --kubeconfig=/etc/kubernetes/kubelet.conf annotate node {{HOSTNAME}} projectcalico.org/IPv4Address=${PUBLIC_IP} --overwrite
   R="$(kubectl --kubeconfig=/etc/kubernetes/kubelet.conf annotate node {{HOSTNAME}} flannel.alpha.coreos.com/public-ip-overwrite=${PUBLIC_IP} --overwrite)"
   if echo "$R" | grep "annotated"; then
     R=$(kubectl --kubeconfig=/etc/kubernetes/kubelet.conf get nodes --no-headers | awk \047END { print NR }\047)

@@ -34,7 +34,6 @@ type MCIR struct {
 
 func NewMCIR(namespace string, role app.ROLE, nodeSetReq app.NodeSetReq) *MCIR {
 
-	name := strings.ReplaceAll(nodeSetReq.Connection, "config-", "")
 	specName := strings.ToLower(lang.ReplaceAll(nodeSetReq.Spec, []string{".", "_", " "}, "-"))
 
 	return &MCIR{
@@ -43,11 +42,11 @@ func NewMCIR(namespace string, role app.ROLE, nodeSetReq app.NodeSetReq) *MCIR {
 		config:       nodeSetReq.Connection,
 		spec:         nodeSetReq.Spec,
 		vmCount:      nodeSetReq.Count,
-		vpcName:      fmt.Sprintf("%s-vpc", name),
-		firewallName: fmt.Sprintf("%s-sg", name),
-		sshkeyName:   fmt.Sprintf("%s-sshkey", name),
-		imageName:    fmt.Sprintf("%s-ubuntu1804", name),
-		specName:     fmt.Sprintf("%s-%s-spec", name, specName),
+		vpcName:      fmt.Sprintf("%s-vpc", nodeSetReq.Connection),
+		firewallName: fmt.Sprintf("%s-sg", nodeSetReq.Connection),
+		sshkeyName:   fmt.Sprintf("%s-sshkey", nodeSetReq.Connection),
+		imageName:    fmt.Sprintf("%s-ubuntu1804", nodeSetReq.Connection),
+		specName:     fmt.Sprintf("%s-%s-spec", nodeSetReq.Connection, specName),
 	}
 }
 
@@ -97,7 +96,7 @@ func (self *MCIR) CreateIfNotExist() (model.ClusterReason, string) {
 	}
 
 	// Create a VPC
-	vpc := tumblebug.NewVPC(self.namespace, self.vpcName, self.config)
+	vpc := tumblebug.NewVPC(self.namespace, self.vpcName, self.config, getCSPCidrBlock(self.csp))
 	exists, err := vpc.GET()
 	if err != nil {
 		return model.CreateVpcFailedReason, fmt.Sprintf("Failed to create a VPC. (cause='%v')", err)
@@ -145,7 +144,7 @@ func (self *MCIR) CreateIfNotExist() (model.ClusterReason, string) {
 	self.credential = sshKey.PrivateKey
 
 	// Create a Image
-	imageId, err := GetVmImageId(self.csp, self.config, region)
+	imageId, err := getCSPImageId(self.csp, self.config, region)
 	if err != nil {
 		return model.InvalidMCIRReason, err.Error()
 	}

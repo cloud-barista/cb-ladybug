@@ -9,16 +9,16 @@ import (
 )
 
 /* new instance of VPC */
-func NewVPC(ns string, name string, conf string) *VPC {
+func NewVPC(ns string, name string, conf string, cidrBlock string) *VPC {
 
 	return &VPC{
 		Model:     Model{Name: name, Namespace: ns},
 		Config:    conf,
-		CidrBlock: "192.168.0.0/16",
+		CidrBlock: cidrBlock,
 		Subnets: []Subnet{
 			{
 				Name:      fmt.Sprintf("%s-subnet", conf),
-				CidrBlock: "192.168.1.0/24"},
+				CidrBlock: cidrBlock},
 		},
 	}
 }
