@@ -185,6 +185,35 @@ definitions:
       kind:
         type: string
     type: object
+  model.SpecList:
+    properties:
+      connectionName:
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/model.VM'
+        type: array
+      kind:
+        type: string
+    type: object
+  model.VM:
+    properties:
+      cpu:
+        properties:
+          clock:
+            description: output - GHz
+            type: string
+          count:
+            description: output
+            type: string
+        type: object
+      memory:
+        description: output
+        type: string
+      name:
+        description: output
+        type: string
+    type: object
 host: localhost:1470
 info:
   contact:
@@ -214,6 +243,62 @@ paths:
       summary: Health Check
       tags:
       - Default
+  /mcir/connections/{connection}/specs:
+    get:
+      consumes:
+      - application/json
+      description: List Specs
+      operationId: List Spec
+      parameters:
+      - description: Connection Name
+        in: path
+        name: connection
+        required: true
+        type: string
+      - description: string enums
+        enum:
+        - "Y"
+        - "N"
+        in: query
+        name: control-plane
+        required: true
+        type: string
+      - description: if Control-Plane, >= 2
+        in: query
+        minimum: 1
+        name: cpu-min
+        type: integer
+      - description: ' <= 99999'
+        in: query
+        maximum: 99999
+        minimum: 1
+        name: cpu-max
+        type: integer
+      - description: ' if Control-Plane, >= 2'
+        in: query
+        minimum: 1
+        name: memory-min
+        type: integer
+      - description: ' <= 99999'
+        in: query
+        maximum: 99999
+        minimum: 1
+        name: memory-max
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SpecList'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/app.Status'
+      summary: List Specs
+      tags:
+      - Mcir
   /ns/{namespace}/clusters:
     get:
       consumes:

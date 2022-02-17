@@ -56,6 +56,86 @@ var doc = `{
                 }
             }
         },
+        "/mcir/connections/{connection}/specs": {
+            "get": {
+                "description": "List Specs",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Mcir"
+                ],
+                "summary": "List Specs",
+                "operationId": "List Spec",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Connection Name",
+                        "name": "connection",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "Y",
+                            "N"
+                        ],
+                        "type": "string",
+                        "description": "string enums",
+                        "name": "control-plane",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "if Control-Plane, \u003e= 2",
+                        "name": "cpu-min",
+                        "in": "query"
+                    },
+                    {
+                        "maximum": 99999,
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": " \u003c= 99999",
+                        "name": "cpu-max",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": " if Control-Plane, \u003e= 2",
+                        "name": "memory-min",
+                        "in": "query"
+                    },
+                    {
+                        "maximum": 99999,
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": " \u003c= 99999",
+                        "name": "memory-max",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.SpecList"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/app.Status"
+                        }
+                    }
+                }
+            }
+        },
         "/ns/{namespace}/clusters": {
             "get": {
                 "description": "List all Clusters",
@@ -731,6 +811,49 @@ var doc = `{
                     }
                 },
                 "kind": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.SpecList": {
+            "type": "object",
+            "properties": {
+                "connectionName": {
+                    "type": "string"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.VM"
+                    }
+                },
+                "kind": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.VM": {
+            "type": "object",
+            "properties": {
+                "cpu": {
+                    "type": "object",
+                    "properties": {
+                        "clock": {
+                            "description": "output - GHz",
+                            "type": "string"
+                        },
+                        "count": {
+                            "description": "output",
+                            "type": "string"
+                        }
+                    }
+                },
+                "memory": {
+                    "description": "output",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "output",
                     "type": "string"
                 }
             }

@@ -83,6 +83,14 @@ func NewLookupSpec(conf string, spec string) *LookupSpec {
 	}
 }
 
+/* new instance of VM-Specs-lookup */
+func NewLookupSpecs(conf string) *LookupSpecs {
+	return &LookupSpecs{
+		Model:  Model{Name: "conf"},
+		Config: conf,
+	}
+}
+
 /* new instance of SSH-Key */
 func NewSSHKey(ns string, name string, conf string) *SSHKey {
 	return &SSHKey{
@@ -280,5 +288,11 @@ func (self *LookupImages) GET() (bool, error) {
 func (spec *LookupSpec) GET() (bool, error) {
 
 	return spec.execute(http.MethodPost, "/lookupSpec", spec, &spec)
+
+}
+
+func (spec *LookupSpecs) GET() (bool, error) {
+
+	return spec.execute(http.MethodPost, "/lookupSpecs", spec, &spec)
 
 }
