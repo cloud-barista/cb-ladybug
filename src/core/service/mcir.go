@@ -227,3 +227,53 @@ func (self *MCIR) verifySpec() error {
 
 	return nil
 }
+
+func VerifySpecList(configName string, controlPlane string, cpumin int, cpumax int, memorymin int, memorymax int) (SpecList, error) {
+	if controlPlane == "Y" {
+		if cpumin < 2 {
+			return SpecList{}, errors.New(fmt.Sprintf("Kubernetes control plane node needs 2 cpu at least. (cpu-min=%d)", cpumin))
+		}
+		if memorymin < 2 {
+			return SpecList{}, errors.New(fmt.Sprintf("Kubernetes control plane node needs 2 memory at least. (memory-min=%d)", memorymin))
+		}
+	}
+
+	if cpumin > cpumax {
+		return SpecList{}, errors.New(fmt.Sprintf("The cpu-max must be greater than or equal to the cpu-min. (cpu-min=%d cpu-max=%d)", cpumin, cpumax))
+	}
+
+	if memorymin > memorymax {
+		return SpecList{}, errors.New(fmt.Sprintf("The memory-max must be greater than or equal to the memory-min. (memory-min=%d memory-max=%d)", memorymin, memorymax))
+	}
+
+	lookupSpecs := tumblebug.NewLookupSpecs(configName)
+
+	if exist, err := lookupSpecs.GET(); err != nil {
+		return SpecList{}, errors.New(fmt.Sprintf("Failed to lookup spec. (connection=%s, cause='%v')", configName, err))
+	} else if !exist {
+		return SpecList{}, errors.New(fmt.Sprintf("Could not be found a specList. (connection=%s)", configName))
+	} else {
+		var filterSpec []Vmspecs
+
+		for _, Vmspec := range lookupSpecs.Vmspecs {
+			cpuCount, err := strconv.Atoi(Vmspec.CPU.Count)
+			if err != nil {
+				return SpecList{}, errors.New(fmt.Sprintf("Failed to convert CPU. (CPU=%s)", Vmspec.CPU.Count))
+			}
+			mem, err := strconv.Atoi(Vmspec.Memory)
+			if err != nil {
+				return SpecList{}, errors.New(fmt.Sprintf("Failed to convert memory. (memory=%s)", Vmspec.Memory))
+			}
+			mem /= 1024
+			if cpuCount >= cpumin && cpumax >= cpuCount && mem >= memorymin && memorymax >= mem {
+				VMSpecList := Vmspecs{Name: Vmspec.Name, Memory: strconv.Itoa(mem), CPU: Vmspec.CPU}
+				filterSpec = append(filterSpec, VMSpecList)
+			}
+		}
+
+		SpecList := SpecList{Kind: "specList", Config: configName, Vmspecs: filterSpec}
+
+		return SpecList, nil
+
+	}
+}

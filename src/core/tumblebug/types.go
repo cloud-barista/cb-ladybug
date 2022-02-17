@@ -122,6 +122,19 @@ type LookupSpec struct {
 	} `json:"vcpu"`
 }
 
+type LookupSpecs struct {
+	Model
+	Config  string `json:"connectionName"`
+	Vmspecs []struct {
+		Name   string `json:"name"` // output
+		Memory string `json:"mem"`  // output
+		CPU    struct {
+			Count string `json:"count"` // output
+			Clock string `json:"clock"` // output - GHz
+		} `json:"vcpu"`
+	} `json:"vmspec"`
+}
+
 type LookupImages struct {
 	Model
 	ConnectionName string `json:"connectionName"`

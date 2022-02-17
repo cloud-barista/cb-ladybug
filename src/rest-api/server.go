@@ -31,6 +31,10 @@ func Server() {
 
 	e.GET(*app.Config.RootURL+"/healthy", router.Healthy)
 
+	m := e.Group(*app.Config.RootURL + "/mcir/connections")
+
+	m.GET("/:connection/specs", router.ListSpec)
+
 	g := e.Group(*app.Config.RootURL+"/ns", validMiddlewareFunc())
 
 	// Routes
