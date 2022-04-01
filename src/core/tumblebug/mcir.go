@@ -39,6 +39,8 @@ func NewFirewall(csp app.CSP, ns string, name string, conf string) *Firewall {
 			FirewallRules{Protocol: "icmp", Direction: "inbound", From: "ALL"},
 			FirewallRules{Protocol: "ALL", Direction: "outbound", From: "ALL"},
 		)
+	} else if csp == app.CSP_CLOUDIT {
+		fw.FirewallRules = append(fw.FirewallRules, FirewallRules{Protocol: "ALL", Direction: "outbound", From: "ALL"})
 	} else {
 		fw.FirewallRules = append(fw.FirewallRules, FirewallRules{Protocol: "icmp", Direction: "inbound", From: "-1", To: "-1"})
 	}

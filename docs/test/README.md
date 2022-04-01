@@ -233,18 +233,43 @@ $ export IBM_ZONE="jp-tok-1"
 $ ./connectioninfo-create.sh IBM
 ```
 
+#### CLOUDIT
+
+* 환경변수 : 클라우드별 연결정보
+
+```
+$ export CI_IDENTITY_ENDPOINT="<cloudit_identity_endpoint>"
+$ export CI_USERNAME="<cloudit_username>"
+$ export CI_PASSWORD="<cloudit_password>"
+$ export CI_AUTH_TOKEN="<cloudit_auth_token>"
+$ export CI_TENANT_ID="<cloudit_tenant_id>"
+```
+
+* 환경변수 : CI_REGION, CI_ZONE
+
+```
+$ export OS_REGION="Region"
+$ export OS_ZONE="default"
+```
+
+* Cloud Connection Info. 등록
+
+```
+$ ./connectioninfo-create.sh CLOUDIT
+```
+
 #### Cloud Connection Info 추가
 
 ```
-# AWS/GCP/ALIBABA/TENCENT/OPENSTACK/IBM
-$ export [AWS/GCP/ALIBABA/TENCENT/OS/IBM]_REGION="<region name>"
-$ export [AWS/GCP/ALIBABA/TENCENT/OS/IBM]_ZONE="<zone name>"
+# AWS/GCP/ALIBABA/TENCENT/OPENSTACK/IBM/CLOUDIT
+$ export [AWS/GCP/ALIBABA/TENCENT/OS/IBM/CLOUDIT]_REGION="<region name>"
+$ export [AWS/GCP/ALIBABA/TENCENT/OS/IBM/CLOUDIT]_ZONE="<zone name>"
 
 # AZURE
 $ export AZURE_REGION="<region name>"
 $ export AZURE_RESOURCE_GROUP="<resource group>"
 
-$ ./connectioninfo-create.sh [AWS/GCP/AZURE/ALIBABA/TENCENT/OPENSTACK] add
+$ ./connectioninfo-create.sh [AWS/GCP/AZURE/ALIBABA/TENCENT/OPENSTACK/IBM/CLOUDIT] add
 ```
 
 #### 결과 확인

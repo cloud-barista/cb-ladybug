@@ -14,6 +14,7 @@ const (
 	CSP_TENCENT   CSP = "tencent"
 	CSP_OPENSTACK CSP = "openstack"
 	CSP_IBM       CSP = "ibm"
+	CSP_CLOUDIT   CSP = "cloudit"
 
 	CONTROL_PLANE ROLE = "control-plane"
 	WORKER        ROLE = "worker"
