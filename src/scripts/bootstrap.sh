@@ -39,6 +39,8 @@ sudo bash -c 'cat > /etc/docker/daemon.json <<EOF
 }
 EOF'
 
+sudo swapoff -a && sed -i '/swap/s/^/#/' /etc/fstab
+
 sudo mkdir -p /etc/systemd/system/docker.service.d
 sudo systemctl daemon-reload
 sudo systemctl restart docker
