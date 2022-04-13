@@ -29,8 +29,9 @@ const (
 	STATUS_SUCCESS  = 200
 	STATUS_NOTFOUND = 404
 
-	NETWORKCNI_KILO  NetworkCni = "kilo"
-	NETWORKCNI_CANAL NetworkCni = "canal"
+	NETWORKCNI_KILO   NetworkCni = "kilo"
+	NETWORKCNI_CANAL  NetworkCni = "canal"
+	NETWORKCNI_CALICO NetworkCni = "calico"
 
 	POD_CIDR       = "10.244.0.0/16"
 	SERVICE_CIDR   = "10.96.0.0/12"
@@ -75,7 +76,7 @@ type ClusterConfigReq struct {
 	Kubernetes ClusterConfigKubernetesReq `json:"kubernetes"`
 }
 type ClusterConfigKubernetesReq struct {
-	NetworkCni       NetworkCni `json:"networkCni" example:"kilo" enums:"canal,kilo" default1:"kilo"`
+	NetworkCni       NetworkCni `json:"networkCni" example:"kilo" enums:"canal,kilo,calico" default1:"kilo"`
 	PodCidr          string     `json:"podCidr" example:"10.244.0.0/16"`
 	ServiceCidr      string     `json:"serviceCidr" example:"10.96.0.0/12"`
 	ServiceDnsDomain string     `json:"serviceDnsDomain" example:"cluster.local"`

@@ -57,8 +57,8 @@ func ClusterReqValidate(req ClusterReq) error {
 	if len(req.Worker) == 0 {
 		return errors.New("Worker node must be at least one")
 	}
-	if !(req.Config.Kubernetes.NetworkCni == NETWORKCNI_CANAL || req.Config.Kubernetes.NetworkCni == NETWORKCNI_KILO) {
-		return errors.New("Network-cni allows only canal or kilo")
+	if !(req.Config.Kubernetes.NetworkCni == NETWORKCNI_CANAL || req.Config.Kubernetes.NetworkCni == NETWORKCNI_KILO || req.Config.Kubernetes.NetworkCni == NETWORKCNI_CALICO) {
+		return errors.New("Network-cni allows only canal or kilo or calico")
 	}
 
 	if len(req.Name) == 0 {

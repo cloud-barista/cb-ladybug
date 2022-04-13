@@ -8,6 +8,7 @@ import (
 const (
 	REMOTE_TARGET_PATH    = "/tmp"
 	CNI_CANAL_FILE        = "addons/canal/canal_v3.20.0.yaml"
+	CNI_CALICO_FILE       = "addons/calico/calico-vxlan_v3.22.0.yaml"
 	CNI_KILO_CRDS_FILE    = "addons/kilo/crds_v0.3.0.yaml"
 	CNI_KILO_KUBEADM_FILE = "addons/kilo/kilo-kubeadm-flannel_v0.3.0.yaml"
 	CNI_KILO_FLANNEL_FILE = "addons/kilo/kube-flannel_v0.14.0.yaml"

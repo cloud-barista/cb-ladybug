@@ -80,17 +80,20 @@ fi' | sed "s/{{HOSTNAME}}/${HOSTNAME}/g" | sed "s/{{PUBLIC_IP}}/${PUBLIC_IP}/g" 
 sudo chmod +x /lib/systemd/system/mcks-bootstrap
 fi
 
-if [ "${NETWORK_CNI}" == "canal" ]; then 
+if [ "${NETWORK_CNI}" == "canal" ] || [ "${NETWORK_CNI}" == "calico" ]; then
 # mcks-bootstrap
 echo -e '#!/bin/sh
 IFACE="$(ip route get 8.8.8.8 | awk \047{ print $5; exit }\047)"
 PUBLIC_IP="{{PUBLIC_IP}}"
+NETWORK_CNI="{{NETWORK_CNI}}"
 ifconfig ${IFACE}:1 ${PUBLIC_IP} netmask 255.255.255.255  broadcast 0.0.0.0 up
 echo "KUBELET_EXTRA_ARGS=-\"-node-ip=${PUBLIC_IP}\"" > /etc/default/kubelet
 if [ -f "/etc/kubernetes/kubelet.conf" ]; then
   systemctl restart kubelet
-  kubectl --kubeconfig=/etc/kubernetes/kubelet.conf annotate node {{HOSTNAME}} projectcalico.org/IPv4Address=${PUBLIC_IP} --overwrite
-  R="$(kubectl --kubeconfig=/etc/kubernetes/kubelet.conf annotate node {{HOSTNAME}} flannel.alpha.coreos.com/public-ip-overwrite=${PUBLIC_IP} --overwrite)"
+  if [ "${NETWORK_CNI}" == "canal" ]; then
+    kubectl --kubeconfig=/etc/kubernetes/kubelet.conf annotate node {{HOSTNAME}} projectcalico.org/IPv4Address=${PUBLIC_IP} --overwrite
+    R="$(kubectl --kubeconfig=/etc/kubernetes/kubelet.conf annotate node {{HOSTNAME}} flannel.alpha.coreos.com/public-ip-overwrite=${PUBLIC_IP} --overwrite)"
+  fi
   if echo "$R" | grep "annotated"; then
     R=$(kubectl --kubeconfig=/etc/kubernetes/kubelet.conf get nodes --no-headers | awk \047END { print NR }\047)
     echo "nodes count = ${R}"
@@ -104,7 +107,7 @@ if [ -f "/etc/kubernetes/kubelet.conf" ]; then
   fi
 fi
 exit 0
-fi' | sed "s/{{HOSTNAME}}/${HOSTNAME}/g" | sed "s/{{PUBLIC_IP}}/${PUBLIC_IP}/g" | sudo tee /lib/systemd/system/mcks-bootstrap > /dev/null
+fi' | sed "s/{{HOSTNAME}}/${HOSTNAME}/g" | sed "s/{{PUBLIC_IP}}/${PUBLIC_IP}/g" | sed "s/{{NETWORK_CNI}}/${NETWORK_CNI}/g" | sudo tee /lib/systemd/system/mcks-bootstrap > /dev/null
 sudo chmod +x /lib/systemd/system/mcks-bootstrap
 fi
 

@@ -49,7 +49,7 @@ type Cluster struct {
 	Namespace       string         `json:"namespace"`
 	ClusterConfig   string         `json:"clusterConfig"`
 	CpLeader        string         `json:"cpLeader"`
-	NetworkCni      app.NetworkCni `json:"networkCni" enums:"canal,kilo"`
+	NetworkCni      app.NetworkCni `json:"networkCni" enums:"canal,kilo,calico"`
 	Label           string         `json:"label"`
 	InstallMonAgent string         `json:"installMonAgent" example:"no" default:"yes"`
 	Description     string         `json:"description"`

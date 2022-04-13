@@ -55,8 +55,8 @@ func (s *MCARService) ClusterReqValidate(req app.ClusterReq) error {
 	if len(req.Worker) == 0 {
 		return errors.New("worker node must be at least one")
 	}
-	if !(req.Config.Kubernetes.NetworkCni == app.NETWORKCNI_CANAL || req.Config.Kubernetes.NetworkCni == app.NETWORKCNI_KILO) {
-		return errors.New("network cni allows only canal or kilo")
+	if !(req.Config.Kubernetes.NetworkCni == app.NETWORKCNI_CANAL || req.Config.Kubernetes.NetworkCni == app.NETWORKCNI_KILO || req.Config.Kubernetes.NetworkCni == app.NETWORKCNI_CALICO) {
+		return errors.New("network cni allows only canal or kilo or calico")
 	}
 
 	if len(req.Name) == 0 {

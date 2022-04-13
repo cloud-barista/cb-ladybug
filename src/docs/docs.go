@@ -559,7 +559,8 @@ var doc = `{
                     "type": "string",
                     "enum": [
                         "canal",
-                        "kilo"
+                        "kilo",
+                        "calico"
                     ],
                     "example": "canal"
                 },

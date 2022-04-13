@@ -187,6 +187,8 @@ func (self *Provisioner) InstallNetworkCni() error {
 	cniYamls := []string{}
 	if self.Cluster.NetworkCni == app.NETWORKCNI_CANAL {
 		cniYamls = append(cniYamls, CNI_CANAL_FILE)
+	} else if self.Cluster.NetworkCni == app.NETWORKCNI_CALICO {
+		cniYamls = append(cniYamls, CNI_CALICO_FILE)
 	} else {
 		cniYamls = append(cniYamls, CNI_KILO_FLANNEL_FILE)
 		cniYamls = append(cniYamls, CNI_KILO_CRDS_FILE)

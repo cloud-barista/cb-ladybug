@@ -120,6 +120,8 @@ func (self *Machine) bootstrap(networkCni app.NetworkCni) error {
 		}
 		if networkCni == app.NETWORKCNI_CANAL {
 			sourceFiles = append(sourceFiles, CNI_CANAL_FILE)
+		} else if networkCni == app.NETWORKCNI_CALICO {
+			sourceFiles = append(sourceFiles, CNI_CALICO_FILE)
 		} else {
 			sourceFiles = append(sourceFiles, CNI_KILO_CRDS_FILE, CNI_KILO_KUBEADM_FILE, CNI_KILO_FLANNEL_FILE)
 		}
