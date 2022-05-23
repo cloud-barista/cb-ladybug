@@ -1,12 +1,15 @@
 package lang
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math/rand"
 	"regexp"
 	"strconv"
 	"strings"
+	"text/template"
 	"time"
 )
 
@@ -105,4 +108,34 @@ func GetOnlyLettersAndNumbers(name string) string {
 func GetNowUTC() string {
 	t := time.Now().UTC()
 	return t.Format(time.RFC3339)
+}
+
+func ToPrettyJSON(data []byte) []byte {
+
+	if len(data) > 0 {
+		var buf bytes.Buffer
+		if err := json.Indent(&buf, data, "", "  "); err == nil {
+			return buf.Bytes()
+		}
+	}
+	return data
+}
+
+func ToTemplateBytes(tpl string, todo interface{}) ([]byte, error) {
+
+	t, err := template.New("tpl").Funcs(
+		template.FuncMap{
+			"ToUpper": strings.ToUpper,
+		}).Parse(tpl)
+	if err != nil {
+		return nil, err
+	}
+
+	var out bytes.Buffer
+	err = t.Execute(&out, todo)
+	if err != nil {
+		return nil, err
+	}
+	return out.Bytes(), nil
+
 }
