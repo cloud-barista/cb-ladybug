@@ -100,7 +100,7 @@ func (self *Machine) ConnectionTest() error {
 }
 
 /* bootstrap */
-func (self *Machine) bootstrap(networkCni app.NetworkCni) error {
+func (self *Machine) bootstrap(networkCni app.NetworkCni, k8sVersion string) error {
 
 	//verfiy
 	if self.CSP == "" || self.Region == "" || self.Name == "" || self.PublicIP == "" {
@@ -135,7 +135,7 @@ func (self *Machine) bootstrap(networkCni app.NetworkCni) error {
 	}
 
 	// 2. execute bootstrap.sh
-	if output, err := self.executeSSH(REMOTE_TARGET_PATH+"/bootstrap.sh %s %s %s %s", self.CSP, self.Name, self.PublicIP, networkCni); err != nil {
+	if output, err := self.executeSSH(REMOTE_TARGET_PATH+"/bootstrap.sh %s %s %s %s %s", k8sVersion, self.CSP, self.Name, self.PublicIP, networkCni); err != nil {
 		return errors.New(fmt.Sprintf("Failed to execute bootstrap.sh (node=%s)", self.Name))
 	} else if !strings.Contains(output, "kubectl set on hold") {
 		return errors.New(fmt.Sprintf("Failed to execute bootstrap.sh shell. (node=%s, cause='kubectl not set on hold')", self.Name))

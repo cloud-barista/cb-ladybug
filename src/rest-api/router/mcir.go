@@ -24,7 +24,7 @@ import (
 // @Param   cpu-max     query     int        	false  " <= 99999"          minimum(1)    maximum(99999)
 // @Param   memory-min     query     int        false  " if Control-Plane, >= 2"          minimum(1)
 // @Param   memory-max     query     int        false  " <= 99999"          minimum(1)    maximum(99999)
-// @Success 200 {object} model.SpecList
+// @Success 200 {object} service.SpecList
 // @Failure 400 {object} app.Status
 // @Router /mcir/connections/{connection}/specs [get]
 func ListSpec(c echo.Context) error {

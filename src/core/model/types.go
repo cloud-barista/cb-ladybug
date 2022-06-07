@@ -47,6 +47,7 @@ type Cluster struct {
 	Status          ClusterStatus  `json:"status"`
 	MCIS            string         `json:"mcis"`
 	Namespace       string         `json:"namespace"`
+	Version         string         `json:"k8sVersion"`
 	ClusterConfig   string         `json:"clusterConfig"`
 	CpLeader        string         `json:"cpLeader"`
 	NetworkCni      app.NetworkCni `json:"networkCni" enums:"canal,kilo"`

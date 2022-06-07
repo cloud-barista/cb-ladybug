@@ -124,7 +124,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.SpecList"
+                            "$ref": "#/definitions/service.SpecList"
                         }
                     },
                     "400": {
@@ -192,6 +192,24 @@ var doc = `{
                         "type": "string",
                         "description": "Namespace ID",
                         "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "1.18",
+                            "1.23"
+                        ],
+                        "type": "string",
+                        "description": "string enums",
+                        "name": "minorversion",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Patch version",
+                        "name": "patchversion",
                         "in": "path",
                         "required": true
                     },
@@ -561,7 +579,7 @@ var doc = `{
                         "canal",
                         "kilo"
                     ],
-                    "example": "canal"
+                    "example": "kilo"
                 },
                 "podCidr": {
                     "type": "string",
@@ -581,7 +599,6 @@ var doc = `{
             "type": "object",
             "properties": {
                 "kubernetes": {
-                    "type": "object",
                     "$ref": "#/definitions/app.ClusterConfigKubernetesReq"
                 }
             }
@@ -590,7 +607,6 @@ var doc = `{
             "type": "object",
             "properties": {
                 "config": {
-                    "type": "object",
                     "$ref": "#/definitions/app.ClusterConfigReq"
                 },
                 "controlPlane": {
@@ -625,6 +641,12 @@ var doc = `{
         "app.NodeReq": {
             "type": "object",
             "properties": {
+                "controlPlane": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/app.NodeSetReq"
+                    }
+                },
                 "worker": {
                     "type": "array",
                     "items": {
@@ -686,6 +708,9 @@ var doc = `{
                     "default": "yes",
                     "example": "no"
                 },
+                "k8sVersion": {
+                    "type": "string"
+                },
                 "kind": {
                     "type": "string"
                 },
@@ -715,24 +740,7 @@ var doc = `{
                     }
                 },
                 "status": {
-                    "type": "object",
-                    "properties": {
-                        "message": {
-                            "type": "string"
-                        },
-                        "phase": {
-                            "type": "string",
-                            "enum": [
-                                "Pending",
-                                "Provisioning",
-                                "Provisioned",
-                                "Failed"
-                            ]
-                        },
-                        "reason": {
-                            "type": "string"
-                        }
-                    }
+                    "$ref": "#/definitions/model.ClusterStatus"
                 }
             }
         },
@@ -746,6 +754,26 @@ var doc = `{
                     }
                 },
                 "kind": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.ClusterStatus": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "phase": {
+                    "type": "string",
+                    "enum": [
+                        "Pending",
+                        "Provisioning",
+                        "Provisioned",
+                        "Failed"
+                    ]
+                },
+                "reason": {
                     "type": "string"
                 }
             }
@@ -815,7 +843,7 @@ var doc = `{
                 }
             }
         },
-        "model.SpecList": {
+        "service.SpecList": {
             "type": "object",
             "properties": {
                 "connectionName": {
@@ -824,7 +852,7 @@ var doc = `{
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.VM"
+                        "$ref": "#/definitions/service.Vmspecs"
                     }
                 },
                 "kind": {
@@ -832,7 +860,7 @@ var doc = `{
                 }
             }
         },
-        "model.VM": {
+        "service.Vmspecs": {
             "type": "object",
             "properties": {
                 "cpu": {

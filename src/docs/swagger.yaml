@@ -6,7 +6,7 @@ definitions:
         enum:
         - canal
         - kilo
-        example: canal
+        example: kilo
         type: string
       podCidr:
         example: 10.244.0.0/16
@@ -22,13 +22,11 @@ definitions:
     properties:
       kubernetes:
         $ref: '#/definitions/app.ClusterConfigKubernetesReq'
-        type: object
     type: object
   app.ClusterReq:
     properties:
       config:
         $ref: '#/definitions/app.ClusterConfigReq'
-        type: object
       controlPlane:
         items:
           $ref: '#/definitions/app.NodeSetReq'
@@ -97,6 +95,8 @@ definitions:
         default: "yes"
         example: "no"
         type: string
+      k8sVersion:
+        type: string
       kind:
         type: string
       label:
@@ -117,19 +117,7 @@ definitions:
           $ref: '#/definitions/model.Node'
         type: array
       status:
-        properties:
-          message:
-            type: string
-          phase:
-            enum:
-            - Pending
-            - Provisioning
-            - Provisioned
-            - Failed
-            type: string
-          reason:
-            type: string
-        type: object
+        $ref: '#/definitions/model.ClusterStatus'
     type: object
   model.ClusterList:
     properties:
@@ -138,6 +126,20 @@ definitions:
           $ref: '#/definitions/model.Cluster'
         type: array
       kind:
+        type: string
+    type: object
+  model.ClusterStatus:
+    properties:
+      message:
+        type: string
+      phase:
+        enum:
+        - Pending
+        - Provisioning
+        - Provisioned
+        - Failed
+        type: string
+      reason:
         type: string
     type: object
   model.Node:
@@ -185,18 +187,18 @@ definitions:
       kind:
         type: string
     type: object
-  model.SpecList:
+  service.SpecList:
     properties:
       connectionName:
         type: string
       items:
         items:
-          $ref: '#/definitions/model.VM'
+          $ref: '#/definitions/service.Vmspecs'
         type: array
       kind:
         type: string
     type: object
-  model.VM:
+  service.Vmspecs:
     properties:
       cpu:
         properties:
@@ -291,7 +293,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.SpecList'
+            $ref: '#/definitions/service.SpecList'
         "400":
           description: Bad Request
           schema:
@@ -336,6 +338,19 @@ paths:
         name: namespace
         required: true
         type: string
+      - description: string enums
+        enum:
+        - "1.18"
+        - "1.23"
+        in: query
+        name: minorversion
+        required: true
+        type: string
+      - description: Patch version
+        in: path
+        name: patchversion
+        required: true
+        type: integer
       - description: Request Body to create cluster
         in: body
         name: ClusterReq

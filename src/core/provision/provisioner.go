@@ -132,7 +132,7 @@ func (self *Provisioner) Bootstrap() error {
 			if err := machine.ConnectionTest(); err != nil {
 				return err
 			}
-			if err := machine.bootstrap(self.Cluster.NetworkCni); err != nil {
+			if err := machine.bootstrap(self.Cluster.NetworkCni, self.Cluster.Version); err != nil {
 				return err
 			}
 			return nil
