@@ -68,6 +68,8 @@ func GetCluster(c echo.Context) error {
 // @Accept json
 // @Produce json
 // @Param	namespace	path	string	true  "Namespace ID"
+// @Param   minorversion  query    string   true  "string enums"    Enums(1.18, 1.23)
+// @Param   patchversion  path	int	true  "Patch version"
 // @Param ClusterReq body app.ClusterReq true "Request Body to create cluster"
 // @Success 200 {object} model.Cluster
 // @Failure 400 {object} app.Status
@@ -88,8 +90,7 @@ func CreateCluster(c echo.Context) error {
 		logger.Warnf("(CreateCluster) %s", err.Error())
 		return app.SendMessage(c, http.StatusBadRequest, err.Error())
 	}
-
-	cluster, err := service.CreateCluster(c.Param("namespace"), clusterReq)
+	cluster, err := service.CreateCluster(c.Param("namespace"), c.QueryParam("minorversion"), c.QueryParam("patchversion"), clusterReq)
 	if err != nil {
 		logger.Warnf("(CreateCluster) %s", err.Error())
 		return app.SendMessage(c, http.StatusInternalServerError, err.Error())

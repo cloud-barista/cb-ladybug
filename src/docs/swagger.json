@@ -109,7 +109,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.SpecList"
+                            "$ref": "#/definitions/service.SpecList"
                         }
                     },
                     "400": {
@@ -177,6 +177,24 @@
                         "type": "string",
                         "description": "Namespace ID",
                         "name": "namespace",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "1.18",
+                            "1.23"
+                        ],
+                        "type": "string",
+                        "description": "string enums",
+                        "name": "minorversion",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Patch version",
+                        "name": "patchversion",
                         "in": "path",
                         "required": true
                     },
@@ -546,7 +564,7 @@
                         "canal",
                         "kilo"
                     ],
-                    "example": "canal"
+                    "example": "kilo"
                 },
                 "podCidr": {
                     "type": "string",
@@ -566,7 +584,6 @@
             "type": "object",
             "properties": {
                 "kubernetes": {
-                    "type": "object",
                     "$ref": "#/definitions/app.ClusterConfigKubernetesReq"
                 }
             }
@@ -575,7 +592,6 @@
             "type": "object",
             "properties": {
                 "config": {
-                    "type": "object",
                     "$ref": "#/definitions/app.ClusterConfigReq"
                 },
                 "controlPlane": {
@@ -677,6 +693,9 @@
                     "default": "yes",
                     "example": "no"
                 },
+                "k8sVersion": {
+                    "type": "string"
+                },
                 "kind": {
                     "type": "string"
                 },
@@ -706,24 +725,7 @@
                     }
                 },
                 "status": {
-                    "type": "object",
-                    "properties": {
-                        "message": {
-                            "type": "string"
-                        },
-                        "phase": {
-                            "type": "string",
-                            "enum": [
-                                "Pending",
-                                "Provisioning",
-                                "Provisioned",
-                                "Failed"
-                            ]
-                        },
-                        "reason": {
-                            "type": "string"
-                        }
-                    }
+                    "$ref": "#/definitions/model.ClusterStatus"
                 }
             }
         },
@@ -737,6 +739,26 @@
                     }
                 },
                 "kind": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.ClusterStatus": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "phase": {
+                    "type": "string",
+                    "enum": [
+                        "Pending",
+                        "Provisioning",
+                        "Provisioned",
+                        "Failed"
+                    ]
+                },
+                "reason": {
                     "type": "string"
                 }
             }
@@ -806,7 +828,7 @@
                 }
             }
         },
-        "model.SpecList": {
+        "service.SpecList": {
             "type": "object",
             "properties": {
                 "connectionName": {
@@ -815,7 +837,7 @@
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.VM"
+                        "$ref": "#/definitions/service.Vmspecs"
                     }
                 },
                 "kind": {
@@ -823,7 +845,7 @@
                 }
             }
         },
-        "model.VM": {
+        "service.Vmspecs": {
             "type": "object",
             "properties": {
                 "cpu": {

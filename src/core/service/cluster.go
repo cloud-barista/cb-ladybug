@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/cloud-barista/cb-mcks/src/core/app"
@@ -50,12 +51,23 @@ func GetCluster(namespace string, clusterName string) (*model.Cluster, error) {
 }
 
 /* create a cluster */
-func CreateCluster(namespace string, req *app.ClusterReq) (*model.Cluster, error) {
+func CreateCluster(namespace string, minorversion string, patchversion string, req *app.ClusterReq) (*model.Cluster, error) {
 
 	// validate a namespace
 	if err := verifyNamespace(namespace); err != nil {
 		return nil, err
 	}
+	if minorversion == "" {
+		minorversion = "1.18"
+	}
+	if !strings.Contains(minorversion, "1.18") && !strings.Contains(minorversion, "1.23") {
+		return nil, errors.New("Supported Kubernetes version is 1.18 or 1.23")
+	}
+	if patchversion == "" {
+		patchversion = "1"
+	}
+	k8sVersion := fmt.Sprintf("%s.%s-00", minorversion, patchversion)
+
 	// validate prameters
 	if req.ControlPlane[0].Count < 1 {
 		return nil, errors.New("Control-Plane count must be at least one.")
@@ -92,6 +104,7 @@ func CreateCluster(namespace string, req *app.ClusterReq) (*model.Cluster, error
 	logger.Infof("[%s.%s] Validation & clean-up has been completed.", namespace, clusterName)
 
 	// set cluster paramaters
+	cluster.Version = k8sVersion
 	cluster.NetworkCni = req.Config.Kubernetes.NetworkCni
 	cluster.Label = req.Label
 	cluster.InstallMonAgent = req.InstallMonAgent
