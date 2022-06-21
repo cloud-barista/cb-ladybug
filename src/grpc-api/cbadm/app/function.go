@@ -42,7 +42,7 @@ func BindCommandArgs(values ...*string) func(c *cobra.Command, args []string) er
 
 }
 
-func GetBody(o IOptions) (buf []byte, err error) {
+func GetBody(o IOptions, tpl string) (buf []byte, err error) {
 	// -f 옵션
 	fileName := o.GetFilename()
 	if len(fileName) > 0 {
@@ -63,8 +63,10 @@ func GetBody(o IOptions) (buf []byte, err error) {
 		if err == nil {
 			buf, err = yaml.YAMLToJSON(buf)
 		}
-	} else {
+	} else if len(o.GetData()) > 0 {
 		buf, err = lang.ToTemplateBytes(o.GetData(), o)
+	} else {
+		buf, err = lang.ToTemplateBytes(tpl, o)
 	}
 
 	return
