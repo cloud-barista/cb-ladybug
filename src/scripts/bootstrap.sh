@@ -10,6 +10,7 @@ sudo hostnamectl set-hostname ${HOSTNAME}
 
 if [[ "${K8S_VERSION}" == "1.23"* ]]; then 
 
+sudo swapoff -a && sed -i '/swap/s/^/#/' /etc/fstab
 # br_netfilter
 sudo cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
 br_netfilter
