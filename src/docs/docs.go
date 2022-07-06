@@ -796,7 +796,9 @@ var doc = `{
                         "azure",
                         "alibaba",
                         "tencent",
-                        "openstack"
+                        "openstack",
+                        "ibm",
+                        "cloudit"
                     ]
                 },
                 "cspLabel": {
