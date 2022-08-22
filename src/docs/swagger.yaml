@@ -42,10 +42,26 @@ definitions:
       name:
         example: cluster-01
         type: string
+      storageclass:
+        $ref: '#/definitions/app.ClusterStorageClassReq'
       worker:
         items:
           $ref: '#/definitions/app.NodeSetReq'
         type: array
+    type: object
+  app.ClusterStorageClassNfsReq:
+    properties:
+      path:
+        example: /nfs/data
+        type: string
+      server:
+        example: 163.154.154.89
+        type: string
+    type: object
+  app.ClusterStorageClassReq:
+    properties:
+      nfs:
+        $ref: '#/definitions/app.ClusterStorageClassNfsReq'
     type: object
   app.NodeReq:
     properties:

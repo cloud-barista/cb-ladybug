@@ -123,6 +123,11 @@ func (self *Machine) bootstrap(networkCni app.NetworkCni, k8sVersion string) err
 		} else {
 			sourceFiles = append(sourceFiles, CNI_KILO_CRDS_FILE, CNI_KILO_KUBEADM_FILE, CNI_KILO_FLANNEL_FILE)
 		}
+
+		if _, err := self.executeSSH("mkdir -p %s/addons/%s", REMOTE_TARGET_PATH, "nfs"); err != nil {
+			return errors.New(fmt.Sprintf("Failed to create a addon directory. (node=%s, path='%s')", self.Name, "addons/"+"nfs"))
+		}
+		sourceFiles = append(sourceFiles, SC_NFS_RBAC_FILE, SC_NFS_CLASS_FILE, "addons/nfs/deploy_v4.0.16.sh")
 	}
 
 	//  - copy list-up files

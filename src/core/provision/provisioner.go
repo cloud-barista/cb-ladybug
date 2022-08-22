@@ -202,6 +202,28 @@ func (self *Provisioner) InstallNetworkCni() error {
 	return nil
 }
 
+func (self *Provisioner) InstallStorageClassNFS(storageReq app.ClusterStorageClassNfsReq) error {
+
+	storageYamls := []string{}
+	if storageReq.Server != "" {
+		storageYamls = append(storageYamls, SC_NFS_RBAC_FILE)
+		storageYamls = append(storageYamls, SC_NFS_CLASS_FILE)
+	}
+
+	for _, file := range storageYamls {
+		if _, err := self.Kubectl("apply -f %s/%s", REMOTE_TARGET_PATH, file); err != nil {
+			return err
+		}
+	}
+	if storageReq.Server != "" {
+		if _, err := self.leader.executeSSH("cd %s;./%s %s %s ", REMOTE_TARGET_PATH, "addons/nfs/deploy_v4.0.16.sh", storageReq.Path, storageReq.Server); err != nil {
+			return errors.New("Failed to setup storageCalss controla-plane.")
+		}
+	}
+
+	return nil
+}
+
 /* assign node labels */
 func (self *Provisioner) AssignNodeLabelAnnotation() error {
 

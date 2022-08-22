@@ -98,6 +98,7 @@ fi
 # kubeadm , kubelet, kubectl
 sudo apt-get install -y kubeadm=${K8S_VERSION} kubelet=${K8S_VERSION} kubectl=${K8S_VERSION}
 sudo apt-mark hold kubeadm kubelet kubectl
+sudo apt-get -y install nfs-common cifs-utils
 
 if [ "${CSP}" != "openstack" ]; then 
 	PUBLIC_IP='$(dig +short myip.opendns.com @resolver1.opendns.com)'

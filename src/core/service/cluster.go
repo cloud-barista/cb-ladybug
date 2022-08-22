@@ -257,6 +257,16 @@ func CreateCluster(namespace string, minorversion string, patchversion string, r
 	}
 	logger.Infof("[%s.%s] CNI installation has been completed.", namespace, clusterName)
 
+	// kubernetes provisioning : setting storageclass
+	if req.StorageClass.Nfs.Server != "" && req.StorageClass.Nfs.Path != "" {
+		if err = provisioner.InstallStorageClassNFS(req.StorageClass.Nfs); err != nil {
+			cluster.FailReason(model.SetupStorageClassFailedReason, fmt.Sprintf("Failed to install storageclass. (cause='%v')", err))
+			cleanUpCluster(*cluster, mcis)
+			return nil, errors.New(cluster.Status.Message)
+		}
+		logger.Infof("[%s.%s] Storageclass installation has been completed.", namespace, clusterName)
+	}
+
 	// save nodes metadata & update status
 	for _, node := range cluster.Nodes {
 		node.CreatedTime = lang.GetNowUTC()

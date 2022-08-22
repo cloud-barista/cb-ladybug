@@ -615,11 +615,35 @@
                     "type": "string",
                     "example": "cluster-01"
                 },
+                "storageclass": {
+                    "$ref": "#/definitions/app.ClusterStorageClassReq"
+                },
                 "worker": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/app.NodeSetReq"
                     }
+                }
+            }
+        },
+        "app.ClusterStorageClassNfsReq": {
+            "type": "object",
+            "properties": {
+                "path": {
+                    "type": "string",
+                    "example": "/nfs/data"
+                },
+                "server": {
+                    "type": "string",
+                    "example": "163.154.154.89"
+                }
+            }
+        },
+        "app.ClusterStorageClassReq": {
+            "type": "object",
+            "properties": {
+                "nfs": {
+                    "$ref": "#/definitions/app.ClusterStorageClassNfsReq"
                 }
             }
         },

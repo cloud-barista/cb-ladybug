@@ -11,6 +11,8 @@ const (
 	CNI_KILO_CRDS_FILE    = "addons/kilo/crds_v0.3.0.yaml"
 	CNI_KILO_KUBEADM_FILE = "addons/kilo/kilo-kubeadm-flannel_v0.3.0.yaml"
 	CNI_KILO_FLANNEL_FILE = "addons/kilo/kube-flannel_v0.14.0.yaml"
+	SC_NFS_RBAC_FILE      = "addons/nfs/rbac_v4.0.16.yaml"
+	SC_NFS_CLASS_FILE     = "addons/nfs/class_v4.0.16.yaml"
 )
 
 type Machine struct {
