@@ -30,6 +30,7 @@ const (
 	SetupHaproxyFailedReason                  = ClusterReason("SetupHaproxyFailedReason")
 	InitControlPlaneFailedReason              = ClusterReason("InitControlPlaneFailedReason")
 	SetupNetworkCNIFailedReason               = ClusterReason("SetupNetworkCNIFailedReason")
+	SetupStorageClassFailedReason             = ClusterReason("SetupStorageClassFailedReason")
 	JoinControlPlaneFailedReason              = ClusterReason("JoinControlPlaneFailedReason")
 	JoinWorkerFailedReason                    = ClusterReason("JoinWorkerFailedReason")
 )

@@ -22,6 +22,7 @@
     networkCni: "",
     label: "",
     installMonAgent: "",
+    k8sVersion: "",
     description: "",
     createdTime: "",
     nodes: [
@@ -75,6 +76,7 @@
 |installMonAgent    |모니터링 에이전트 설치 여부        |string | yes/no (no가 아니면 설치)              |
 |description        |description                 |string |                                     |
 |createdTime        |생성일자                      |string |                                     |
+|k8sVersion         |쿠버네티스버전                  |string |                                     |
 
 ### ClusterPhase
 > 프로비저닝 단계

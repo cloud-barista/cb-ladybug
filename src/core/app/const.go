@@ -51,13 +51,14 @@ type Status struct {
 }
 
 type ClusterReq struct {
-	Name            string           `json:"name" example:"cluster-01"`
-	ControlPlane    []NodeSetReq     `json:"controlPlane"`
-	Worker          []NodeSetReq     `json:"worker"`
-	Config          ClusterConfigReq `json:"config"`
-	Label           string           `json:"label"`
-	InstallMonAgent string           `json:"installMonAgent" example:"no" default:"yes"`
-	Description     string           `json:"description"`
+	Name            string                 `json:"name" example:"cluster-01"`
+	ControlPlane    []NodeSetReq           `json:"controlPlane"`
+	Worker          []NodeSetReq           `json:"worker"`
+	Config          ClusterConfigReq       `json:"config"`
+	StorageClass    ClusterStorageClassReq `json:"storageclass"`
+	Label           string                 `json:"label"`
+	InstallMonAgent string                 `json:"installMonAgent" example:"no" default:"yes"`
+	Description     string                 `json:"description"`
 }
 
 type NodeReq struct {
@@ -79,4 +80,13 @@ type ClusterConfigKubernetesReq struct {
 	PodCidr          string     `json:"podCidr" example:"10.244.0.0/16"`
 	ServiceCidr      string     `json:"serviceCidr" example:"10.96.0.0/12"`
 	ServiceDnsDomain string     `json:"serviceDnsDomain" example:"cluster.local"`
+}
+
+type ClusterStorageClassReq struct {
+	Nfs ClusterStorageClassNfsReq `json:"nfs"`
+}
+
+type ClusterStorageClassNfsReq struct {
+	Server string `json:"server" example:"163.154.154.89"`
+	Path   string `json:"path" example:"/nfs/data"`
 }
