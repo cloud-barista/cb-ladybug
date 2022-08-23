@@ -105,8 +105,11 @@ func getCSPImageId(csp app.CSP, configName string, region *tumblebug.Region) (st
 
 		for _, image := range lookupImages.Images {
 			id := strings.ToLower(lang.GetOnlyLettersAndNumbers(image.IId.NameId))
+			guestOs := strings.ToLower(lang.GetOnlyLettersAndNumbers(image.GuestOS))
 			if strings.Contains(id, "ubuntu") && strings.Contains(id, "1804") {
 				return image.IId.NameId, nil
+			} else if strings.Contains(guestOs, "ubuntu") && strings.Contains(guestOs, "1804") {
+				return image.GuestOS, nil
 			}
 		}
 
