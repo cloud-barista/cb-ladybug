@@ -611,6 +611,11 @@
                 "label": {
                     "type": "string"
                 },
+                "loadbalancer": {
+                    "type": "string",
+                    "default": "haproxy",
+                    "example": "haproxy"
+                },
                 "name": {
                     "type": "string",
                     "example": "cluster-01"
@@ -725,6 +730,11 @@
                 },
                 "label": {
                     "type": "string"
+                },
+                "loadbalancer": {
+                    "type": "string",
+                    "default": "haproxy",
+                    "example": "haproxy"
                 },
                 "mcis": {
                     "type": "string"

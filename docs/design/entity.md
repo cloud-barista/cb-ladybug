@@ -22,6 +22,7 @@
     networkCni: "",
     label: "",
     installMonAgent: "",
+    loadbalancer: ""
     k8sVersion: "",
     description: "",
     createdTime: "",
@@ -73,6 +74,7 @@
 |cpLeader           |control plane leader 노드명   |string |                                     |
 |networkCni         |network CNI 정보             |string |                                     |
 |label              |label                       |string |                                     |
+|loadbalancer       |loadbalancer                |string |                                     |
 |installMonAgent    |모니터링 에이전트 설치 여부        |string | yes/no (no가 아니면 설치)              |
 |description        |description                 |string |                                     |
 |createdTime        |생성일자                      |string |                                     |

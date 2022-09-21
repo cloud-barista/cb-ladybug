@@ -167,8 +167,13 @@ func (self *Provisioner) InstallHAProxy() error {
 func (self *Provisioner) InitControlPlane(kubernetesConfigReq app.ClusterConfigKubernetesReq) ([]string, string, error) {
 
 	var joinCmd []string
-
-	if output, err := self.leader.executeSSH("cd %s;./%s %s %s %s %s", REMOTE_TARGET_PATH, "k8s-init.sh", kubernetesConfigReq.PodCidr, kubernetesConfigReq.ServiceCidr, kubernetesConfigReq.ServiceDnsDomain, self.leader.PublicIP); err != nil {
+	var port string
+	if self.Cluster.Loadbalancer == app.LB_HAPROXY {
+		port = "9998"
+	} else {
+		port = "6443"
+	}
+	if output, err := self.leader.executeSSH("cd %s;./%s %s %s %s %s %s", REMOTE_TARGET_PATH, "k8s-init.sh", kubernetesConfigReq.PodCidr, kubernetesConfigReq.ServiceCidr, kubernetesConfigReq.ServiceDnsDomain, self.leader.PublicIP, port); err != nil {
 		return nil, "", errors.New("Failed to initialize control-plane. (k8s-init.sh)")
 	} else if strings.Contains(output, "Your Kubernetes control-plane has initialized successfully") {
 		joinCmd = getJoinCmd(output)

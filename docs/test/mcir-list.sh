@@ -2,7 +2,7 @@
 # ------------------------------------------------------------------------------
 # usage
 if [ "$#" -lt 1 ]; then 
-	echo "./mcir-list.sh <namespace> [all/image/spec/ssh/sg/vpc]"
+	echo "./mcir-list.sh <namespace> [all/image/spec/ssh/sg/vpc/nlb]"
 	echo "./mcir-list.sh cb-mcks-ns all"
 	exit 0
 fi
@@ -26,10 +26,10 @@ if [ "${v_NAMESPACE}" == "" ]; then echo "[ERROR] missing <namespace>"; exit -1;
 # 2. query
 if [ "$#" -gt 1 ]; then v_QUERY="$2"; fi
 if [ "${v_QUERY}" == "" ]; then 
-	read -e -p "Query ? [all/image/spec/ssh/sg/vpc] : "  v_QUERY
+	read -e -p "Query ? [all/image/spec/ssh/sg/vpc/nlb] : "  v_QUERY
 fi
 if [ "${v_QUERY}" == "" ]; then echo "[ERROR] missing <query>"; exit -1; fi
-if [ "${v_QUERY}" == "all" ]; then v_QUERY="image,spec,ssh,sg,vpc"; fi
+if [ "${v_QUERY}" == "all" ]; then v_QUERY="image,spec,ssh,sg,vpc,nlb"; fi
 
 
 # ------------------------------------------------------------------------------
@@ -50,6 +50,7 @@ list() {
 	if [[ "${v_QUERY}" == *"ssh"* ]]; then	echo "SSHKEY";     curl -sX GET ${NM_TUMBLEBUG_NS}/resources/sshKey   -H "${c_AUTH}"	-H "${c_CT}" | jq; fi
 	if [[ "${v_QUERY}" == *"sg"* ]]; then	echo "SECURITYGROUP";     curl -sX GET ${NM_TUMBLEBUG_NS}/resources/securityGroup   -H "${c_AUTH}"	-H "${c_CT}" | jq; fi
 	if [[ "${v_QUERY}" == *"vpc"* ]]; then	echo "VPC";     curl -sX GET ${NM_TUMBLEBUG_NS}/resources/vNet   -H "${c_AUTH}" -H "${c_AUTH}" -H "${c_CT}" | jq; fi
+	if [[ "${v_QUERY}" == *"nlb"* ]]; then	echo "NLB";     curl -sX GET ${NM_TUMBLEBUG_NS}/nlb   -H "${c_AUTH}" -H "${c_AUTH}" -H "${c_CT}" | jq; fi
 }
 
 # ------------------------------------------------------------------------------

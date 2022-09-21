@@ -25,6 +25,7 @@ const (
 	CreateSSHKeyFailedReason                  = ClusterReason("CreateSSHKeyFailedReason")
 	CreateVmImageFailedReason                 = ClusterReason("CreateVmImageFailedReason")
 	CreateVmSpecFailedReason                  = ClusterReason("CreateVmSpecFailedReason")
+	CreateNLBFailedReason                     = ClusterReason("CreateNLBFailedReason")
 	AddNodeEntityFailedReason                 = ClusterReason("AddNodeEntityFailedReason")
 	SetupBoostrapFailedReason                 = ClusterReason("SetupBoostrapFailedReason")
 	SetupHaproxyFailedReason                  = ClusterReason("SetupHaproxyFailedReason")
@@ -54,6 +55,7 @@ type Cluster struct {
 	NetworkCni      app.NetworkCni `json:"networkCni" enums:"canal,kilo"`
 	Label           string         `json:"label"`
 	InstallMonAgent string         `json:"installMonAgent" example:"no" default:"yes"`
+	Loadbalancer    string         `json:"loadbalancer" example:"haproxy" default:"haproxy"`
 	Description     string         `json:"description"`
 	CreatedTime     string         `json:"createdTime" example:"2022-01-02T12:00:00Z" default:""`
 	Nodes           []*Node        `json:"nodes"`

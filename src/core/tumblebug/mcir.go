@@ -3,6 +3,7 @@ package tumblebug
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/beego/beego/v2/core/validation"
 	"github.com/cloud-barista/cb-mcks/src/core/app"
@@ -37,11 +38,8 @@ func NewFirewall(csp app.CSP, ns string, name string, conf string) *Firewall {
 	if csp == app.CSP_TENCENT {
 		fw.FirewallRules = append(fw.FirewallRules,
 			FirewallRules{Protocol: "icmp", Direction: "inbound", From: "ALL"},
-			FirewallRules{Protocol: "ALL", Direction: "outbound", From: "ALL"},
 		)
-	} else if csp == app.CSP_CLOUDIT {
-		fw.FirewallRules = append(fw.FirewallRules, FirewallRules{Protocol: "ALL", Direction: "outbound", From: "ALL"})
-	} else {
+	} else if csp != app.CSP_CLOUDIT {
 		fw.FirewallRules = append(fw.FirewallRules, FirewallRules{Protocol: "icmp", Direction: "inbound", From: "-1", To: "-1"})
 	}
 
@@ -100,6 +98,34 @@ func NewSSHKey(ns string, name string, conf string) *SSHKey {
 		Config:   conf,
 		Username: VM_USER_ACCOUNT,
 	}
+}
+
+/* new instance of NLB */
+func NewNLB(ns string, name string, conf string, mcisName string) *NLBReq {
+	nlb := &NLBReq{
+		NLBBase: NLBBase{
+			Model:  Model{Name: name, Namespace: ns},
+			Config: conf,
+			Type:   "PUBLIC",
+			Scope:  "REGION", Listener: NLBProtocolBase{Protocol: "TCP", Port: "6443"},
+			TargetGroup: TargetGroup{NLBProtocolBase: NLBProtocolBase{Protocol: "TCP", Port: "6443"}, MCIS: mcisName},
+		},
+		HealthChecker: HealthCheckReq{
+			NLBProtocolBase: NLBProtocolBase{Protocol: "TCP", Port: "22"},
+			Interval:        "10", Threshold: "3",
+		},
+	}
+
+	if !strings.Contains(nlb.NLBBase.Config, string(app.CSP_AWS)) && !strings.Contains(nlb.NLBBase.Config, string(app.CSP_AZURE)) {
+		nlb.HealthChecker.Timeout = "9"
+	}
+
+	if strings.Contains(nlb.NLBBase.Config, string(app.CSP_GCP)) {
+		nlb.HealthChecker.NLBProtocolBase.Protocol = "HTTP"
+		nlb.HealthChecker.NLBProtocolBase.Port = "80"
+	}
+
+	return nlb
 }
 
 /* VPC */
@@ -297,4 +323,38 @@ func (spec *LookupSpecs) GET() (bool, error) {
 
 	return spec.execute(http.MethodPost, "/lookupSpecs", spec, &spec)
 
+}
+
+// NLB
+func (self *NLBReq) GET() (bool, error) {
+
+	return self.execute(http.MethodGet, fmt.Sprintf("/ns/%s/nlb/%s", self.Namespace, self.Name), nil, &self)
+
+}
+
+func (self *NLBReq) POST() error {
+
+	NLBRes := new(NLBRes)
+
+	_, err := self.execute(http.MethodPost, fmt.Sprintf("/ns/%s/nlb", self.Namespace), self, &NLBRes)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (self *NLBReq) DELETE() (bool, error) {
+	exist, err := self.GET()
+	if err != nil {
+		return exist, err
+	}
+	if exist {
+		_, err := self.execute(http.MethodDelete, fmt.Sprintf("/ns/%s/nlb/%s", self.Namespace, self.Name), fmt.Sprintf(`{"connectionName" : "%s"}`, self.Config), app.Status{})
+		if err != nil {
+			return exist, err
+		}
+	}
+
+	return exist, nil
 }

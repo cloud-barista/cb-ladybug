@@ -60,7 +60,9 @@ func ClusterReqValidate(req ClusterReq) error {
 	if !(req.Config.Kubernetes.NetworkCni == NETWORKCNI_CANAL || req.Config.Kubernetes.NetworkCni == NETWORKCNI_KILO) {
 		return errors.New("Network-cni allows only canal or kilo")
 	}
-
+	if len(req.Loadbalancer) != 0 && !(req.Loadbalancer == LB_HAPROXY || req.Loadbalancer == LB_NLB) {
+		return errors.New("loadbalancer allows only haproxy or nlb")
+	}
 	if len(req.Name) == 0 {
 		return errors.New("Cluster name is empty")
 	} else {

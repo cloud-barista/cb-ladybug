@@ -626,6 +626,11 @@ var doc = `{
                 "label": {
                     "type": "string"
                 },
+                "loadbalancer": {
+                    "type": "string",
+                    "default": "haproxy",
+                    "example": "haproxy"
+                },
                 "name": {
                     "type": "string",
                     "example": "cluster-01"
@@ -740,6 +745,11 @@ var doc = `{
                 },
                 "label": {
                     "type": "string"
+                },
+                "loadbalancer": {
+                    "type": "string",
+                    "default": "haproxy",
+                    "example": "haproxy"
                 },
                 "mcis": {
                     "type": "string"
