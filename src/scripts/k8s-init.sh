@@ -6,7 +6,7 @@ cat << EOF > kubeadm-config.yaml
 apiVersion: kubeadm.k8s.io/v1beta2
 kind: ClusterConfiguration
 imageRepository: k8s.gcr.io
-controlPlaneEndpoint: $4:9998
+controlPlaneEndpoint: $4:$5
 dns:
   type: CoreDNS
 apiServer:

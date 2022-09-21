@@ -16,7 +16,7 @@ const (
 	AZURE_IMAGE_ID   = "Canonical:UbuntuServer:18.04-LTS:latest"
 	ALIBABA_IMAGE_ID = "ubuntu_18_04_x64_20G_alibase_20210521.vhd"
 	TENCENT_IMAGE_ID = "img-pi0ii46r"
-	CLOUDIT_IMAGE_ID = "Ubuntu 18.04"
+	CLOUDIT_IMAGE_ID = "ac2696a8-ecf7-4aab-bfbf-9ab5f3256ca2"
 )
 
 // region별 AMI :  (AMI 이름 : ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-20200908, 소유자:099720109477 )
@@ -106,10 +106,8 @@ func getCSPImageId(csp app.CSP, configName string, region *tumblebug.Region) (st
 		for _, image := range lookupImages.Images {
 			id := strings.ToLower(lang.GetOnlyLettersAndNumbers(image.IId.NameId))
 			guestOs := strings.ToLower(lang.GetOnlyLettersAndNumbers(image.GuestOS))
-			if strings.Contains(id, "ubuntu") && strings.Contains(id, "1804") {
+			if (strings.Contains(id, "ubuntu") && strings.Contains(id, "1804")) || (strings.Contains(guestOs, "ubuntu") && strings.Contains(guestOs, "1804")) {
 				return image.IId.NameId, nil
-			} else if strings.Contains(guestOs, "ubuntu") && strings.Contains(guestOs, "1804") {
-				return image.GuestOS, nil
 			}
 		}
 

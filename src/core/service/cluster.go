@@ -27,7 +27,6 @@ func ListCluster(namespace string) (*model.ClusterList, error) {
 	if err := clusters.SelectList(); err != nil {
 		return nil, err
 	}
-
 	return clusters, nil
 }
 
@@ -46,7 +45,6 @@ func GetCluster(namespace string, clusterName string) (*model.Cluster, error) {
 	} else if !exists {
 		return nil, errors.New(fmt.Sprintf("Could not be found a cluster '%s' (namespace=%s)", clusterName, namespace))
 	}
-
 	return cluster, nil
 }
 
@@ -66,6 +64,21 @@ func CreateCluster(namespace string, minorversion string, patchversion string, r
 	if patchversion == "" {
 		patchversion = "1"
 	}
+	loadbalancer := req.Loadbalancer
+	if req.Loadbalancer == "" {
+		loadbalancer = "haproxy"
+	}
+	// ibm, cloudit 일 경우에는 현재 haproxy만 사용하도록 함. 추후 지원 예정
+	if req.Loadbalancer != app.LB_HAPROXY {
+		connection := tumblebug.NewConnection(req.ControlPlane[0].Connection)
+		exists, _ := connection.GET()
+		if exists {
+			if strings.ToLower(connection.ProviderName) == string(app.CSP_IBM) || strings.ToLower(connection.ProviderName) == string(app.CSP_CLOUDIT) {
+				return nil, errors.New(fmt.Sprintf("%s does not yet supported nlb loadbalancer.", strings.ToLower(connection.ProviderName)))
+			}
+		}
+	}
+
 	k8sVersion := fmt.Sprintf("%s.%s-00", minorversion, patchversion)
 
 	// validate prameters
@@ -108,6 +121,7 @@ func CreateCluster(namespace string, minorversion string, patchversion string, r
 	cluster.NetworkCni = req.Config.Kubernetes.NetworkCni
 	cluster.Label = req.Label
 	cluster.InstallMonAgent = req.InstallMonAgent
+	cluster.Loadbalancer = loadbalancer
 	cluster.Description = req.Description
 	provisioner := provision.NewProvisioner(cluster)
 
@@ -130,6 +144,8 @@ func CreateCluster(namespace string, minorversion string, patchversion string, r
 
 	// create a MCIR - "vpc, f/w, sshkey, image, spec" - with vlidations
 	mcir := NewMCIR(namespace, app.CONTROL_PLANE, req.ControlPlane[0])
+	NLB := mcir.NewNLB(namespace, mcisName)
+
 	reason, msg := mcir.CreateIfNotExist()
 	if reason != "" {
 		cluster.FailReason(reason, msg)
@@ -141,6 +157,7 @@ func CreateCluster(namespace string, minorversion string, patchversion string, r
 			if i == 0 {
 				cluster.CpLeader = name
 			}
+			NLB.TargetGroup.VMs = append(NLB.TargetGroup.VMs, name)
 			mcis.VMs = append(mcis.VMs, mcir.NewVM(namespace, name, mcisName))
 			provisioner.AppendControlPlaneMachine(name, mcir.csp, mcir.region, mcir.zone, mcir.credential)
 		}
@@ -179,6 +196,20 @@ func CreateCluster(namespace string, minorversion string, patchversion string, r
 	cluster.MCIS = mcisName
 	logger.Infof("[%s.%s] MCIS creation has been completed.", namespace, clusterName)
 
+	//create a NLB (contains control-plane)
+	if cluster.Loadbalancer != app.LB_HAPROXY {
+		if exists, err := NLB.GET(); err != nil {
+			cluster.FailReason(model.CreateNLBFailedReason, err.Error())
+			return nil, errors.New(cluster.Status.Message)
+		} else if !exists {
+			if err := NLB.POST(); err != nil {
+				cluster.FailReason(model.CreateNLBFailedReason, fmt.Sprintf("Failed to create a NLB. (cause='%v')", err))
+				return nil, errors.New(cluster.Status.Message)
+			}
+			logger.Infof("[%s] NLB creation has been completed. (%s)", req.ControlPlane[0].Connection, mcir.nlbName)
+		}
+	}
+
 	// update received data & save nodes metadata
 	if nodes, err := provisioner.BindVM(mcis.VMs); err != nil {
 		cluster.FailReason(model.AddNodeEntityFailedReason, err.Error())
@@ -201,13 +232,15 @@ func CreateCluster(namespace string, minorversion string, patchversion string, r
 	}
 	logger.Infof("[%s.%s] Bootstrap has been completed.", namespace, clusterName)
 
-	// kubernetes provisioning : haproxy
-	if err := provisioner.InstallHAProxy(); err != nil {
-		cluster.FailReason(model.SetupHaproxyFailedReason, fmt.Sprintf("Failed to install haproxy. (cause='%v')", err))
-		cleanUpCluster(*cluster, mcis)
-		return nil, errors.New(cluster.Status.Message)
+	if cluster.Loadbalancer == app.LB_HAPROXY {
+		// kubernetes provisioning : haproxy
+		if err := provisioner.InstallHAProxy(); err != nil {
+			cluster.FailReason(model.SetupHaproxyFailedReason, fmt.Sprintf("Failed to install haproxy. (cause='%v')", err))
+			cleanUpCluster(*cluster, mcis)
+			return nil, errors.New(cluster.Status.Message)
+		}
+		logger.Infof("[%s.%s] HAProxy installation has been completed.", namespace, clusterName)
 	}
-	logger.Infof("[%s.%s] HAProxy installation has been completed.", namespace, clusterName)
 
 	// kubernetes provisioning :control-plane init
 	var joinCmds []string
@@ -273,7 +306,6 @@ func CreateCluster(namespace string, minorversion string, patchversion string, r
 	}
 	cluster.UpdatePhase(model.ClusterPhaseProvisioned)
 	logger.Infof("[%s.%s] Cluster creation has been completed.", namespace, clusterName)
-
 	return cluster, nil
 }
 

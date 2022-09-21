@@ -32,6 +32,9 @@ const (
 	NETWORKCNI_KILO  NetworkCni = "kilo"
 	NETWORKCNI_CANAL NetworkCni = "canal"
 
+	LB_HAPROXY = "haproxy"
+	LB_NLB     = "nlb"
+
 	POD_CIDR       = "10.244.0.0/16"
 	SERVICE_CIDR   = "10.96.0.0/12"
 	SERVICE_DOMAIN = "cluster.local"
@@ -58,6 +61,7 @@ type ClusterReq struct {
 	StorageClass    ClusterStorageClassReq `json:"storageclass"`
 	Label           string                 `json:"label"`
 	InstallMonAgent string                 `json:"installMonAgent" example:"no" default:"yes"`
+	Loadbalancer    string                 `json:"loadbalancer" example:"haproxy" default:"haproxy"`
 	Description     string                 `json:"description"`
 }
 

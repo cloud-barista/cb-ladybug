@@ -22,6 +22,7 @@ type MCIR struct {
 	spec         string //prameter
 	vmCount      int    //prameter
 	credential   string
+	nlbName      string
 	subnetName   string
 	vpcName      string
 	firewallName string
@@ -42,6 +43,7 @@ func NewMCIR(namespace string, role app.ROLE, nodeSetReq app.NodeSetReq) *MCIR {
 		config:       nodeSetReq.Connection,
 		spec:         nodeSetReq.Spec,
 		vmCount:      nodeSetReq.Count,
+		nlbName:      fmt.Sprintf("%s-nlb", nodeSetReq.Connection),
 		vpcName:      fmt.Sprintf("%s-vpc", nodeSetReq.Connection),
 		firewallName: fmt.Sprintf("%s-sg", nodeSetReq.Connection),
 		sshkeyName:   fmt.Sprintf("%s-sshkey", nodeSetReq.Connection),
@@ -193,6 +195,12 @@ func (self *MCIR) NewVM(namespace string, name string, mcisName string) tumblebu
 	vm.Image = self.imageName
 	vm.Spec = self.specName
 	return *vm
+}
+
+func (self *MCIR) NewNLB(namespace string, mcisName string) tumblebug.NLBReq {
+	nlb := tumblebug.NewNLB(namespace, self.nlbName, self.config, mcisName)
+	nlb.VPC = self.vpcName
+	return *nlb
 }
 
 /* verify - cpus & momories & look-up(exists) */

@@ -39,6 +39,10 @@ definitions:
         type: string
       label:
         type: string
+      loadbalancer:
+        default: haproxy
+        example: haproxy
+        type: string
       name:
         example: cluster-01
         type: string
@@ -116,6 +120,10 @@ definitions:
       kind:
         type: string
       label:
+        type: string
+      loadbalancer:
+        default: haproxy
+        example: haproxy
         type: string
       mcis:
         type: string

@@ -187,3 +187,49 @@ type VM struct {
 	} `json:"cspViewVmDetail"` // output
 
 }
+
+type NLBProtocolBase struct {
+	Protocol string // TCP|UDP
+	Port     string // 1-65535
+}
+
+type HealthCheckReq struct {
+	NLBProtocolBase
+	Interval  string // secs, Interval time between health checks.
+	Timeout   string // secs, Waiting time to decide an unhealthy VM when no response.
+	Threshold string // num, The number of continuous health checks to change the VM status.
+}
+
+type HealthCheckRes struct {
+	NLBProtocolBase
+	Interval  int // secs, Interval time between health checks.
+	Timeout   int // secs, Waiting time to decide an unhealthy VM when no response.
+	Threshold int // num, The number of continuous health checks to change the VM status.
+}
+
+type TargetGroup struct {
+	NLBProtocolBase
+	MCIS string
+	VMs  []string
+}
+
+// NLB
+type NLBBase struct {
+	Model
+	Config      string          `json:"connectionName"`
+	VPC         string          `json:"vNetId"`
+	Type        string          `json:"type" enums:"PUBLIC,INTERNAL"`
+	Scope       string          `json:"scope" enums:"REGION,GLOBAL"`
+	Listener    NLBProtocolBase `json:"listener"`
+	TargetGroup TargetGroup     `json:"targetGroup"`
+}
+
+type NLBRes struct {
+	NLBBase
+	HealthChecker HealthCheckRes `json:"healthChecker"`
+}
+
+type NLBReq struct {
+	NLBBase
+	HealthChecker HealthCheckReq `json:"healthChecker"`
+}

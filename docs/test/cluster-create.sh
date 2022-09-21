@@ -53,6 +53,7 @@ create() {
 			"name": "${v_CLUSTER_NAME}",
 			"label": "",
 			"installMonAgent": "",
+			"loadbalancer": "",
 			"description": "",
 			"config": {
 				"kubernetes": {
