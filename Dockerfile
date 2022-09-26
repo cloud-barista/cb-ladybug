@@ -1,7 +1,7 @@
 #-------------------------------------------
 # STEP 1 : build executable binary
 #-------------------------------------------
-FROM golang:1.16-alpine as builder
+FROM golang:1.19-alpine as builder
 
 # gcc
 RUN apk add --no-cache build-base
