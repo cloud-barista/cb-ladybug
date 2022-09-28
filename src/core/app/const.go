@@ -71,9 +71,11 @@ type NodeReq struct {
 }
 
 type NodeSetReq struct {
-	Connection string `json:"connection" example:"config-aws-ap-northeast-2"`
-	Count      int    `json:"count" example:"3"`
-	Spec       string `json:"spec" example:"t2.medium"`
+	Connection   string `json:"connection" example:"config-aws-ap-northeast-2"`
+	Count        int    `json:"count" example:"3"`
+	Spec         string `json:"spec" example:"t2.medium"`
+	RootDiskType string `json:"rootDiskType" example:"default"`
+	RootDiskSize string `json:"rootDiskSize" example:"default"`
 }
 
 type ClusterConfigReq struct {

@@ -67,14 +67,18 @@ create() {
 				{
 					"connection": "config-azure-koreacentral",
 					"count": 3,
-					"spec": "Standard_B2s"
+					"spec": "Standard_B2s",
+					"rootDiskType": "defalut",
+					"rootDiskSize": "defalut"
 				}
 			],
 			"worker": [
 				{
 					"connection": "config-ibm-jp-tok",
 					"count": 1,
-					"spec": "bx2-2x8"
+					"spec": "bx2-2x8",
+					"rootDiskType": "defalut",
+					"rootDiskSize": "defalut"
 				}
 			]
 		}

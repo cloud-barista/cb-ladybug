@@ -174,10 +174,12 @@ type VM struct {
 	UserAccount   string   `json:"vmUserAccount"`
 	UserPassword  string   `json:"vmUserPassword"`
 	Description   string   `json:"description"`
-	PublicIP      string   `json:"publicIP"`      // output
-	PrivateIP     string   `json:"privateIP"`     // output
-	Status        VMStatus `json:"status"`        // output
-	SystemMessage string   `json:"systemMessage"` // output
+	PublicIP      string   `json:"publicIP"`                                 // output
+	PrivateIP     string   `json:"privateIP"`                                // output
+	Status        VMStatus `json:"status"`                                   // output
+	SystemMessage string   `json:"systemMessage"`                            // output
+	RootDiskType  string   `json:"rootDiskType,omitempty" example:"default"` // "", "default", "TYPE1", AWS: ["standard", "gp2", "gp3"], Azure: ["PremiumSSD", "StandardSSD", "StandardHHD"], GCP: ["pd-standard", "pd-balanced", "pd-ssd", "pd-extreme"], ALIBABA: ["cloud_efficiency", "cloud", "cloud_ssd"], TENCENT: ["CLOUD_PREMIUM", "CLOUD_SSD"]
+	RootDiskSize  string   `json:"rootDiskSize,omitempty" example:"default"` // "default", Integer (GB): ["50", ..., "1000"]
 	Region        struct {
 		Region string `json:"region"`
 		Zone   string `json:"zone"`

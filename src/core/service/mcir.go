@@ -185,7 +185,7 @@ func (self *MCIR) CreateIfNotExist() (model.ClusterReason, string) {
 }
 
 /* new a VM template */
-func (self *MCIR) NewVM(namespace string, name string, mcisName string) tumblebug.VM {
+func (self *MCIR) NewVM(namespace string, name string, mcisName string, diskType string, diskSize string) tumblebug.VM {
 	vm := tumblebug.NewVM(namespace, name, mcisName)
 	vm.Config = self.config
 	vm.VPC = self.vpcName
@@ -194,6 +194,8 @@ func (self *MCIR) NewVM(namespace string, name string, mcisName string) tumblebu
 	vm.SSHKey = self.sshkeyName
 	vm.Image = self.imageName
 	vm.Spec = self.specName
+	vm.RootDiskType = diskType
+	vm.RootDiskSize = diskSize
 	return *vm
 }
 
