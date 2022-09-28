@@ -695,6 +695,14 @@ var doc = `{
                     "type": "integer",
                     "example": 3
                 },
+                "rootDiskSize": {
+                    "type": "string",
+                    "example": "default"
+                },
+                "rootDiskType": {
+                    "type": "string",
+                    "example": "default"
+                },
                 "spec": {
                     "type": "string",
                     "example": "t2.medium"

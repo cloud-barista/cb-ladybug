@@ -158,7 +158,7 @@ func CreateCluster(namespace string, minorversion string, patchversion string, r
 				cluster.CpLeader = name
 			}
 			NLB.TargetGroup.VMs = append(NLB.TargetGroup.VMs, name)
-			mcis.VMs = append(mcis.VMs, mcir.NewVM(namespace, name, mcisName))
+			mcis.VMs = append(mcis.VMs, mcir.NewVM(namespace, name, mcisName, req.ControlPlane[0].RootDiskType, req.ControlPlane[0].RootDiskSize))
 			provisioner.AppendControlPlaneMachine(name, mcir.csp, mcir.region, mcir.zone, mcir.credential)
 		}
 	}
@@ -175,7 +175,7 @@ func CreateCluster(namespace string, minorversion string, patchversion string, r
 			// make mics reuqest & provisioner data
 			for i := 0; i < mcir.vmCount; i++ {
 				name := lang.GenerateNewNodeName(string(app.WORKER), idx+1)
-				mcis.VMs = append(mcis.VMs, mcir.NewVM(namespace, name, mcisName))
+				mcis.VMs = append(mcis.VMs, mcir.NewVM(namespace, name, mcisName, worker.RootDiskType, worker.RootDiskSize))
 				provisioner.AppendWorkerNodeMachine(name, mcir.csp, mcir.region, mcir.zone, mcir.credential)
 				idx = idx + 1
 			}
