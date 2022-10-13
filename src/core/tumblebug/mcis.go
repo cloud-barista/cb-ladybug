@@ -3,6 +3,7 @@ package tumblebug
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/cloud-barista/cb-mcks/src/core/app"
 )
@@ -22,6 +23,33 @@ func NewVM(namespace string, name string, mcisName string) *VM {
 		mcisName:    mcisName,
 		UserAccount: VM_USER_ACCOUNT,
 	}
+}
+
+/* new instance of NLB */
+func NewNLB(ns string, mcisName string, groupId string) *NLBReq {
+	nlb := &NLBReq{
+		NLBBase: NLBBase{
+			Model: Model{Name: groupId, Namespace: ns},
+			Type:  "PUBLIC",
+			Scope: "REGION", Listener: NLBProtocolBase{Protocol: "TCP", Port: "6443"},
+			TargetGroup: TargetGroup{NLBProtocolBase: NLBProtocolBase{Protocol: "TCP", Port: "6443"}, MCIS: mcisName, VmGroupId: groupId},
+		},
+		HealthChecker: HealthCheckReq{
+			NLBProtocolBase: NLBProtocolBase{Protocol: "TCP", Port: "22"},
+			Interval:        "10", Threshold: "3",
+		},
+	}
+
+	if !strings.Contains(nlb.NLBBase.Config, string(app.CSP_AWS)) && !strings.Contains(nlb.NLBBase.Config, string(app.CSP_AZURE)) {
+		nlb.HealthChecker.Timeout = "9"
+	}
+
+	if strings.Contains(nlb.NLBBase.Config, string(app.CSP_GCP)) {
+		nlb.HealthChecker.NLBProtocolBase.Protocol = "HTTP"
+		nlb.HealthChecker.NLBProtocolBase.Port = "80"
+	}
+
+	return nlb
 }
 
 /* MCIS */
@@ -99,6 +127,38 @@ func (self *VM) DELETE() (bool, error) {
 	}
 	if exist {
 		_, err := self.execute(http.MethodDelete, fmt.Sprintf("/ns/%s/mcis/%s/vm/%s", self.Namespace, self.mcisName, self.Name), nil, app.Status{})
+		if err != nil {
+			return exist, err
+		}
+	}
+
+	return exist, nil
+}
+
+// NLB
+func (self *NLBReq) GET() (bool, error) {
+	NLBRes := new(NLBRes)
+	return self.execute(http.MethodGet, fmt.Sprintf("/ns/%s/mcis/%s/nlb/%s", self.Namespace, self.TargetGroup.MCIS, self.Name), nil, &NLBRes)
+
+}
+
+func (self *NLBReq) POST() error {
+	NLBRes := new(NLBRes)
+	_, err := self.execute(http.MethodPost, fmt.Sprintf("/ns/%s/mcis/%s/nlb", self.Namespace, self.TargetGroup.MCIS), self, &NLBRes)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (self *NLBReq) DELETE() (bool, error) {
+	exist, err := self.GET()
+	if err != nil {
+		return exist, err
+	}
+	if exist {
+		_, err := self.execute(http.MethodDelete, fmt.Sprintf("/ns/%s/mcis/%s/nlb", self.Namespace, self.TargetGroup.MCIS), fmt.Sprintf(`{"connectionName" : "%s"}`, self.Config), app.Status{})
 		if err != nil {
 			return exist, err
 		}

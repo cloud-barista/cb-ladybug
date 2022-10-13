@@ -110,6 +110,8 @@ definitions:
     properties:
       clusterConfig:
         type: string
+      cpGroup:
+        type: string
       cpLeader:
         type: string
       createdTime:

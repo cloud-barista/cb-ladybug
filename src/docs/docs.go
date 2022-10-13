@@ -730,6 +730,9 @@ var doc = `{
                 "clusterConfig": {
                     "type": "string"
                 },
+                "cpGroup": {
+                    "type": "string"
+                },
                 "cpLeader": {
                     "type": "string"
                 },

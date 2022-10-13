@@ -52,6 +52,7 @@ type Cluster struct {
 	Version         string         `json:"k8sVersion"`
 	ClusterConfig   string         `json:"clusterConfig"`
 	CpLeader        string         `json:"cpLeader"`
+	CpGroup         string         `json:"cpGroup"`
 	NetworkCni      app.NetworkCni `json:"networkCni" enums:"canal,kilo"`
 	Label           string         `json:"label"`
 	InstallMonAgent string         `json:"installMonAgent" example:"no" default:"yes"`
