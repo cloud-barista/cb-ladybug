@@ -107,7 +107,7 @@ func AddNode(namespace string, clusterName string, req *app.NodeReq) (*model.Nod
 		} else {
 			for i := 0; i < mcir.vmCount; i++ {
 				name := lang.GenerateNewNodeName(string(app.WORKER), idx)
-				vm := mcir.NewVM(namespace, name, mcisName, worker.RootDiskType, worker.RootDiskSize)
+				vm := mcir.NewVM(namespace, name, mcisName, "", worker.RootDiskType, worker.RootDiskSize)
 				if err := vm.POST(); err != nil {
 					cleanUpNodes(*provisioner)
 					return nil, err

@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -144,7 +145,6 @@ func CreateCluster(namespace string, minorversion string, patchversion string, r
 
 	// create a MCIR - "vpc, f/w, sshkey, image, spec" - with vlidations
 	mcir := NewMCIR(namespace, app.CONTROL_PLANE, req.ControlPlane[0])
-	NLB := mcir.NewNLB(namespace, mcisName)
 
 	reason, msg := mcir.CreateIfNotExist()
 	if reason != "" {
@@ -152,15 +152,9 @@ func CreateCluster(namespace string, minorversion string, patchversion string, r
 		return nil, errors.New(msg)
 	} else {
 		// make mics reuqest & provisioner data
-		for i := 0; i < req.ControlPlane[0].Count; i++ {
-			name := lang.GenerateNewNodeName(string(app.CONTROL_PLANE), i+1)
-			if i == 0 {
-				cluster.CpLeader = name
-			}
-			NLB.TargetGroup.VMs = append(NLB.TargetGroup.VMs, name)
-			mcis.VMs = append(mcis.VMs, mcir.NewVM(namespace, name, mcisName, req.ControlPlane[0].RootDiskType, req.ControlPlane[0].RootDiskSize))
-			provisioner.AppendControlPlaneMachine(name, mcir.csp, mcir.region, mcir.zone, mcir.credential)
-		}
+		name := lang.GenerateNewNodeName(string(app.CONTROL_PLANE), 1)
+		cluster.CpGroup = name
+		mcis.VMs = append(mcis.VMs, mcir.NewVM(namespace, name, mcisName, strconv.Itoa(req.ControlPlane[0].Count), req.ControlPlane[0].RootDiskType, req.ControlPlane[0].RootDiskSize))
 	}
 	logger.Infof("[%s.%s] MCIR(control-plane) creation has been completed.", namespace, clusterName)
 
@@ -175,7 +169,7 @@ func CreateCluster(namespace string, minorversion string, patchversion string, r
 			// make mics reuqest & provisioner data
 			for i := 0; i < mcir.vmCount; i++ {
 				name := lang.GenerateNewNodeName(string(app.WORKER), idx+1)
-				mcis.VMs = append(mcis.VMs, mcir.NewVM(namespace, name, mcisName, worker.RootDiskType, worker.RootDiskSize))
+				mcis.VMs = append(mcis.VMs, mcir.NewVM(namespace, name, mcisName, "", worker.RootDiskType, worker.RootDiskSize))
 				provisioner.AppendWorkerNodeMachine(name, mcir.csp, mcir.region, mcir.zone, mcir.credential)
 				idx = idx + 1
 			}
@@ -195,9 +189,17 @@ func CreateCluster(namespace string, minorversion string, patchversion string, r
 	}
 	cluster.MCIS = mcisName
 	logger.Infof("[%s.%s] MCIS creation has been completed.", namespace, clusterName)
+	cluster.CpLeader = mcis.VMs[0].Name
+
+	for i := 0; i < len(mcis.VMs); i++ {
+		if cluster.CpGroup == mcis.VMs[i].VmGroupId {
+			provisioner.AppendControlPlaneMachine(mcis.VMs[i].Name, mcir.csp, mcir.region, mcir.zone, mcir.credential)
+		}
+	}
 
 	//create a NLB (contains control-plane)
 	if cluster.Loadbalancer != app.LB_HAPROXY {
+		NLB := mcir.NewNLB(namespace, mcisName, cluster.CpGroup)
 		if exists, err := NLB.GET(); err != nil {
 			cluster.FailReason(model.CreateNLBFailedReason, err.Error())
 			return nil, errors.New(cluster.Status.Message)

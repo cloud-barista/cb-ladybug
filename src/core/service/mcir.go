@@ -185,7 +185,8 @@ func (self *MCIR) CreateIfNotExist() (model.ClusterReason, string) {
 }
 
 /* new a VM template */
-func (self *MCIR) NewVM(namespace string, name string, mcisName string, diskType string, diskSize string) tumblebug.VM {
+func (self *MCIR) NewVM(namespace string, name string, mcisName string, vmCount string, diskType string, diskSize string) tumblebug.VM {
+
 	vm := tumblebug.NewVM(namespace, name, mcisName)
 	vm.Config = self.config
 	vm.VPC = self.vpcName
@@ -196,11 +197,15 @@ func (self *MCIR) NewVM(namespace string, name string, mcisName string, diskType
 	vm.Spec = self.specName
 	vm.RootDiskType = diskType
 	vm.RootDiskSize = diskSize
+	if vmCount != "" {
+		vm.VmGroupSize = vmCount
+	}
 	return *vm
 }
 
-func (self *MCIR) NewNLB(namespace string, mcisName string) tumblebug.NLBReq {
-	nlb := tumblebug.NewNLB(namespace, self.nlbName, self.config, mcisName)
+func (self *MCIR) NewNLB(namespace string, mcisName string, groupId string) tumblebug.NLBReq {
+	nlb := tumblebug.NewNLB(namespace, mcisName, groupId)
+	nlb.Config = self.config
 	nlb.VPC = self.vpcName
 	return *nlb
 }
