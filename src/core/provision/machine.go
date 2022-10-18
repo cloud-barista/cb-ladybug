@@ -29,7 +29,17 @@ func (self *Machine) executeSSH(format string, a ...interface{}) (string, error)
 			ServerPort: address,
 		}, command)
 	if err != nil {
-		logger.Warnf("[%s] Failed to run SSH command. (server=%s, cause='%v', command='%s', output='%s')", self.Name, address, err, command, output)
+		if strings.Contains(err.Error(), "handshake failed") {
+			if self.Username == "" {
+				logger.Warnf("[%s] Failed to run SSH command - username is empty (server=%s, key=%s, command='%s', cause='%v')", self.Name, address, len(self.Credential), command, err)
+			} else if self.Credential == "" {
+				logger.Warnf("[%s] Failed to run SSH command - private-key is empty (server=%s, command='%s', cause='%v')", self.Name, address, command, err)
+			} else {
+				logger.Warnf("[%s] Failed to run SSH command. (server=%s, command='%s', cause='%v')", self.Name, address, command, err)
+			}
+		} else {
+			logger.Warnf("[%s] Failed to run SSH command. (server=%s, username=%s, key=%s, command='%s', cause='%v')", self.Name, address, self.Username, len(self.Credential), command, err)
+		}
 	}
 	return output, err
 }
