@@ -107,7 +107,7 @@ func (self *Provisioner) BindVM(vms []tumblebug.VM) ([]*model.Node, error) {
 		if machine != nil {
 			machine.PublicIP = vm.PublicIP
 			machine.PrivateIP = vm.PrivateIP
-			machine.Username = vm.UserAccount
+			machine.Username = lang.NVL(vm.UserAccount, tumblebug.VM_USER_ACCOUNT)
 			machine.Region = lang.NVL(vm.Region.Region, machine.Region) // region, zone 공백인 경우가 간혹 있음
 			machine.Zone = lang.NVL(vm.Region.Zone, machine.Zone)
 			machine.Spec = vm.CspViewVmDetail.VMSpecName
