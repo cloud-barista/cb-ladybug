@@ -10,7 +10,7 @@ sudo hostnamectl set-hostname ${HOSTNAME}
 
 if [[ "${K8S_VERSION}" == "1.23"* ]]; then 
 
-sudo swapoff -a && sed -i '/swap/s/^/#/' /etc/fstab
+sudo swapoff -a && sudo sed -i '/swap/s/^/#/' /etc/fstab
 # br_netfilter
 sudo cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
 br_netfilter
@@ -84,7 +84,7 @@ sudo bash -c 'cat > /etc/docker/daemon.json <<EOF
 }
 EOF'
 
-sudo swapoff -a && sed -i '/swap/s/^/#/' /etc/fstab
+sudo swapoff -a && sudo sed -i '/swap/s/^/#/' /etc/fstab
 
 sudo mkdir -p /etc/systemd/system/docker.service.d
 sudo systemctl daemon-reload
@@ -120,7 +120,7 @@ if [ -f "/etc/kubernetes/kubelet.conf" ]; then
   kubectl --kubeconfig=/etc/kubernetes/kubelet.conf annotate node {{HOSTNAME}} kilo.squat.ai/force-endpoint=${PUBLIC_IP}:51820 --overwrite
 fi
 exit 0
-fi' | sed "s/{{HOSTNAME}}/${HOSTNAME}/g" | sed "s/{{PUBLIC_IP}}/${PUBLIC_IP}/g" | sudo tee /lib/systemd/system/mcks-bootstrap > /dev/null
+fi' | sudo sed "s/{{HOSTNAME}}/${HOSTNAME}/g" | sudo sed "s/{{PUBLIC_IP}}/${PUBLIC_IP}/g" | sudo tee /lib/systemd/system/mcks-bootstrap > /dev/null
 sudo chmod +x /lib/systemd/system/mcks-bootstrap
 fi
 
@@ -148,7 +148,7 @@ if [ -f "/etc/kubernetes/kubelet.conf" ]; then
   fi
 fi
 exit 0
-fi' | sed "s/{{HOSTNAME}}/${HOSTNAME}/g" | sed "s/{{PUBLIC_IP}}/${PUBLIC_IP}/g" | sudo tee /lib/systemd/system/mcks-bootstrap > /dev/null
+fi' | sudo sed "s/{{HOSTNAME}}/${HOSTNAME}/g" | sudo sed "s/{{PUBLIC_IP}}/${PUBLIC_IP}/g" | sudo tee /lib/systemd/system/mcks-bootstrap > /dev/null
 sudo chmod +x /lib/systemd/system/mcks-bootstrap
 fi
 
