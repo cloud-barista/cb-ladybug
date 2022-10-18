@@ -83,7 +83,9 @@ func (self *Cluster) Select() (bool, error) {
 	key := getStoreClusterKey(self.Namespace, self.Name)
 	keyValue, err := app.CBStore.Get(key)
 	if err != nil {
-		return exists, err
+		if !strings.Contains(err.Error(), "bucket not") {
+			return exists, err
+		}
 	}
 	exists = (keyValue != nil)
 	if exists {
