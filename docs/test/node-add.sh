@@ -55,8 +55,10 @@ create() {
 					"connection": "config-aws-ap-northeast-1",
 					"count": 1,
 					"spec": "t2.medium",
-					"rootDiskType": "defalut",
-					"rootDiskSize": "defalut"
+					"rootDisk": {
+						"type": "defalut",
+						"size": "defalut"
+					}
 				}
 			]
 		}

@@ -2,6 +2,10 @@ basePath: /mcks
 definitions:
   app.ClusterConfigKubernetesReq:
     properties:
+      loadbalancer:
+        default: haproxy
+        example: haproxy
+        type: string
       networkCni:
         enum:
         - canal
@@ -17,37 +21,42 @@ definitions:
       serviceDnsDomain:
         example: cluster.local
         type: string
+      storageclass:
+        properties:
+          nfs:
+            $ref: '#/definitions/app.ClusterStorageClassNfsReq'
+            type: object
+        type: object
+      version:
+        example: 1.23.13
+        type: string
     type: object
   app.ClusterConfigReq:
     properties:
+      installMonAgent:
+        default: "yes"
+        example: "no"
+        type: string
       kubernetes:
         $ref: '#/definitions/app.ClusterConfigKubernetesReq'
+        type: object
     type: object
   app.ClusterReq:
     properties:
       config:
         $ref: '#/definitions/app.ClusterConfigReq'
+        type: object
       controlPlane:
         items:
           $ref: '#/definitions/app.NodeSetReq'
         type: array
       description:
         type: string
-      installMonAgent:
-        default: "yes"
-        example: "no"
-        type: string
       label:
-        type: string
-      loadbalancer:
-        default: haproxy
-        example: haproxy
         type: string
       name:
         example: cluster-01
         type: string
-      storageclass:
-        $ref: '#/definitions/app.ClusterStorageClassReq'
       worker:
         items:
           $ref: '#/definitions/app.NodeSetReq'
@@ -61,11 +70,6 @@ definitions:
       server:
         example: 163.154.154.89
         type: string
-    type: object
-  app.ClusterStorageClassReq:
-    properties:
-      nfs:
-        $ref: '#/definitions/app.ClusterStorageClassNfsReq'
     type: object
   app.NodeReq:
     properties:
@@ -86,12 +90,15 @@ definitions:
       count:
         example: 3
         type: integer
-      rootDiskSize:
-        example: default
-        type: string
-      rootDiskType:
-        example: default
-        type: string
+      rootDisk:
+        properties:
+          size:
+            example: default
+            type: string
+          type:
+            example: default
+            type: string
+        type: object
       spec:
         example: t2.medium
         type: string
@@ -150,6 +157,7 @@ definitions:
         type: array
       status:
         $ref: '#/definitions/model.ClusterStatus'
+        type: object
     type: object
   model.ClusterList:
     properties:
@@ -301,24 +309,18 @@ paths:
         type: string
       - description: if Control-Plane, >= 2
         in: query
-        minimum: 1
         name: cpu-min
         type: integer
       - description: ' <= 99999'
         in: query
-        maximum: 99999
-        minimum: 1
         name: cpu-max
         type: integer
       - description: ' if Control-Plane, >= 2'
         in: query
-        minimum: 1
         name: memory-min
         type: integer
       - description: ' <= 99999'
         in: query
-        maximum: 99999
-        minimum: 1
         name: memory-max
         type: integer
       produces:
@@ -372,19 +374,6 @@ paths:
         name: namespace
         required: true
         type: string
-      - description: string enums
-        enum:
-        - "1.18"
-        - "1.23"
-        in: query
-        name: minorversion
-        required: true
-        type: string
-      - description: Patch version
-        in: path
-        name: patchversion
-        required: true
-        type: integer
       - description: Request Body to create cluster
         in: body
         name: ClusterReq

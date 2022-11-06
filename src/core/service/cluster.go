@@ -50,27 +50,18 @@ func GetCluster(namespace string, clusterName string) (*model.Cluster, error) {
 }
 
 /* create a cluster */
-func CreateCluster(namespace string, minorversion string, patchversion string, req *app.ClusterReq) (*model.Cluster, error) {
+func CreateCluster(namespace string, req *app.ClusterReq) (*model.Cluster, error) {
 
 	// validate a namespace
 	if err := verifyNamespace(namespace); err != nil {
 		return nil, err
 	}
-	if minorversion == "" {
-		minorversion = "1.18"
-	}
-	if !strings.Contains(minorversion, "1.18") && !strings.Contains(minorversion, "1.23") {
-		return nil, errors.New("Supported Kubernetes version is 1.18 or 1.23")
-	}
-	if patchversion == "" {
-		patchversion = "1"
-	}
-	loadbalancer := req.Loadbalancer
-	if req.Loadbalancer == "" {
+	loadbalancer := req.Config.Kubernetes.Loadbalancer
+	if req.Config.Kubernetes.Loadbalancer == "" {
 		loadbalancer = "haproxy"
 	}
 	// ibm, cloudit 일 경우에는 현재 haproxy만 사용하도록 함. 추후 지원 예정
-	if req.Loadbalancer != app.LB_HAPROXY {
+	if req.Config.Kubernetes.Loadbalancer != app.LB_HAPROXY {
 		connection := tumblebug.NewConnection(req.ControlPlane[0].Connection)
 		exists, _ := connection.GET()
 		if exists {
@@ -80,7 +71,7 @@ func CreateCluster(namespace string, minorversion string, patchversion string, r
 		}
 	}
 
-	k8sVersion := fmt.Sprintf("%s.%s-00", minorversion, patchversion)
+	k8sVersion := fmt.Sprintf("%s-00", req.Config.Kubernetes.Version)
 
 	// validate prameters
 	if req.ControlPlane[0].Count < 1 {
@@ -121,7 +112,7 @@ func CreateCluster(namespace string, minorversion string, patchversion string, r
 	cluster.Version = k8sVersion
 	cluster.NetworkCni = req.Config.Kubernetes.NetworkCni
 	cluster.Label = req.Label
-	cluster.InstallMonAgent = req.InstallMonAgent
+	cluster.InstallMonAgent = req.Config.InstallMonAgent
 	cluster.Loadbalancer = loadbalancer
 	cluster.Description = req.Description
 	provisioner := provision.NewProvisioner(cluster)
@@ -144,7 +135,7 @@ func CreateCluster(namespace string, minorversion string, patchversion string, r
 	logger.Infof("[%s.%s] MCIS validation has been completed. (mcis=%s)", namespace, clusterName, mcisName)
 
 	// create a MCIR - "vpc, f/w, sshkey, image, spec" - with vlidations
-	mcir := NewMCIR(namespace, app.CONTROL_PLANE, req.ControlPlane[0])
+	mcir := NewMCIR(namespace, app.CONTROL_PLANE, *req.ControlPlane[0])
 
 	reason, msg := mcir.CreateIfNotExist()
 	if reason != "" {
@@ -154,13 +145,13 @@ func CreateCluster(namespace string, minorversion string, patchversion string, r
 		// make mics reuqest & provisioner data
 		name := lang.GenerateNewNodeName(string(app.CONTROL_PLANE), 1)
 		cluster.CpGroup = name
-		mcis.VMs = append(mcis.VMs, mcir.NewVM(namespace, name, mcisName, strconv.Itoa(req.ControlPlane[0].Count), req.ControlPlane[0].RootDiskType, req.ControlPlane[0].RootDiskSize))
+		mcis.VMs = append(mcis.VMs, mcir.NewVM(namespace, name, mcisName, strconv.Itoa(req.ControlPlane[0].Count), req.ControlPlane[0].RootDisk.Type, req.ControlPlane[0].RootDisk.Size))
 	}
 	logger.Infof("[%s.%s] MCIR(control-plane) creation has been completed.", namespace, clusterName)
 
 	idx := 0
 	for _, worker := range req.Worker {
-		mcir := NewMCIR(namespace, app.WORKER, worker)
+		mcir := NewMCIR(namespace, app.WORKER, *worker)
 		reason, msg := mcir.CreateIfNotExist()
 		if reason != "" {
 			cluster.FailReason(reason, msg)
@@ -169,7 +160,7 @@ func CreateCluster(namespace string, minorversion string, patchversion string, r
 			// make mics reuqest & provisioner data
 			for i := 0; i < mcir.vmCount; i++ {
 				name := lang.GenerateNewNodeName(string(app.WORKER), idx+1)
-				mcis.VMs = append(mcis.VMs, mcir.NewVM(namespace, name, mcisName, "", worker.RootDiskType, worker.RootDiskSize))
+				mcis.VMs = append(mcis.VMs, mcir.NewVM(namespace, name, mcisName, "", worker.RootDisk.Type, worker.RootDisk.Size))
 				provisioner.AppendWorkerNodeMachine(name, mcir.csp, mcir.region, mcir.zone, mcir.credential)
 				idx = idx + 1
 			}
@@ -293,8 +284,8 @@ func CreateCluster(namespace string, minorversion string, patchversion string, r
 	logger.Infof("[%s.%s] CNI installation has been completed.", namespace, clusterName)
 
 	// kubernetes provisioning : setting storageclass
-	if req.StorageClass.Nfs.Server != "" && req.StorageClass.Nfs.Path != "" {
-		if err = provisioner.InstallStorageClassNFS(req.StorageClass.Nfs); err != nil {
+	if req.Config.Kubernetes.StorageClass.Nfs.Server != "" && req.Config.Kubernetes.StorageClass.Nfs.Path != "" {
+		if err = provisioner.InstallStorageClassNFS(req.Config.Kubernetes.StorageClass.Nfs); err != nil {
 			cluster.FailReason(model.SetupStorageClassFailedReason, fmt.Sprintf("Failed to install storageclass. (cause='%v')", err))
 			cleanUpCluster(*cluster, mcis)
 			return nil, errors.New(cluster.Status.Message)
@@ -331,6 +322,7 @@ func DeleteCluster(namespace string, clusterName string) (*app.Status, error) {
 
 	// delete a MCIS
 	if cluster.MCIS != "" {
+		logger.Infof("[%s.%s] MCIS deletion start.", namespace, clusterName)
 		mcis := tumblebug.NewMCIS(namespace, cluster.MCIS)
 		if exist, err := mcis.GET(); err != nil {
 			return nil, err

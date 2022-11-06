@@ -90,30 +90,24 @@ var doc = `{
                         "required": true
                     },
                     {
-                        "minimum": 1,
                         "type": "integer",
                         "description": "if Control-Plane, \u003e= 2",
                         "name": "cpu-min",
                         "in": "query"
                     },
                     {
-                        "maximum": 99999,
-                        "minimum": 1,
                         "type": "integer",
                         "description": " \u003c= 99999",
                         "name": "cpu-max",
                         "in": "query"
                     },
                     {
-                        "minimum": 1,
                         "type": "integer",
                         "description": " if Control-Plane, \u003e= 2",
                         "name": "memory-min",
                         "in": "query"
                     },
                     {
-                        "maximum": 99999,
-                        "minimum": 1,
                         "type": "integer",
                         "description": " \u003c= 99999",
                         "name": "memory-max",
@@ -192,24 +186,6 @@ var doc = `{
                         "type": "string",
                         "description": "Namespace ID",
                         "name": "namespace",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "enum": [
-                            "1.18",
-                            "1.23"
-                        ],
-                        "type": "string",
-                        "description": "string enums",
-                        "name": "minorversion",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Patch version",
-                        "name": "patchversion",
                         "in": "path",
                         "required": true
                     },
@@ -573,6 +549,11 @@ var doc = `{
         "app.ClusterConfigKubernetesReq": {
             "type": "object",
             "properties": {
+                "loadbalancer": {
+                    "type": "string",
+                    "default": "haproxy",
+                    "example": "haproxy"
+                },
                 "networkCni": {
                     "type": "string",
                     "enum": [
@@ -592,13 +573,32 @@ var doc = `{
                 "serviceDnsDomain": {
                     "type": "string",
                     "example": "cluster.local"
+                },
+                "storageclass": {
+                    "type": "object",
+                    "properties": {
+                        "nfs": {
+                            "type": "object",
+                            "$ref": "#/definitions/app.ClusterStorageClassNfsReq"
+                        }
+                    }
+                },
+                "version": {
+                    "type": "string",
+                    "example": "1.23.13"
                 }
             }
         },
         "app.ClusterConfigReq": {
             "type": "object",
             "properties": {
+                "installMonAgent": {
+                    "type": "string",
+                    "default": "yes",
+                    "example": "no"
+                },
                 "kubernetes": {
+                    "type": "object",
                     "$ref": "#/definitions/app.ClusterConfigKubernetesReq"
                 }
             }
@@ -607,6 +607,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "config": {
+                    "type": "object",
                     "$ref": "#/definitions/app.ClusterConfigReq"
                 },
                 "controlPlane": {
@@ -618,25 +619,12 @@ var doc = `{
                 "description": {
                     "type": "string"
                 },
-                "installMonAgent": {
-                    "type": "string",
-                    "default": "yes",
-                    "example": "no"
-                },
                 "label": {
                     "type": "string"
-                },
-                "loadbalancer": {
-                    "type": "string",
-                    "default": "haproxy",
-                    "example": "haproxy"
                 },
                 "name": {
                     "type": "string",
                     "example": "cluster-01"
-                },
-                "storageclass": {
-                    "$ref": "#/definitions/app.ClusterStorageClassReq"
                 },
                 "worker": {
                     "type": "array",
@@ -656,14 +644,6 @@ var doc = `{
                 "server": {
                     "type": "string",
                     "example": "163.154.154.89"
-                }
-            }
-        },
-        "app.ClusterStorageClassReq": {
-            "type": "object",
-            "properties": {
-                "nfs": {
-                    "$ref": "#/definitions/app.ClusterStorageClassNfsReq"
                 }
             }
         },
@@ -695,13 +675,18 @@ var doc = `{
                     "type": "integer",
                     "example": 3
                 },
-                "rootDiskSize": {
-                    "type": "string",
-                    "example": "default"
-                },
-                "rootDiskType": {
-                    "type": "string",
-                    "example": "default"
+                "rootDisk": {
+                    "type": "object",
+                    "properties": {
+                        "size": {
+                            "type": "string",
+                            "example": "default"
+                        },
+                        "type": {
+                            "type": "string",
+                            "example": "default"
+                        }
+                    }
                 },
                 "spec": {
                     "type": "string",
@@ -785,6 +770,7 @@ var doc = `{
                     }
                 },
                 "status": {
+                    "type": "object",
                     "$ref": "#/definitions/model.ClusterStatus"
                 }
             }

@@ -36,7 +36,7 @@ func (s *MCARService) CreateCluster(ctx context.Context, req *pb.ClusterCreateRe
 		return nil, gc.ConvGrpcStatusErr(err, "", "MCARService.CreateCluster()")
 	}
 
-	cluster, err := service.CreateCluster(req.Namespace, req.Minorversion, req.Patchversion, &mcarObj)
+	cluster, err := service.CreateCluster(req.Namespace, &mcarObj)
 	if err != nil {
 		return nil, gc.ConvGrpcStatusErr(err, "", "MCARService.CreateCluster()")
 	}

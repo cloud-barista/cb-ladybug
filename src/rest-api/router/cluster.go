@@ -1,11 +1,13 @@
 package router
 
 import (
+	"errors"
 	"net/http"
 	"time"
 
 	"github.com/cloud-barista/cb-mcks/src/core/app"
 	"github.com/cloud-barista/cb-mcks/src/core/service"
+	"github.com/cloud-barista/cb-mcks/src/utils/lang"
 	"github.com/labstack/echo/v4"
 
 	logger "github.com/sirupsen/logrus"
@@ -68,8 +70,6 @@ func GetCluster(c echo.Context) error {
 // @Accept json
 // @Produce json
 // @Param	namespace	path	string	true  "Namespace ID"
-// @Param   minorversion  query    string   true  "string enums"    Enums(1.18, 1.23)
-// @Param   patchversion  path	int	true  "Patch version"
 // @Param ClusterReq body app.ClusterReq true "Request Body to create cluster"
 // @Success 200 {object} model.Cluster
 // @Failure 400 {object} app.Status
@@ -83,14 +83,12 @@ func CreateCluster(c echo.Context) error {
 		return app.SendMessage(c, http.StatusBadRequest, err.Error())
 	}
 
-	app.ClusterReqDef(*clusterReq)
-
-	err := app.ClusterReqValidate(*clusterReq)
+	err := validateCreateClusterReq(clusterReq)
 	if err != nil {
 		logger.Warnf("(CreateCluster) %s", err.Error())
 		return app.SendMessage(c, http.StatusBadRequest, err.Error())
 	}
-	cluster, err := service.CreateCluster(c.Param("namespace"), c.QueryParam("minorversion"), c.QueryParam("patchversion"), clusterReq)
+	cluster, err := service.CreateCluster(c.Param("namespace"), clusterReq)
 	if err != nil {
 		logger.Warnf("(CreateCluster) %s", err.Error())
 		return app.SendMessage(c, http.StatusInternalServerError, err.Error())
@@ -129,4 +127,68 @@ func DeleteCluster(c echo.Context) error {
 
 	logger.Info("(DeleteCluster) Duration = ", time.Since(start))
 	return app.Send(c, http.StatusOK, status)
+}
+
+func validateCreateClusterReq(clusterReq *app.ClusterReq) error {
+
+	clusterReq.Config.Kubernetes.Version = lang.NVL(clusterReq.Config.Kubernetes.Version, "1.23.13")
+	clusterReq.Config.Kubernetes.PodCidr = lang.NVL(clusterReq.Config.Kubernetes.PodCidr, app.POD_CIDR)
+	clusterReq.Config.Kubernetes.ServiceCidr = lang.NVL(clusterReq.Config.Kubernetes.ServiceCidr, app.SERVICE_CIDR)
+	clusterReq.Config.Kubernetes.ServiceDnsDomain = lang.NVL(clusterReq.Config.Kubernetes.ServiceDnsDomain, app.SERVICE_DOMAIN)
+	clusterReq.Config.Kubernetes.Loadbalancer = lang.NVL(clusterReq.Config.Kubernetes.Loadbalancer, app.LB_HAPROXY)
+	if len(clusterReq.Config.Kubernetes.NetworkCni) == 0 {
+		clusterReq.Config.Kubernetes.NetworkCni = app.NETWORKCNI_KILO
+	}
+	clusterReq.Config.InstallMonAgent = lang.NVL(clusterReq.Config.InstallMonAgent, "no")
+
+	if len(clusterReq.ControlPlane) == 0 {
+		return errors.New("Control plane node must be at least one")
+	}
+	if len(clusterReq.ControlPlane) > 1 {
+		return errors.New("Only one control plane node is supported")
+	}
+	if len(clusterReq.Worker) == 0 {
+		return errors.New("Worker node must be at least one")
+	}
+	if !(clusterReq.Config.Kubernetes.NetworkCni == app.NETWORKCNI_CANAL || clusterReq.Config.Kubernetes.NetworkCni == app.NETWORKCNI_KILO) {
+		return errors.New("Network-cni allows only canal or kilo")
+	}
+	if len(clusterReq.Config.Kubernetes.Loadbalancer) != 0 && !(clusterReq.Config.Kubernetes.Loadbalancer == app.LB_HAPROXY || clusterReq.Config.Kubernetes.Loadbalancer == app.LB_NLB) {
+		return errors.New("loadbalancer allows only haproxy or nlb")
+	}
+	if len(clusterReq.Name) == 0 {
+		return errors.New("Cluster name is empty")
+	} else {
+		err := lang.VerifyClusterName(clusterReq.Name)
+		if err != nil {
+			return err
+		}
+	}
+	if len(clusterReq.Config.Kubernetes.PodCidr) > 0 {
+		err := lang.VerifyCIDR("podCidr", clusterReq.Config.Kubernetes.PodCidr)
+		if err != nil {
+			return err
+		}
+	}
+	if len(clusterReq.Config.Kubernetes.ServiceCidr) > 0 {
+		err := lang.VerifyCIDR("serviceCidr", clusterReq.Config.Kubernetes.ServiceCidr)
+		if err != nil {
+			return err
+		}
+	}
+
+	// control plane nodes
+	for _, set := range clusterReq.ControlPlane {
+		if err := validateNodeSetReq(set); err != nil {
+			return err
+		}
+	}
+	// worker nodes
+	for _, set := range clusterReq.Worker {
+		if err := validateNodeSetReq(set); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
