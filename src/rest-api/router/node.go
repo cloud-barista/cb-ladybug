@@ -1,11 +1,13 @@
 package router
 
 import (
+	"errors"
 	"net/http"
 	"time"
 
 	"github.com/cloud-barista/cb-mcks/src/core/app"
 	"github.com/cloud-barista/cb-mcks/src/core/service"
+	"github.com/cloud-barista/cb-mcks/src/utils/lang"
 
 	"github.com/labstack/echo/v4"
 	logger "github.com/sirupsen/logrus"
@@ -94,10 +96,20 @@ func AddNode(c echo.Context) error {
 		return app.SendMessage(c, http.StatusBadRequest, err.Error())
 	}
 
-	err := app.NodeReqValidate(*nodeReq)
-	if err != nil {
-		logger.Warnf("(AddNode) %s", err.Error())
-		return app.SendMessage(c, http.StatusBadRequest, err.Error())
+	if len(nodeReq.ControlPlane) > 0 {
+		logger.Warnf("(AddNode) Control plane node is not supported")
+		return app.SendMessage(c, http.StatusBadRequest, "Control plane node is not supported")
+	}
+
+	if len(nodeReq.Worker) == 0 {
+		logger.Warnf("(AddNode) Worker node must be at least one")
+		return app.SendMessage(c, http.StatusBadRequest, "Worker node must be at least one")
+	}
+	for _, set := range nodeReq.Worker {
+		if err := validateNodeSetReq(set); err != nil {
+			logger.Warnf("(AddNode) %s", err.Error())
+			return app.SendMessage(c, http.StatusBadRequest, err.Error())
+		}
 	}
 
 	node, err := service.AddNode(c.Param("namespace"), c.Param("cluster"), nodeReq)
@@ -108,6 +120,7 @@ func AddNode(c echo.Context) error {
 
 	logger.Info("(AddNode) Duration = ", time.Since(start))
 	return app.Send(c, http.StatusOK, node)
+
 }
 
 // RemoveNode godoc
@@ -144,4 +157,19 @@ func RemoveNode(c echo.Context) error {
 		}
 	}
 
+}
+
+func validateNodeSetReq(nodeSetReq *app.NodeSetReq) error {
+
+	nodeSetReq.RootDisk.Type = lang.NVL(nodeSetReq.RootDisk.Type, "default")
+	nodeSetReq.RootDisk.Size = lang.NVL(nodeSetReq.RootDisk.Size, "default")
+
+	if len(nodeSetReq.Connection) == 0 {
+		return errors.New("Connection is empty")
+	}
+	if len(nodeSetReq.Spec) == 0 {
+		return errors.New("Machine specification is empty")
+	}
+
+	return nil
 }
