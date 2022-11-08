@@ -1,0 +1,54 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: aws-cloud-controller-manager
+  namespace: kube-system
+  labels:
+    k8s-app: aws-cloud-controller-manager
+spec:
+  selector:
+    matchLabels:
+      k8s-app: aws-cloud-controller-manager
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        k8s-app: aws-cloud-controller-manager
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/master: ""
+      tolerations:
+      - key: node.cloudprovider.kubernetes.io/uninitialized
+        value: "true"
+        effect: NoSchedule
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      serviceAccountName: cloud-controller-manager
+      containers:
+        - name: aws-cloud-controller-manager
+          image: us.gcr.io/k8s-artifacts-prod/provider-aws/cloud-controller-manager:v1.23.0-alpha.0
+          args:
+            - --v=2
+            - --cloud-config=$(CLOUD_CONFIG)
+            - --cloud-provider=aws
+            # Use the superset-role overlay if you don't want a token per controller
+            - --use-service-account-credentials=true
+            # Set --configure-cloud-routes=true if required by your CNI
+            - --configure-cloud-routes=false
+          volumeMounts:
+            - mountPath: /etc/config
+              name: cloud-config-volume
+              readOnly: true
+          resources:
+            requests:
+              cpu: 200m
+          env:
+            - name: CLOUD_CONFIG
+              value: /etc/config/cloud.conf
+      hostNetwork: true
+      volumes:
+      - name: cloud-config-volume
+        secret:
+          secretName: cloud-config

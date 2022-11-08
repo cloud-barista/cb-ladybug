@@ -109,12 +109,22 @@ func (self *Machine) ConnectionTest() error {
 	return nil
 }
 
+func (self *Machine) GetHostname() (string, error) {
+	if self.CSP == app.CSP_AWS {
+		return awsGetMetadataLocalHostname(self)
+	} else if self.CSP == app.CSP_OPENSTACK {
+		return self.NameInCsp, nil
+	} else {
+		return "", errors.New(fmt.Sprintf("Failed to get the fullname: no CSP (node=%s)", self.Name))
+	}
+}
+
 /* bootstrap */
 func (self *Machine) bootstrap(clusterInfo *model.Cluster) error {
 
 	//verfiy
-	if self.CSP == "" || self.Region == "" || self.Name == "" || self.PublicIP == "" {
-		return errors.New(fmt.Sprintf("There are mandatory fields. (node=%s, role=%s, csp=%s, region=%s, publicip=%s)", self.Name, self.Role, self.CSP, self.Region, self.PublicIP))
+	if self.CSP == "" || self.Region == "" || self.Name == "" || self.PublicIP == "" || clusterInfo.ServiceType == "" {
+		return errors.New(fmt.Sprintf("There are mandatory fields. (node=%s, role=%s, csp=%s, region=%s, publicip=%s, servicetype=%s)", self.Name, self.Role, self.CSP, self.Region, self.PublicIP, clusterInfo.ServiceType))
 	}
 
 	// 1. copy files
@@ -125,14 +135,39 @@ func (self *Machine) bootstrap(clusterInfo *model.Cluster) error {
 	//  - list-up for control-plane
 	if self.Role == app.CONTROL_PLANE {
 		sourceFiles = append(sourceFiles, "haproxy.sh")
-		if _, err := self.executeSSH("mkdir -p %s/addons/%s", REMOTE_TARGET_PATH, clusterInfo.NetworkCni); err != nil {
-			return errors.New(fmt.Sprintf("Failed to create a addon directory. (node=%s, path='%s')", self.Name, "addons/"+clusterInfo.NetworkCni))
+		if _, err := self.executeSSH("mkdir -p %s/addons/cni/%s", REMOTE_TARGET_PATH, clusterInfo.NetworkCni); err != nil {
+			return errors.New(fmt.Sprintf("Failed to create a addon directory. (node=%s, path='%s')", self.Name, "addons/cni/"+clusterInfo.NetworkCni))
 		}
-		if clusterInfo.NetworkCni == app.NETWORKCNI_CANAL {
-			sourceFiles = append(sourceFiles, CNI_CANAL_FILE)
-		} else {
-			sourceFiles = append(sourceFiles, CNI_KILO_CRDS_FILE, CNI_KILO_KUBEADM_FILE, CNI_KILO_FLANNEL_FILE)
+
+		if clusterInfo.ServiceType != app.ST_SINGLE {
+			if clusterInfo.NetworkCni == app.NETWORKCNI_CANAL {
+				sourceFiles = append(sourceFiles, CNI_CANAL_FILE)
+			} else {
+				sourceFiles = append(sourceFiles, CNI_KILO_CRDS_FILE, CNI_KILO_KUBEADM_FILE, CNI_KILO_FLANNEL_FILE)
+			}
+		} else { // clusterInfo.ServiceType == app.ST_SINGLE
+			if clusterInfo.NetworkCni == app.NETWORKCNI_FLANNEL {
+				sourceFiles = append(sourceFiles, CNI_FLANNEL_FILE)
+			} else {
+			}
+
+			sourceFiles = append(sourceFiles, "gen-cloud-config.sh")
+			if _, err := self.executeSSH("mkdir -p %s/addons/ccm/%s", REMOTE_TARGET_PATH, self.CSP); err != nil {
+				return errors.New(fmt.Sprintf("Failed to create a addon directory. (node=%s, path='%s')", self.Name, "addons/ccm/"+self.CSP))
+			}
+
+			if self.CSP == app.CSP_AWS {
+				sourceFiles = append(sourceFiles,
+					CCM_AWS_ROLE_SA_FILE,
+					CCM_AWS_DS_FILE)
+			} else if self.CSP == app.CSP_OPENSTACK {
+				sourceFiles = append(sourceFiles,
+					CCM_OPENSTACK_ROLE_BINDINGS_FILE,
+					CCM_OPENSTACK_ROLES_FILE,
+					CCM_OPENSTACK_DS_FILE)
+			}
 		}
+
 		if clusterInfo.Etcd == app.ETCD_EXTERNAL {
 			sourceFiles = append(sourceFiles, "etcd-conf.sh", "k8s-init-etcd.sh")
 			if clusterInfo.CpLeader == self.Name {
@@ -158,7 +193,15 @@ func (self *Machine) bootstrap(clusterInfo *model.Cluster) error {
 	}
 
 	// 2. execute bootstrap.sh
-	if _, err := self.executeSSH(REMOTE_TARGET_PATH+"/bootstrap.sh %s %s %s %s %s", clusterInfo.Version, self.CSP, self.Name, self.PublicIP, clusterInfo.NetworkCni); err != nil {
+	var hostname string = self.Name
+	if clusterInfo.ServiceType == app.ST_SINGLE {
+		var err error
+		if hostname, err = self.GetHostname(); err != nil {
+			return err
+		}
+	}
+
+	if _, err := self.executeSSH(REMOTE_TARGET_PATH+"/bootstrap.sh %s %s %s %s %s %s", clusterInfo.Version, self.CSP, hostname, self.PublicIP, clusterInfo.NetworkCni, clusterInfo.ServiceType); err != nil {
 		return errors.New(fmt.Sprintf("Failed to execute bootstrap.sh (node=%s)", self.Name))
 	}
 
@@ -217,6 +260,7 @@ func (self *Machine) NewNode() *model.Node {
 		Spec:        self.Spec,
 		Csp:         self.CSP,
 		PublicIP:    self.PublicIP,
+		PrivateIP:   self.PrivateIP,
 		CspLabel:    fmt.Sprintf("%s=%s", app.LABEL_KEY_CSP, string(self.CSP)),
 		RegionLabel: fmt.Sprintf("%s=%s", app.LABEL_KEY_REGION, self.Region),
 		ZoneLabel:   fmt.Sprintf("%s=%s", app.LABEL_KEY_ZONE, self.Zone),

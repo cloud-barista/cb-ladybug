@@ -163,7 +163,7 @@ type MCIS struct {
 
 type VM struct {
 	Model
-	mcisName      string   //private
+	McisName      string
 	VmGroupId     string   `json:"subGroupId"`
 	VmGroupSize   string   `json:"subGroupSize"`
 	Config        string   `json:"connectionName"`
@@ -188,6 +188,15 @@ type VM struct {
 	} `json:"region"` // output
 	CspViewVmDetail struct {
 		VMSpecName string `json:"vmspecName"`
+		IId        struct {
+			SystemId string `json:"systemId"`
+		} `json:"iid"`
+		SecurityGroupIIds []struct {
+			SystemId string `json:"systemId"`
+		} `json:"securityGroupIIds"`
+		SubnetIID struct {
+			SystemId string `json:"systemId"`
+		} `json:"subnetIID"`
 	} `json:"cspViewVmDetail"` // output
 
 }

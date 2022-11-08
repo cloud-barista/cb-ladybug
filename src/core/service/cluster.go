@@ -10,6 +10,7 @@ import (
 	"github.com/cloud-barista/cb-mcks/src/core/app"
 	"github.com/cloud-barista/cb-mcks/src/core/model"
 	"github.com/cloud-barista/cb-mcks/src/core/provision"
+	"github.com/cloud-barista/cb-mcks/src/core/spider"
 	"github.com/cloud-barista/cb-mcks/src/core/tumblebug"
 	"github.com/cloud-barista/cb-mcks/src/utils/lang"
 
@@ -87,6 +88,14 @@ func CreateCluster(namespace string, req *app.ClusterReq) (*model.Cluster, error
 			}
 		}
 	}
+	if req.ServiceType == app.ST_SINGLE {
+		connection := req.ControlPlane[0].Connection
+		for _, worker := range req.Worker {
+			if worker.Connection != connection {
+				return nil, errors.New(fmt.Sprintf("All nodes must be the same connection config. (connection=%s)", worker.Connection))
+			}
+		}
+	}
 
 	clusterName := req.Name
 	mcisName := clusterName
@@ -117,6 +126,7 @@ func CreateCluster(namespace string, req *app.ClusterReq) (*model.Cluster, error
 	cluster.Loadbalancer = req.Config.Kubernetes.Loadbalancer
 	cluster.Etcd = req.Config.Kubernetes.Etcd
 	cluster.Description = req.Description
+	cluster.ServiceType = req.ServiceType
 	provisioner := provision.NewProvisioner(cluster)
 
 	//update phase(provisioning)
@@ -136,6 +146,8 @@ func CreateCluster(namespace string, req *app.ClusterReq) (*model.Cluster, error
 	}
 	logger.Infof("[%s.%s] MCIS validation has been completed. (mcis=%s)", namespace, clusterName, mcisName)
 
+	var cpLeaderCSP app.CSP
+
 	// create a MCIR - "vpc, f/w, sshkey, image, spec" - with vlidations
 	mcir := NewMCIR(namespace, app.CONTROL_PLANE, *req.ControlPlane[0])
 
@@ -144,6 +156,8 @@ func CreateCluster(namespace string, req *app.ClusterReq) (*model.Cluster, error
 		cluster.FailReason(reason, msg)
 		return nil, errors.New(msg)
 	} else {
+		cpLeaderCSP = mcir.csp
+
 		// make mics reuqest & provisioner data
 		name := lang.GenerateNewNodeName(string(app.CONTROL_PLANE), 1)
 		cluster.CpGroup = name
@@ -185,6 +199,8 @@ func CreateCluster(namespace string, req *app.ClusterReq) (*model.Cluster, error
 	cluster.CpLeader = mcis.VMs[0].Name
 
 	for _, vms := range mcis.VMs {
+		vms.Namespace = namespace
+		vms.McisName = mcisName
 		if cluster.CpGroup == vms.VmGroupId {
 			provisioner.AppendControlPlaneMachine(vms.Name, mcir.csp, mcir.region, mcir.zone, mcir.credential)
 		}
@@ -304,6 +320,93 @@ func CreateCluster(namespace string, req *app.ClusterReq) (*model.Cluster, error
 		logger.Infof("[%s.%s] Storageclass installation has been completed.", namespace, clusterName)
 	}
 
+	// kubernetes provision : deploy cloud-controller-manager when service_type is single
+	if cluster.ServiceType == app.ST_SINGLE {
+		var bFail bool = false
+		var cloudConfig string
+
+		if cpLeaderCSP == app.CSP_AWS {
+			// check whether AWS IAM roles exists and are same
+			var bEmptyOrDiff bool = false
+			var awsCpRole, awsWorkerRole string
+
+			awsCpRole = req.ControlPlane[0].Role
+			awsWorkerRole = req.Worker[0].Role
+			if awsCpRole == "" || awsWorkerRole == "" {
+				bEmptyOrDiff = true
+			}
+
+			if bEmptyOrDiff == false {
+				for _, cp := range req.ControlPlane {
+					if awsCpRole != cp.Role {
+						bEmptyOrDiff = true
+						break
+					}
+				}
+			}
+
+			if bEmptyOrDiff == false {
+				for _, worker := range req.Worker {
+					if awsWorkerRole != worker.Role {
+						bEmptyOrDiff = true
+						break
+					}
+				}
+			}
+
+			if bEmptyOrDiff == true {
+				bFail = true
+				cluster.FailReason(model.SetupCCMFailedReason, fmt.Sprintf("Failed to prepare cloud-controller-manager: role should be assigned"))
+			} else {
+				if err := awsPrepareCCM(req.ControlPlane[0].Connection, clusterName, mcis.VMs, provisioner, awsCpRole, awsWorkerRole); err != nil {
+					bFail = true
+					cluster.FailReason(model.SetupCCMFailedReason, fmt.Sprintf("Failed to prepare cloud-controller-manager: %v", err))
+				} else {
+					if cloudConfig, err = awsBuildCloudConfig(req.ControlPlane[0].Connection); err != nil {
+						bFail = true
+						cluster.FailReason(model.SetupCCMFailedReason, fmt.Sprintf("Failed to get cloud config: %v", err))
+					} else {
+						// Success
+					}
+				}
+
+			}
+		} else if cpLeaderCSP == app.CSP_OPENSTACK {
+			var configLB []spider.KeyValue
+
+			cpVm := mcis.FindVM(cluster.CpLeader)
+			if cpVm != nil {
+				configLB = append(configLB, spider.KeyValue{"subnet-id", cpVm.CspViewVmDetail.SubnetIID.SystemId})
+			}
+
+			if cloudConfig, err = openstackBuildCloudConfig(req.ControlPlane[0].Connection, configLB); err != nil {
+				bFail = true
+				cluster.FailReason(model.SetupCCMFailedReason, fmt.Sprintf("Failed to get cloud config: %v", err))
+			} else {
+				// Success
+			}
+		} else {
+			// Not supported CSP
+		}
+
+		// deploy cloud-controller-manager
+		if bFail == false {
+			if err = provisioner.InstallCcm(cloudConfig); err != nil {
+				bFail = true
+				cluster.FailReason(model.SetupCCMFailedReason, fmt.Sprintf("Failed to install cloud-controller-manager: %v", err))
+			} else {
+				// Success
+			}
+		}
+
+		if bFail == true {
+			cleanUpCluster(*cluster, mcis)
+			return nil, errors.New(cluster.Status.Message)
+		} else {
+			logger.Infof("[%s.%s] CCM installation has been completed.", namespace, clusterName)
+		}
+	}
+
 	// save nodes metadata & update status
 	for _, node := range cluster.Nodes {
 		node.CreatedTime = lang.GetNowUTC()
@@ -330,6 +433,12 @@ func DeleteCluster(namespace string, clusterName string) (*app.Status, error) {
 
 	// set a stauts
 	cluster.UpdatePhase(model.ClusterPhaseDeleting)
+
+	// delete all kubernetes resources
+	provisioner := provision.NewProvisioner(cluster)
+	if err := provisioner.CleanupAllResources(); err != nil {
+		logger.Infof("[%s.%s] Fail to clean up all resources: err=%v", namespace, clusterName, err)
+	}
 
 	// delete a MCIS
 	if cluster.MCIS != "" {

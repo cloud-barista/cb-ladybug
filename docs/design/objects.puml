@@ -108,11 +108,13 @@ object cluster {
 	+mcis
 	+clusterConfig
 	+cpLeader
+	+cpGroup
 	+networkCni
 	+label
 	+installMonAgent
 	+description
 	+createdTime
+	+serviceType
 }
 object kubernetesCluster {
 	kubernetesConfiguration

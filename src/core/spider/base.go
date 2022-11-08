@@ -1,13 +1,10 @@
-package tumblebug
+package spider
 
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
-	"strings"
 
-	"github.com/beego/beego/v2/core/validation"
 	"github.com/cloud-barista/cb-mcks/src/core/app"
 	"github.com/go-resty/resty/v2"
 
@@ -17,25 +14,17 @@ import (
 /* execute  */
 func (self *Model) execute(method string, url string, body interface{}, result interface{}) (bool, error) {
 	logger.Debugf("[%s] Start to execute a HTTP (url='%s')", method, url)
-
-	if strings.Contains(url, "/ns") {
-		// validation
-		if err := self.validate(validation.Validation{}); err != nil {
-			return false, err
-		}
-	}
-
-	resp, err := executeHTTP(method, *app.Config.TumblebugUrl+url, body, result)
+	resp, err := executeHTTP(method, *app.Config.SpiderUrl+url, body, result)
 	if err != nil {
 		return false, err
 	}
 
 	// response check
 	if resp.StatusCode() == http.StatusNotFound {
-		logger.Infof("[%s] Could not be found data. (method=%s, url='%s')", self.Name, method, url)
+		logger.Infof("[%s] Could not be found data. (url='%s')", method, url)
 		return false, nil
 	} else if resp.StatusCode() > 300 {
-		logger.Warnf("[%s] Received error data from the Tumblebug (statusCode=%d, url='%s', body='%v')", self.Name, resp.StatusCode(), resp.Request.URL, resp)
+		logger.Warnf("[%s] Received error data from the Spider (statusCode=%d, url='%s', body='%v')", method, resp.StatusCode(), resp.Request.URL, resp)
 		status := app.Status{}
 		json.Unmarshal(resp.Body(), &status)
 		// message > message 로 리턴되는 경우가 있어서 한번더 unmarshal 작업
@@ -46,7 +35,6 @@ func (self *Model) execute(method string, url string, body interface{}, result i
 	}
 
 	return true, nil
-
 }
 
 /* execute HTTP */
@@ -63,17 +51,4 @@ func executeHTTP(method string, url string, body interface{}, result interface{}
 
 	// execute
 	return req.Execute(method, url)
-
-}
-
-/* validate a namespace & a name */
-func (self *Model) validate(valid validation.Validation) error {
-	valid.Required(self.Namespace, "namespace")
-	valid.Required(self.Name, "name")
-	if valid.HasErrors() {
-		for _, err := range valid.Errors {
-			return errors.New(fmt.Sprintf("Invalid field '%s'%s.", err.Key, err.Error()))
-		}
-	}
-	return nil
 }

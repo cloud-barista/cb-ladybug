@@ -20,7 +20,7 @@ func NewMCIS(ns string, name string) *MCIS {
 func NewVM(namespace string, name string, mcisName string) *VM {
 	return &VM{
 		Model:       Model{Name: name, Namespace: namespace},
-		mcisName:    mcisName,
+		McisName:    mcisName,
 		UserAccount: VM_USER_ACCOUNT,
 	}
 }
@@ -100,16 +100,41 @@ func (self *MCIS) REFINE() error {
 	return nil
 }
 
+func (self *MCIS) FindVM(name string) *VM {
+	for _, vm := range self.VMs {
+		if vm.Name == name {
+			return &vm
+		}
+	}
+	return nil
+}
+
 /* VM */
 func (self *VM) GET() (bool, error) {
 
-	return self.execute(http.MethodGet, fmt.Sprintf("/ns/%s/mcis/%s/vm/%s", self.Namespace, self.mcisName, self.Name), nil, &self)
+	return self.execute(http.MethodGet, fmt.Sprintf("/ns/%s/mcis/%s/vm/%s", self.Namespace, self.McisName, self.Name), nil, &self)
 
+}
+
+func (self *VM) GetNameInCsp() (string, error) {
+	var idsInDetail struct {
+		IdInTb    string `json:"idInTb"`
+		IdInSp    string `json:"idInSp"`
+		IdInCsp   string `json:"idInCsp"`
+		NameInCsp string `json:"nameInCsp"`
+	}
+
+	_, err := self.execute(http.MethodGet, fmt.Sprintf("/ns/%s/mcis/%s/vm/%s?option=idsInDetail", self.Namespace, self.McisName, self.Name), nil, &idsInDetail)
+	if err != nil {
+		return "", err
+	}
+
+	return idsInDetail.NameInCsp, nil
 }
 
 func (self *VM) POST() error {
 
-	_, err := self.execute(http.MethodPost, fmt.Sprintf("/ns/%s/mcis/%s/vm", self.Namespace, self.mcisName), self, &self)
+	_, err := self.execute(http.MethodPost, fmt.Sprintf("/ns/%s/mcis/%s/vm", self.Namespace, self.McisName), self, &self)
 	if err != nil {
 		return err
 	}
@@ -125,7 +150,7 @@ func (self *VM) DELETE() (bool, error) {
 		return exist, err
 	}
 	if exist {
-		_, err := self.execute(http.MethodDelete, fmt.Sprintf("/ns/%s/mcis/%s/vm/%s", self.Namespace, self.mcisName, self.Name), nil, app.Status{})
+		_, err := self.execute(http.MethodDelete, fmt.Sprintf("/ns/%s/mcis/%s/vm/%s", self.Namespace, self.McisName, self.Name), nil, app.Status{})
 		if err != nil {
 			return exist, err
 		}

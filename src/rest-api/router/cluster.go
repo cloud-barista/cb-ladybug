@@ -155,8 +155,11 @@ func validateCreateClusterReq(clusterReq *app.ClusterReq) error {
 	if len(clusterReq.Worker) == 0 {
 		return errors.New("Worker node must be at least one")
 	}
-	if !(clusterReq.Config.Kubernetes.NetworkCni == app.NETWORKCNI_CANAL || clusterReq.Config.Kubernetes.NetworkCni == app.NETWORKCNI_KILO) {
-		return errors.New("Network-cni allows only canal or kilo")
+	if clusterReq.ServiceType == app.ST_MULTI && !(clusterReq.Config.Kubernetes.NetworkCni == app.NETWORKCNI_CANAL || clusterReq.Config.Kubernetes.NetworkCni == app.NETWORKCNI_KILO) {
+		return errors.New("Network-cni allows only canal or kilo in Multi-Cloud type")
+	}
+	if clusterReq.ServiceType == app.ST_SINGLE && !(clusterReq.Config.Kubernetes.NetworkCni == app.NETWORKCNI_FLANNEL || clusterReq.Config.Kubernetes.NetworkCni == app.NETWORKCNI_CALICO) {
+		return errors.New("Network-cni allows only calico or flannel in Single-Cloud type")
 	}
 	if len(clusterReq.Config.Kubernetes.Loadbalancer) != 0 && !(clusterReq.Config.Kubernetes.Loadbalancer == app.LB_HAPROXY || clusterReq.Config.Kubernetes.Loadbalancer == app.LB_NLB) {
 		return errors.New("loadbalancer allows only haproxy or nlb")

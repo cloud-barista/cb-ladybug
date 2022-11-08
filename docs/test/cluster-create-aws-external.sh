@@ -1,10 +1,10 @@
 #!/bin/bash
 # -----------------------------------------------------------------
 # usage
-if [ "$#" -lt 1 ]; then 
+if [ "$#" -lt 1 ]; then
 	echo "./cluster-create.sh <namespace> <clsuter name> <service type>"
 	echo "./cluster-create.sh cb-mcks-ns cluster-01 <multi or single>"
-	exit 0; 
+	exit 0;
 fi
 
 source ./conf.env
@@ -18,14 +18,14 @@ source ./conf.env
 
 # 1. namespace
 if [ "$#" -gt 0 ]; then v_NAMESPACE="$1"; else	v_NAMESPACE="${NAMESPACE}"; fi
-if [ "${v_NAMESPACE}" == "" ]; then 
+if [ "${v_NAMESPACE}" == "" ]; then
 	read -e -p "Namespace ? : " v_NAMESPACE
 fi
 if [ "${v_NAMESPACE}" == "" ]; then echo "[ERROR] missing <namespace>"; exit -1; fi
 
 # 2. Cluster Name
 if [ "$#" -gt 1 ]; then v_CLUSTER_NAME="$2"; else	v_CLUSTER_NAME="${CLUSTER_NAME}"; fi
-if [ "${v_CLUSTER_NAME}" == "" ]; then 
+if [ "${v_CLUSTER_NAME}" == "" ]; then
 	read -e -p "Cluster name  ? : "  v_CLUSTER_NAME
 fi
 if [ "${v_CLUSTER_NAME}" == "" ]; then echo "[ERROR] missing <cluster name>"; exit -1; fi
@@ -49,13 +49,11 @@ echo "- Namespace                  is '${v_NAMESPACE}'"
 echo "- Cluster name               is '${v_CLUSTER_NAME}'"
 echo "- Service type               is '${v_SERVICE_TYPE}'"
 
-
 # ------------------------------------------------------------------------------
 # Create a cluster
 create() {
 
 	if [ "$MCKS_CALL_METHOD" == "REST" ]; then
-
 		resp=$(curl -sX POST ${c_URL_MCKS_NS}/clusters -H "${c_CT}" -d @- <<EOF
 		{
 			"name": "${v_CLUSTER_NAME}",
@@ -65,33 +63,37 @@ create() {
 			"config": {
 				"installMonAgent": "",
 				"kubernetes": {
-					"networkCni": "canal",
+					"version": "1.23.13",
+					"etcd": "external",
+					"loadbalancer": "haproxy",
+					"networkCni": "flannel",
 					"podCidr": "10.244.0.0/16",
 					"serviceCidr": "10.96.0.0/12",
-					"serviceDnsDomain": "cluster.local",
-					"loadbalancer": ""
+					"serviceDnsDomain": "cluster.local"
 				}
 			},
 			"controlPlane": [
 				{
-					"connection": "config-azure-koreacentral",
+					"connection": "config-aws-ap-northeast-2",
 					"count": 3,
-					"spec": "Standard_B2s",
+					"spec": "t2.medium",
 					"rootDisk": {
-						"type": "defalut",
-						"size": "defalut"
+						"type": "",
+						"size": ""
 					},
+					"role": "sykim-k8s-control-plane-role-for-ccm"
 				}
 			],
 			"worker": [
 				{
-					"connection": "config-ibm-jp-tok",
+					"connection": "config-aws-ap-northeast-2",
 					"count": 1,
-					"spec": "bx2-2x8",
+					"spec": "t2.medium",
 					"rootDisk": {
-						"type": "defalut",
-						"size": "defalut"
-					}
+						"type": "",
+						"size": ""
+					},
+					"role": "sykim-k8s-worker-role-for-ccm"
 				}
 			]
 		}
@@ -111,7 +113,7 @@ EOF
 					"config": {
 						"installMonAgent": "no",
 						"kubernetes": {
-							"networkCni": "canal",
+							"networkCni": "flannel",
 							"podCidr": "10.244.0.0/16",
 							"serviceCidr": "10.96.0.0/12",
 							"serviceDnsDomain": "cluster.local"
@@ -121,14 +123,16 @@ EOF
 						{
 							"connection": "config-aws-ap-northeast-1",
 							"count": 1,
-							"spec": "t2.medium"
+							"spec": "t2.medium",
+							"role": "sykim-k8s-control-plane-role-for-ccm"
 						}
 					],
 					"worker": [
 						{
-							"connection": "config-gcp-asia-northeast3",
-							"count": 1,
-							"spec": "n1-standard-2"
+							"connection": "config-aws-ap-northeast-2",
+							"count": 2,
+							"spec": "t2.medium",
+							"role": "sykim-k8s-worker-role-for-ccm"
 						}
 					]
 				}
@@ -137,12 +141,12 @@ EOF
 	else
 		echo "[ERROR] missing MCKS_CALL_METHOD"; exit -1;
 	fi
-	
+
 }
 
 
 # ------------------------------------------------------------------------------
-if [ "$1" != "-h" ]; then 
+if [ "$1" != "-h" ]; then
 	echo ""
 	echo "------------------------------------------------------------------------------"
 	create;

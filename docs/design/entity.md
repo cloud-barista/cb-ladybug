@@ -27,6 +27,7 @@
     k8sVersion: "",
     description: "",
     createdTime: "",
+    serviceType: "",
     nodes: [
       {
         name: "",
@@ -81,6 +82,7 @@
 |description        |description                 |string |                                     |
 |createdTime        |생성일자                      |string |                                     |
 |k8sVersion         |쿠버네티스버전                  |string |                                     |
+|serviceType        |서비스 타입                  |string | multi/single                           |
 
 ### ClusterPhase
 > 프로비저닝 단계
@@ -112,6 +114,7 @@
 * SetupNetworkCNIFailedReason : Network CNI 설치 실패
 * JoinControlPlaneFailedReason : ControlPlane join 실패
 * JoinWorkerFailedReason : Worker 노드 join 실패
+* SetupCCMFailedReason : Cloud-Controller Manager 설치 실패
 
 ## Node
 > 클러스터의 노드 정보
@@ -122,10 +125,11 @@
 |name           |노드명             |string |mcis vm 이름과 동일  |
 |credential     |private key        |string |                     |
 |publicIp       |공인 IP            |string |                     |
+|privateIp      |사설 IP            |string |                     |
 |role           |역할               |string |control-plane/worker |
 |spec           |spec               |string |                     |
 |csp            |csp 정보           |string |                     |
-|createdTime    |생성일자            |string |                    |
-|cspLabel       |CSP Label         |string |<label_key>=<label_value> |
-|regionLabel    |Region Label      |string |<label_key>=<label_value> |
-|zoneLabel      |Zone Label        |string |<label_key>=<label_value> |
+|createdTime    |생성일자           |string |                     |
+|cspLabel       |CSP Label          |string |<label_key>=<label_value> |
+|regionLabel    |Region Label       |string |<label_key>=<label_value> |
+|zoneLabel      |Zone Label         |string |<label_key>=<label_value> |

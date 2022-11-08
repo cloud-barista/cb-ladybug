@@ -1,9 +1,15 @@
 #!/bin/bash
+
 K8S_VERSION="$1"	# curl https://packages.cloud.google.com/apt/dists/kubernetes-xenial/main/binary-amd64/Packages
 CSP="$2"
 HOSTNAME="$3"
-PUBLIC_IP="$4"			# openstack
+PUBLIC_IP="$4"		# openstack
 NETWORK_CNI="$5"
+SERVICE_TYPE="$6"       # multi or single
+
+if [ "${SERVICE_TYPE}" != "single" ]; then
+    SERVICE_TYPE="multi"
+fi
 
 # hostname
 sudo hostnamectl set-hostname ${HOSTNAME}
@@ -104,6 +110,8 @@ if [ "${CSP}" != "openstack" ]; then
 	PUBLIC_IP='$(dig +short myip.opendns.com @resolver1.opendns.com)'
 fi
 
+if [ "${SERVICE_TYPE}" == "multi" ]; then
+
 if [ "${NETWORK_CNI}" == "kilo" ]; then 
 # install wireguard
 sudo add-apt-repository -y ppa:wireguard/wireguard
@@ -119,8 +127,7 @@ if [ -f "/etc/kubernetes/kubelet.conf" ]; then
   systemctl restart kubelet
   kubectl --kubeconfig=/etc/kubernetes/kubelet.conf annotate node {{HOSTNAME}} kilo.squat.ai/force-endpoint=${PUBLIC_IP}:51820 --overwrite
 fi
-exit 0
-fi' | sudo sed "s/{{HOSTNAME}}/${HOSTNAME}/g" | sudo sed "s/{{PUBLIC_IP}}/${PUBLIC_IP}/g" | sudo tee /lib/systemd/system/mcks-bootstrap > /dev/null
+exit 0' | sudo sed "s/{{HOSTNAME}}/${HOSTNAME}/g" | sudo sed "s/{{PUBLIC_IP}}/${PUBLIC_IP}/g" | sudo tee /lib/systemd/system/mcks-bootstrap > /dev/null
 sudo chmod +x /lib/systemd/system/mcks-bootstrap
 fi
 
@@ -147,10 +154,45 @@ if [ -f "/etc/kubernetes/kubelet.conf" ]; then
     exit 1
   fi
 fi
-exit 0
-fi' | sudo sed "s/{{HOSTNAME}}/${HOSTNAME}/g" | sudo sed "s/{{PUBLIC_IP}}/${PUBLIC_IP}/g" | sudo tee /lib/systemd/system/mcks-bootstrap > /dev/null
+exit 0' | sudo sed "s/{{HOSTNAME}}/${HOSTNAME}/g" | sudo sed "s/{{PUBLIC_IP}}/${PUBLIC_IP}/g" | sudo tee /lib/systemd/system/mcks-bootstrap > /dev/null
 sudo chmod +x /lib/systemd/system/mcks-bootstrap
 fi
+
+else # ${SERVICE_TYPE} == "single"
+
+# mcks-bootstrap
+
+if [ "${CSP}" == "aws" ]; then
+
+echo -e '#!/bin/sh
+IFACE="$(ip route get 8.8.8.8 | awk \047{ print $5; exit }\047)"
+INSTANCE_ID="$(curl http://169.254.169.254/latest/meta-data/instance-id)"
+#PUBLIC_IP="{{PUBLIC_IP}}"
+#ifconfig ${IFACE}:1 ${PUBLIC_IP} netmask 255.255.255.255  broadcast 0.0.0.0 up
+echo "KUBELET_EXTRA_ARGS=\"--hostname-override={{HOSTNAME}} --provider-id=aws:///${INSTANCE_ID}\"" > /etc/default/kubelet
+if [ -f "/etc/kubernetes/kubelet.conf" ]; then
+  systemctl restart kubelet
+fi
+exit 0' | sed "s/{{HOSTNAME}}/${HOSTNAME}/g" | sed "s/{{PUBLIC_IP}}/${PUBLIC_IP}/g" | sudo tee /lib/systemd/system/mcks-bootstrap > /dev/null
+
+else
+
+echo -e '#!/bin/sh
+IFACE="$(ip route get 8.8.8.8 | awk \047{ print $5; exit }\047)"
+#PUBLIC_IP="{{PUBLIC_IP}}"
+#ifconfig ${IFACE}:1 ${PUBLIC_IP} netmask 255.255.255.255  broadcast 0.0.0.0 up
+echo "KUBELET_EXTRA_ARGS=\"--hostname-override={{HOSTNAME}}\"" > /etc/default/kubelet
+if [ -f "/etc/kubernetes/kubelet.conf" ]; then
+  systemctl restart kubelet
+fi
+exit 0' | sed "s/{{HOSTNAME}}/${HOSTNAME}/g" | sed "s/{{PUBLIC_IP}}/${PUBLIC_IP}/g" | sudo tee /lib/systemd/system/mcks-bootstrap > /dev/null
+
+fi
+
+sudo chmod +x /lib/systemd/system/mcks-bootstrap
+
+fi # ${SERVICE_TYPE} == "multi"
+
 
 # setup bootstrap service deamon
 sudo bash -c 'cat > /lib/systemd/system/mcks-bootstrap.service <<EOF
@@ -168,3 +210,4 @@ WantedBy=kubelet.service
 EOF'
 sudo systemctl daemon-reload
 sudo systemctl enable mcks-bootstrap
+
