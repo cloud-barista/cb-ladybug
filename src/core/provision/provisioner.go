@@ -12,6 +12,7 @@ import (
 	"github.com/cloud-barista/cb-mcks/src/core/model"
 	"github.com/cloud-barista/cb-mcks/src/core/tumblebug"
 	"github.com/cloud-barista/cb-mcks/src/utils/lang"
+	logger "github.com/sirupsen/logrus"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -29,8 +30,10 @@ func NewProvisioner(cluster *model.Cluster) *Provisioner {
 				provisioner.leader = &ControlPlaneMachine{Machine: &Machine{
 					Name:       node.Name,
 					PublicIP:   node.PublicIP,
+					PrivateIP:  node.PrivateIP,
 					Username:   tumblebug.VM_USER_ACCOUNT,
 					Credential: node.Credential,
+					CSP:        node.Csp,
 				}}
 			}
 		}
@@ -85,8 +88,10 @@ func (self *Provisioner) BindVM(vms []tumblebug.VM) ([]*model.Node, error) {
 				status.Message = vm.SystemMessage
 			}
 			return nil, errors.New(fmt.Sprintf("Failed to create a vm (status=%s, cause='%s')", vm.Status, status.Message))
-		} else if vm.PublicIP == "" {
+		} else if vm.PublicIP == "" && self.Cluster.ServiceType == app.ST_MULTI {
 			return nil, errors.New(fmt.Sprintf("Failed to create a vm (status=%s, cause='unbounded public-ip')", vm.Status))
+		} else if vm.PrivateIP == "" && self.Cluster.ServiceType == app.ST_SINGLE {
+			return nil, errors.New(fmt.Sprintf("Failed to create a vm (status=%s, cause='unbounded private-ip')", vm.Status))
 		}
 
 		var machine *Machine
@@ -112,6 +117,11 @@ func (self *Provisioner) BindVM(vms []tumblebug.VM) ([]*model.Node, error) {
 			machine.Zone = lang.NVL(vm.Region.Zone, machine.Zone)
 			machine.Spec = vm.CspViewVmDetail.VMSpecName
 			nodes = append(nodes, machine.NewNode())
+			nameInCsp, err := vm.GetNameInCsp()
+			if err != nil {
+				return nil, errors.New(fmt.Sprintf("Can't get a name in CSP of node '%s'", vm.Name))
+			}
+			machine.NameInCsp = nameInCsp
 		} else {
 			return nil, errors.New(fmt.Sprintf("Can't be found node by name '%s'", vm.Name))
 		}
@@ -147,10 +157,17 @@ func (self *Provisioner) Bootstrap() error {
 
 /* setup haproxy */
 func (self *Provisioner) InstallHAProxy() error {
-
 	var servers string
+
 	for _, machine := range self.ControlPlaneMachines {
-		servers += fmt.Sprintf("  server  %s  %s:6443  check\\n", machine.Name, machine.PrivateIP)
+		var err error
+		var hostname string = machine.Name
+		if self.Cluster.ServiceType == app.ST_SINGLE {
+			if hostname, err = machine.GetHostname(); err != nil {
+				return err
+			}
+		}
+		servers += fmt.Sprintf("  server  %s  %s:6443  check\\n", hostname, machine.PrivateIP)
 	}
 	if output, err := self.leader.executeSSH("sudo sed 's/^{{SERVERS}}/%s/g' %s/%s", servers, REMOTE_TARGET_PATH, "haproxy.sh"); err != nil {
 		return err
@@ -165,10 +182,20 @@ func (self *Provisioner) InstallHAProxy() error {
 func (self *Provisioner) InitExternalEtcd() error {
 	var ips string
 	var hosts string
+	var hostname string
 
 	for _, machine := range self.ControlPlaneMachines {
 		ips += fmt.Sprintf("%s ", machine.PrivateIP)
-		hosts += fmt.Sprintf("%s %s ", machine.Name, machine.PrivateIP)
+
+		if self.Cluster.ServiceType == app.ST_SINGLE {
+			var err error
+			if hostname, err = machine.GetHostname(); err != nil {
+				return errors.New(fmt.Sprintf("Failed to get hostname"))
+			}
+		} else { // self.Cluster.ServiceType == app.ST_MULTI
+			hostname = machine.Name
+		}
+		hosts += fmt.Sprintf("%s %s ", hostname, machine.PrivateIP)
 	}
 	if _, err := self.leader.executeSSH("sudo echo '%s'>$HOME/id_rsa; sudo mv $HOME/id_rsa $HOME/.ssh/id_rsa; sudo chmod 600 $HOME/.ssh/id_rsa", self.leader.Credential); err != nil {
 		return errors.New(fmt.Sprintf("Failed to create private-key."))
@@ -203,7 +230,7 @@ func (self *Provisioner) InitControlPlane(kubernetesConfigReq app.ClusterConfigK
 		for _, machine := range self.ControlPlaneMachines {
 			etcdIp += fmt.Sprintf("%s ", machine.PrivateIP)
 		}
-		if output, err := self.leader.executeSSH("cd %s;./%s %s %s %s %s %s %s", REMOTE_TARGET_PATH, "k8s-init-etcd.sh", kubernetesConfigReq.PodCidr, kubernetesConfigReq.ServiceCidr, kubernetesConfigReq.ServiceDnsDomain, self.leader.PublicIP, port, etcdIp); err != nil {
+		if output, err := self.leader.executeSSH("cd %s;./%s %s %s %s %s %s %s %s %s", REMOTE_TARGET_PATH, "k8s-init-etcd.sh", kubernetesConfigReq.PodCidr, kubernetesConfigReq.ServiceCidr, kubernetesConfigReq.ServiceDnsDomain, self.leader.PublicIP, self.leader.PrivateIP, port, self.Cluster.ServiceType, etcdIp); err != nil {
 			return nil, "", errors.New("Failed to initialize control-plane. (k8s-init-etcd.sh)")
 		} else if strings.Contains(output, "Your Kubernetes control-plane has initialized successfully") {
 			joinCmd = getJoinCmd(output)
@@ -211,7 +238,7 @@ func (self *Provisioner) InitControlPlane(kubernetesConfigReq app.ClusterConfigK
 			return nil, "", errors.New("to initialize control-plane (the output not contains 'Your Kubernetes control-plane has initialized successfully')")
 		}
 	} else {
-		if output, err := self.leader.executeSSH("cd %s;./%s %s %s %s %s %s", REMOTE_TARGET_PATH, "k8s-init.sh", kubernetesConfigReq.PodCidr, kubernetesConfigReq.ServiceCidr, kubernetesConfigReq.ServiceDnsDomain, self.leader.PublicIP, port); err != nil {
+		if output, err := self.leader.executeSSH("cd %s;./%s %s %s %s %s %s %s %s", REMOTE_TARGET_PATH, "k8s-init.sh", kubernetesConfigReq.PodCidr, kubernetesConfigReq.ServiceCidr, kubernetesConfigReq.ServiceDnsDomain, self.leader.PublicIP, self.leader.PrivateIP, port, self.Cluster.ServiceType); err != nil {
 			return nil, "", errors.New("Failed to initialize control-plane. (k8s-init.sh)")
 		} else if strings.Contains(output, "Your Kubernetes control-plane has initialized successfully") {
 			joinCmd = getJoinCmd(output)
@@ -231,10 +258,14 @@ func (self *Provisioner) InstallNetworkCni() error {
 	cniYamls := []string{}
 	if self.Cluster.NetworkCni == app.NETWORKCNI_CANAL {
 		cniYamls = append(cniYamls, CNI_CANAL_FILE)
-	} else {
+	} else if self.Cluster.NetworkCni == app.NETWORKCNI_KILO {
 		cniYamls = append(cniYamls, CNI_KILO_FLANNEL_FILE)
 		cniYamls = append(cniYamls, CNI_KILO_CRDS_FILE)
 		cniYamls = append(cniYamls, CNI_KILO_KUBEADM_FILE)
+	} else if self.Cluster.NetworkCni == app.NETWORKCNI_FLANNEL {
+		cniYamls = append(cniYamls, CNI_FLANNEL_FILE)
+	} else if self.Cluster.NetworkCni == app.NETWORKCNI_CALICO {
+		cniYamls = append(cniYamls, CNI_CALICO_FILE)
 	}
 
 	for _, file := range cniYamls {
@@ -268,18 +299,71 @@ func (self *Provisioner) InstallStorageClassNFS(storageReq app.ClusterStorageCla
 	return nil
 }
 
+/* install cloud-controller-manager */
+func (self *Provisioner) InstallCcm(cloudConfig string) error {
+
+	if self.Cluster.ServiceType != app.ST_SINGLE {
+		return errors.New(fmt.Sprintf("Not valid service type(%s)", self.Cluster.ServiceType))
+	}
+
+	// Generate cloud-config
+	if _, err := self.leader.executeSSH("cd %s;./%s '%s'", REMOTE_TARGET_PATH, "gen-cloud-config.sh", cloudConfig); err != nil {
+		return errors.New(fmt.Sprintf("Failed to execute gen-cloud-config.sh: %v", err))
+	}
+
+	logger.Infof("[%s.%s] Auto generated cloud-config => %s", self.Cluster.Namespace, self.Cluster.Name, cloudConfig)
+
+	// Apply CCM yaml files
+	ccmYamls := []string{}
+	if self.leader.CSP == app.CSP_AWS {
+		ccmYamls = append(ccmYamls, CCM_AWS_ROLE_SA_FILE)
+		ccmYamls = append(ccmYamls, CCM_AWS_DS_FILE)
+
+		if _, err := self.Kubectl("create secret -n kube-system generic cloud-config --from-file=cloud.conf=%s/%s", REMOTE_TARGET_PATH, CCM_CLOUD_CONFIG_FILE); err != nil {
+			return err
+		}
+
+	} else if self.leader.CSP == app.CSP_OPENSTACK {
+		ccmYamls = append(ccmYamls, CCM_OPENSTACK_ROLE_BINDINGS_FILE)
+		ccmYamls = append(ccmYamls, CCM_OPENSTACK_ROLES_FILE)
+		ccmYamls = append(ccmYamls, CCM_OPENSTACK_DS_FILE)
+
+		if _, err := self.Kubectl("create secret -n kube-system generic cloud-config --from-file=cloud.conf=%s/%s", REMOTE_TARGET_PATH, CCM_CLOUD_CONFIG_FILE); err != nil {
+			return err
+		}
+	}
+
+	for _, file := range ccmYamls {
+		if _, err := self.Kubectl("apply -f %s/%s", REMOTE_TARGET_PATH, file); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 /* assign node labels */
 func (self *Provisioner) AssignNodeLabelAnnotation() error {
 
 	// commons labels
 	for _, machine := range self.GetMachinesAll() {
-		if _, err := self.Kubectl("label nodes %s %s=%s", machine.Name, app.LABEL_KEY_CSP, machine.CSP); err != nil {
+		var err error
+		var k8sNodeName string = machine.Name
+		if self.Cluster.ServiceType == app.ST_SINGLE {
+			if k8sNodeName, err = machine.GetHostname(); err != nil {
+				return err
+			}
+		}
+		if _, err = self.Kubectl("label nodes %s %s=%s", k8sNodeName, app.LABEL_KEY_CSP, machine.CSP); err != nil {
 			return err
 		}
-		if _, err := self.Kubectl("label nodes %s %s=%s", machine.Name, app.LABEL_KEY_REGION, machine.Region); err != nil {
+		if _, err = self.Kubectl("label nodes %s %s=%s", k8sNodeName, app.LABEL_KEY_REGION, machine.Region); err != nil {
 			return err
 		}
-		if _, err := self.Kubectl("label nodes %s %s=%s", machine.Name, app.LABEL_KEY_ZONE, machine.Zone); err != nil {
+		if _, err = self.Kubectl("label nodes %s %s=%s", k8sNodeName, app.LABEL_KEY_ZONE, machine.Zone); err != nil {
+			return err
+		}
+		if _, err = self.Kubectl("label nodes %s %s=%s", k8sNodeName, app.LABEL_KEY_CLUSTER, self.Cluster.Name); err != nil {
 			return err
 		}
 	}
@@ -300,6 +384,14 @@ func (self *Provisioner) AssignNodeLabelAnnotation() error {
 	return nil
 }
 
+func (self *Provisioner) CleanupAllResources() error {
+	if _, err := self.Kubectl("delete all --all"); err != nil {
+		return errors.New(fmt.Sprintf("Failed to clean up resources of Cluster '%s'. (cause=%v)", self.Cluster.Name, err))
+	}
+
+	return nil
+}
+
 /* new generate worker-node join command */
 func (self *Provisioner) NewWorkerJoinCommand() (string, error) {
 
@@ -314,6 +406,9 @@ func (self *Provisioner) NewWorkerJoinCommand() (string, error) {
 
 /* execute kubectl */
 func (self *Provisioner) Kubectl(format string, a ...interface{}) (string, error) {
+	if self.leader == nil {
+		return "", errors.New(fmt.Sprintf("No valid control plane"))
+	}
 
 	command := fmt.Sprintf(format, a...)
 	command = fmt.Sprintf("sudo kubectl %s --kubeconfig=/etc/kubernetes/admin.conf", command)
@@ -340,12 +435,25 @@ func (self *Provisioner) GetMachinesAll() []*Machine {
 
 /* drain a node + delete node + delete a VM */
 func (self *Provisioner) DrainAndDeleteNode(nodeName string) error {
+	var k8sNodeName string = nodeName
 
-	if output, err := self.Kubectl("drain %s --ignore-daemonsets --force --delete-local-data", nodeName); err != nil {
-		return errors.New(fmt.Sprintf("Failed to drain a node (node=%s, output='%s')", nodeName, output))
+	if self.Cluster.ServiceType == app.ST_SINGLE {
+		var err error = nil
+		for _, m := range self.GetMachinesAll() {
+			if m != self.leader.Machine && m.Name == nodeName {
+				if k8sNodeName, err = m.GetHostname(); err != nil {
+					return errors.New(fmt.Sprintf("Failed to find a node (node=%s)", nodeName))
+				}
+				break
+			}
+		}
 	}
-	if output, err := self.Kubectl("delete node %s", nodeName); err != nil {
-		return errors.New(fmt.Sprintf("Failed to delete a node (node=%s, output='%s')", nodeName, output))
+
+	if output, err := self.Kubectl("drain %s --ignore-daemonsets --force --delete-local-data", k8sNodeName); err != nil {
+		return errors.New(fmt.Sprintf("Failed to drain a node (node=%s, output='%s')", k8sNodeName, output))
+	}
+	if output, err := self.Kubectl("delete node %s", k8sNodeName); err != nil {
+		return errors.New(fmt.Sprintf("Failed to delete a node (node=%s, output='%s')", k8sNodeName, output))
 	}
 	vm := tumblebug.NewVM(self.Cluster.Namespace, nodeName, self.Cluster.MCIS)
 	if exists, err := vm.DELETE(); err != nil {

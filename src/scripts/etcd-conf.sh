@@ -1,6 +1,6 @@
 #!/bin/bash
 ETCD_VER="v3.5.1"
-ETCD_NAME=$(hostname -s)
+ETCD_NAME=$(hostname)
 NODE_IP=$(hostname -I)
 NODE_IPS=(${NODE_IP})
 regexp='([0-9]{1,3}\.){3}[0-9]{1,3}'

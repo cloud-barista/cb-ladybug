@@ -302,14 +302,30 @@ $ go run src/main.go
 ```
 
 ### 클러스터 생성
+
+#### 멀티클라우드 타입
 ```
-$ ./cluster-create.sh <namespace> <cluster name>
+$ ./cluster-create.sh <namespace> <cluster name> multi
 ```
 
 * 예
 ```
-$ ./cluster-create.sh cb-mcks-ns cluster-01
+$ ./cluster-create.sh cb-mcks-ns cluster-01 # 미지정시 multi로 동작
+or
+$ ./cluster-create.sh cb-mcks-ns cluster-01 multi
 ```
+
+#### 싱글클라우드 타입
+```
+$ ./cluster-create.sh <namespace> <cluster name> single
+```
+
+* 예
+```
+$ ./cluster-create.sh cb-mcks-ns cluster-01 single
+```
+
+
 
 ### 클러스터 확인
 ```

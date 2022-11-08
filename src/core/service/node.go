@@ -2,6 +2,7 @@ package service
 
 import (
 	//"context"
+
 	"errors"
 	"fmt"
 	"time"
@@ -86,6 +87,19 @@ func AddNode(namespace string, clusterName string, req *app.NodeReq) (*model.Nod
 
 	mcisName := cluster.MCIS
 
+	if cluster.ServiceType == app.ST_SINGLE {
+		if len(mcis.VMs) > 0 {
+			connection := mcis.VMs[0].Config
+			for _, worker := range req.Worker {
+				if worker.Connection != connection {
+					return nil, errors.New(fmt.Sprintf("The new node must be the same connection config. (connection=%s)", worker.Connection))
+				}
+			}
+		} else {
+			return nil, errors.New(fmt.Sprintf("There is no VMs. (cluster=%s)", clusterName))
+		}
+	}
+
 	// get a provisioner
 	provisioner := provision.NewProvisioner(cluster)
 
@@ -95,6 +109,8 @@ func AddNode(namespace string, clusterName string, req *app.NodeReq) (*model.Nod
 		return nil, errors.New(fmt.Sprintf("failed to get join-command (cause='%v')", err))
 	}
 	logger.Infof("[%s.%s] Worker join-command inquiry has been completed. (command=%s)", namespace, clusterName, workerJoinCmd)
+
+	var workerCSP app.CSP
 
 	// create a MCIR & MCIS-vm
 	idx := cluster.NextNodeIndex(app.WORKER)
@@ -107,6 +123,9 @@ func AddNode(namespace string, clusterName string, req *app.NodeReq) (*model.Nod
 		} else {
 			for i := 0; i < mcir.vmCount; i++ {
 				name := lang.GenerateNewNodeName(string(app.WORKER), idx)
+				if i == 0 {
+					workerCSP = mcir.csp
+				}
 				vm := mcir.NewVM(namespace, name, mcisName, "", worker.RootDisk.Type, worker.RootDisk.Size)
 				if err := vm.POST(); err != nil {
 					cleanUpNodes(*provisioner)
@@ -160,11 +179,58 @@ func AddNode(namespace string, clusterName string, req *app.NodeReq) (*model.Nod
 	}
 	logger.Infof("[%s.%s] Woker-nodes join has been completed.", namespace, clusterName)
 
+	/* FIXME: after joining, check the worker is ready */
+
 	// assign node labels (topology.cloud-barista.github.io/csp , topology.kubernetes.io/region, topology.kubernetes.io/zone)
 	if err = provisioner.AssignNodeLabelAnnotation(); err != nil {
 		logger.Warnf("[%s.%s] Failed to assign node labels (cause='%v')", namespace, clusterName, err)
 	} else {
 		logger.Infof("[%s.%s] Node label assignment has been completed.", namespace, clusterName)
+	}
+
+	// kubernetes provisioning : add some actions for cloud-controller-manager
+	if provisioner.Cluster.ServiceType == app.ST_SINGLE {
+		if workerCSP == app.CSP_AWS {
+			// check whether AWS IAM roles exists and are same
+			var bFail bool = false
+			var bEmptyOrDiff bool = false
+			var msgError string
+			var awsWorkerRole string
+
+			awsWorkerRole = req.Worker[0].Role
+			if awsWorkerRole == "" {
+				bEmptyOrDiff = true
+			}
+
+			if bEmptyOrDiff == false {
+				for _, worker := range req.Worker {
+					if awsWorkerRole != worker.Role {
+						bEmptyOrDiff = true
+						break
+					}
+				}
+			}
+
+			if bEmptyOrDiff == true {
+				bFail = true
+				msgError = "Role should be assigned"
+			} else {
+				if err := awsPrepareCCM(req.Worker[0].Connection, clusterName, vms, provisioner, "", awsWorkerRole); err != nil {
+					bFail = true
+					msgError = "Failed to prepare cloud-controller-manager"
+				} else {
+					// Success
+				}
+			}
+
+			if bFail == true {
+				cleanUpNodes(*provisioner)
+				return nil, errors.New(fmt.Sprintf("Failed to add node entity: %v)", msgError))
+			} else {
+				// Success
+				logger.Infof("[%s.%s] CCM ready has been completed.", namespace, clusterName)
+			}
+		}
 	}
 
 	// save nodes metadata & update status
@@ -207,10 +273,19 @@ func RemoveNode(namespace string, clusterName string, nodeName string) (*app.Sta
 	if exists := cluster.ExistsNode(nodeName); !exists {
 		return app.NewStatus(app.STATUS_NOTFOUND, fmt.Sprintf("Could not be found a node-entity '%s'", nodeName)), nil
 	}
+
+	// get a MCIS
+	mcis := tumblebug.NewMCIS(namespace, cluster.MCIS)
+	if exists, err := mcis.GET(); err != nil {
+		return nil, err
+	} else if !exists {
+		return nil, errors.New(fmt.Sprintf("Can't be found a MCIS '%s'.", cluster.MCIS))
+	}
 	logger.Infof("[%s.%s] The inquiry has been completed..", namespace, clusterName)
 
 	// get a provisioner
 	provisioner := provision.NewProvisioner(cluster)
+
 	// delete node (kubernetes) & vm (mcis)
 	if err := provisioner.DrainAndDeleteNode(nodeName); err != nil {
 		return nil, err
@@ -234,6 +309,7 @@ func cleanUpNodes(provisioner provision.Provisioner) {
 			if node.Name == nodeName {
 				node.Credential = ""
 				node.PublicIP = ""
+				node.PrivateIP = ""
 				existNode = true
 				break
 			}

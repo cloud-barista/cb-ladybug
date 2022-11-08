@@ -7,6 +7,7 @@ type NetworkCni string
 type StatusCode int
 type Loadbalancer string
 type Etcd string
+type ServiceType string
 
 const (
 	CSP_AWS       CSP = "aws"
@@ -34,8 +35,10 @@ const (
 	STATUS_SUCCESS  = 200
 	STATUS_NOTFOUND = 404
 
-	NETWORKCNI_KILO  NetworkCni = "kilo"
-	NETWORKCNI_CANAL NetworkCni = "canal"
+	NETWORKCNI_KILO    NetworkCni = "kilo"
+	NETWORKCNI_CANAL   NetworkCni = "canal"
+	NETWORKCNI_FLANNEL NetworkCni = "flannel"
+	NETWORKCNI_CALICO  NetworkCni = "calico"
 
 	LB_HAPROXY Loadbalancer = "haproxy"
 	LB_NLB     Loadbalancer = "nlb"
@@ -51,8 +54,13 @@ const (
 	LABEL_KEY_REGION = "topology.kubernetes.io/region"
 	LABEL_KEY_ZONE   = "topology.kubernetes.io/zone"
 
+	LABEL_KEY_CLUSTER = "kubernetes.io/cluster"
+
 	MCIS_LABEL       = "mcks"
 	MCIS_SYSTEMLABEL = "Managed by MCKS"
+
+	ST_MULTI  ServiceType = "multi"
+	ST_SINGLE ServiceType = "single"
 )
 
 type Status struct {
@@ -65,6 +73,7 @@ type ClusterReq struct {
 	Name         string           `json:"name" example:"cluster-01"`
 	ControlPlane []*NodeSetReq    `json:"controlPlane"`
 	Worker       []*NodeSetReq    `json:"worker"`
+	ServiceType  ServiceType      `json:"serviceType" enums:"multi,single" default:"multi"`
 	Config       ClusterConfigReq `json:"config"`
 	Label        string           `json:"label"`
 	Description  string           `json:"description"`
@@ -83,6 +92,7 @@ type NodeSetReq struct {
 		Type string `json:"type" example:"default"`
 		Size string `json:"size" example:"default"`
 	} `json:"rootDisk"`
+	Role string `json:"role"`
 }
 
 type ClusterConfigReq struct {
@@ -91,7 +101,7 @@ type ClusterConfigReq struct {
 }
 type ClusterConfigKubernetesReq struct {
 	Version          string     `json:"version" example:"1.23.13"`
-	NetworkCni       NetworkCni `json:"networkCni" example:"kilo" enums:"canal,kilo"`
+	NetworkCni       NetworkCni `json:"networkCni" example:"kilo" enums:"canal,kilo,flannel,calico" default1:"kilo"`
 	PodCidr          string     `json:"podCidr" example:"10.244.0.0/16"`
 	ServiceCidr      string     `json:"serviceCidr" example:"10.96.0.0/12"`
 	ServiceDnsDomain string     `json:"serviceDnsDomain" example:"cluster.local"`
@@ -105,4 +115,9 @@ type ClusterConfigKubernetesReq struct {
 type ClusterStorageClassNfsReq struct {
 	Server string `json:"server" example:"163.154.154.89"`
 	Path   string `json:"path" example:"/nfs/data"`
+}
+
+type KeyValue struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
 }

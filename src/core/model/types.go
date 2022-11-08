@@ -35,6 +35,7 @@ const (
 	SetupStorageClassFailedReason             = ClusterReason("SetupStorageClassFailedReason")
 	JoinControlPlaneFailedReason              = ClusterReason("JoinControlPlaneFailedReason")
 	JoinWorkerFailedReason                    = ClusterReason("JoinWorkerFailedReason")
+	SetupCCMFailedReason                      = ClusterReason("SetupCCMFailedReason")
 )
 
 type Model struct {
@@ -61,6 +62,7 @@ type Cluster struct {
 	Etcd            app.Etcd         `json:"etcd" enums:"local,external" example:"local" default:"local"`
 	Description     string           `json:"description"`
 	CreatedTime     string           `json:"createdTime" example:"2022-01-02T12:00:00Z" default:""`
+	ServiceType     app.ServiceType  `json:"serviceType" enums:"multi,single" default:"multi"`
 	Nodes           []*Node          `json:"nodes"`
 }
 
@@ -82,6 +84,7 @@ type Node struct {
 	clusterName string
 	Credential  string   `json:"credential"`
 	PublicIP    string   `json:"publicIp"`
+	PrivateIP   string   `json:"privateIp"`
 	Role        app.ROLE `json:"role" enums:"control-plane,worker"`
 	Spec        string   `json:"spec"`
 	Csp         app.CSP  `json:"csp" enums:"aws,gcp,azure,alibaba,tencent,openstack,ibm,cloudit,ncp,ncpvpc,nhncloud"`

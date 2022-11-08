@@ -2,8 +2,8 @@
 # -----------------------------------------------------------------
 # usage
 if [ "$#" -lt 1 ]; then 
-	echo "./cluster-create.sh <namespace> <clsuter name> <service type>"
-	echo "./cluster-create.sh cb-mcks-ns cluster-01 <multi or single>"
+	echo "./node-add.sh <namespace> <clsuter name>"
+	echo "./node-add.sh cb-mcks-ns cluster-01"
 	exit 0; 
 fi
 
@@ -30,13 +30,6 @@ if [ "${v_CLUSTER_NAME}" == "" ]; then
 fi
 if [ "${v_CLUSTER_NAME}" == "" ]; then echo "[ERROR] missing <cluster name>"; exit -1; fi
 
-# 3. Service Type
-if [ "$#" -gt 2  ]; then v_SERVICE_TYPE="$3"; else	v_SERVICE_TYPE="${SERVICE_TYPE}"; fi
-if [ "${v_SERVICE_TYPE}" == ""  ]; then
-	read -e -p "Service Type  ? : "  v_SERVICE_TYPE
-fi
-if [ "${v_SERVICE_TYPE}" == ""  ]; then echo "[ERROR] missing <service type>"; exit -1; fi
-
 
 c_URL_MCKS_NS="${c_URL_MCKS}/ns/${v_NAMESPACE}"
 
@@ -47,50 +40,24 @@ echo ""
 echo "[INFO]"
 echo "- Namespace                  is '${v_NAMESPACE}'"
 echo "- Cluster name               is '${v_CLUSTER_NAME}'"
-echo "- Service type               is '${v_SERVICE_TYPE}'"
 
 
 # ------------------------------------------------------------------------------
-# Create a cluster
+# Add Node
 create() {
 
 	if [ "$MCKS_CALL_METHOD" == "REST" ]; then
 
-		resp=$(curl -sX POST ${c_URL_MCKS_NS}/clusters -H "${c_CT}" -d @- <<EOF
+		resp=$(curl -sX POST ${c_URL_MCKS_NS}/clusters/${v_CLUSTER_NAME}/nodes -H "${c_CT}" -d @- <<EOF
 		{
-			"name": "${v_CLUSTER_NAME}",
-			"label": "",
-			"description": "",
-			"serviceType": "${v_SERVICE_TYPE}",
-			"config": {
-				"installMonAgent": "",
-				"kubernetes": {
-					"networkCni": "canal",
-					"podCidr": "10.244.0.0/16",
-					"serviceCidr": "10.96.0.0/12",
-					"serviceDnsDomain": "cluster.local",
-					"loadbalancer": ""
-				}
-			},
-			"controlPlane": [
-				{
-					"connection": "config-azure-koreacentral",
-					"count": 3,
-					"spec": "Standard_B2s",
-					"rootDisk": {
-						"type": "defalut",
-						"size": "defalut"
-					},
-				}
-			],
 			"worker": [
 				{
 					"connection": "config-ibm-jp-tok",
 					"count": 1,
 					"spec": "bx2-2x8",
 					"rootDisk": {
-						"type": "defalut",
-						"size": "defalut"
+						"type": "",
+						"size": ""
 					}
 				}
 			]
@@ -100,40 +67,25 @@ EOF
 
 	elif [ "$MCKS_CALL_METHOD" == "GRPC" ]; then
 
-		$APP_ROOT/src/grpc-api/cbadm/cbadm cluster create --config $APP_ROOT/src/grpc-api/cbadm/grpc_conf.yaml -i json -o json -d \
+		$APP_ROOT/src/grpc-api/cbadm/cbadm node add --config $APP_ROOT/src/grpc-api/cbadm/grpc_conf.yaml -i json -o json -d \
 		'{
 			"namespace":  "'${v_NAMESPACE}'",
+			"cluster":  "'${v_CLUSTER_NAME}'",
 			"ReqInfo": {
-					"name": "'${v_CLUSTER_NAME}'",
-					"label": "",
-					"description": "",
-					"serviceType": "'${v_SERVICE_TYPE}'",
-					"config": {
-						"installMonAgent": "no",
-						"kubernetes": {
-							"networkCni": "canal",
-							"podCidr": "10.244.0.0/16",
-							"serviceCidr": "10.96.0.0/12",
-							"serviceDnsDomain": "cluster.local"
-						}
-					},
-					"controlPlane": [
-						{
-							"connection": "config-aws-ap-northeast-1",
-							"count": 1,
-							"spec": "t2.medium"
-						}
-					],
 					"worker": [
 						{
-							"connection": "config-gcp-asia-northeast3",
+							"connection": "config-ibm-jp-tok",
 							"count": 1,
-							"spec": "n1-standard-2"
+							"spec": "bx2-2x8",
+							"rootDisk": {
+								"type": "",
+								"size": ""
+							}
 						}
 					]
-				}
-		}'	
-
+			}
+		}'
+		
 	else
 		echo "[ERROR] missing MCKS_CALL_METHOD"; exit -1;
 	fi
