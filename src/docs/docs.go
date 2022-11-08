@@ -90,24 +90,30 @@ var doc = `{
                         "required": true
                     },
                     {
+                        "minimum": 1,
                         "type": "integer",
                         "description": "if Control-Plane, \u003e= 2",
                         "name": "cpu-min",
                         "in": "query"
                     },
                     {
+                        "maximum": 99999,
+                        "minimum": 1,
                         "type": "integer",
                         "description": " \u003c= 99999",
                         "name": "cpu-max",
                         "in": "query"
                     },
                     {
+                        "minimum": 1,
                         "type": "integer",
                         "description": " if Control-Plane, \u003e= 2",
                         "name": "memory-min",
                         "in": "query"
                     },
                     {
+                        "maximum": 99999,
+                        "minimum": 1,
                         "type": "integer",
                         "description": " \u003c= 99999",
                         "name": "memory-max",
@@ -549,9 +555,20 @@ var doc = `{
         "app.ClusterConfigKubernetesReq": {
             "type": "object",
             "properties": {
+                "etcd": {
+                    "type": "string",
+                    "enum": [
+                        "local",
+                        "external"
+                    ],
+                    "example": "local"
+                },
                 "loadbalancer": {
                     "type": "string",
-                    "default": "haproxy",
+                    "enum": [
+                        "haproxy",
+                        "nlb"
+                    ],
                     "example": "haproxy"
                 },
                 "networkCni": {
@@ -578,7 +595,6 @@ var doc = `{
                     "type": "object",
                     "properties": {
                         "nfs": {
-                            "type": "object",
                             "$ref": "#/definitions/app.ClusterStorageClassNfsReq"
                         }
                     }
@@ -594,11 +610,9 @@ var doc = `{
             "properties": {
                 "installMonAgent": {
                     "type": "string",
-                    "default": "yes",
                     "example": "no"
                 },
                 "kubernetes": {
-                    "type": "object",
                     "$ref": "#/definitions/app.ClusterConfigKubernetesReq"
                 }
             }
@@ -607,7 +621,6 @@ var doc = `{
             "type": "object",
             "properties": {
                 "config": {
-                    "type": "object",
                     "$ref": "#/definitions/app.ClusterConfigReq"
                 },
                 "controlPlane": {
@@ -728,6 +741,15 @@ var doc = `{
                 "description": {
                     "type": "string"
                 },
+                "etcd": {
+                    "type": "string",
+                    "default": "local",
+                    "enum": [
+                        "local",
+                        "external"
+                    ],
+                    "example": "local"
+                },
                 "installMonAgent": {
                     "type": "string",
                     "default": "yes",
@@ -745,6 +767,10 @@ var doc = `{
                 "loadbalancer": {
                     "type": "string",
                     "default": "haproxy",
+                    "enum": [
+                        "haproxy",
+                        "nlb"
+                    ],
                     "example": "haproxy"
                 },
                 "mcis": {
@@ -770,7 +796,6 @@ var doc = `{
                     }
                 },
                 "status": {
-                    "type": "object",
                     "$ref": "#/definitions/model.ClusterStatus"
                 }
             }

@@ -2,8 +2,16 @@ basePath: /mcks
 definitions:
   app.ClusterConfigKubernetesReq:
     properties:
+      etcd:
+        enum:
+        - local
+        - external
+        example: local
+        type: string
       loadbalancer:
-        default: haproxy
+        enum:
+        - haproxy
+        - nlb
         example: haproxy
         type: string
       networkCni:
@@ -25,7 +33,6 @@ definitions:
         properties:
           nfs:
             $ref: '#/definitions/app.ClusterStorageClassNfsReq'
-            type: object
         type: object
       version:
         example: 1.23.13
@@ -34,18 +41,15 @@ definitions:
   app.ClusterConfigReq:
     properties:
       installMonAgent:
-        default: "yes"
         example: "no"
         type: string
       kubernetes:
         $ref: '#/definitions/app.ClusterConfigKubernetesReq'
-        type: object
     type: object
   app.ClusterReq:
     properties:
       config:
         $ref: '#/definitions/app.ClusterConfigReq'
-        type: object
       controlPlane:
         items:
           $ref: '#/definitions/app.NodeSetReq'
@@ -126,6 +130,13 @@ definitions:
         type: string
       description:
         type: string
+      etcd:
+        default: local
+        enum:
+        - local
+        - external
+        example: local
+        type: string
       installMonAgent:
         default: "yes"
         example: "no"
@@ -138,6 +149,9 @@ definitions:
         type: string
       loadbalancer:
         default: haproxy
+        enum:
+        - haproxy
+        - nlb
         example: haproxy
         type: string
       mcis:
@@ -157,7 +171,6 @@ definitions:
         type: array
       status:
         $ref: '#/definitions/model.ClusterStatus'
-        type: object
     type: object
   model.ClusterList:
     properties:
@@ -309,18 +322,24 @@ paths:
         type: string
       - description: if Control-Plane, >= 2
         in: query
+        minimum: 1
         name: cpu-min
         type: integer
       - description: ' <= 99999'
         in: query
+        maximum: 99999
+        minimum: 1
         name: cpu-max
         type: integer
       - description: ' if Control-Plane, >= 2'
         in: query
+        minimum: 1
         name: memory-min
         type: integer
       - description: ' <= 99999'
         in: query
+        maximum: 99999
+        minimum: 1
         name: memory-max
         type: integer
       produces:

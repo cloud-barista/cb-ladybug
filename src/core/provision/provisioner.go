@@ -132,7 +132,7 @@ func (self *Provisioner) Bootstrap() error {
 			if err := machine.ConnectionTest(); err != nil {
 				return err
 			}
-			if err := machine.bootstrap(self.Cluster.NetworkCni, self.Cluster.Version); err != nil {
+			if err := machine.bootstrap(self.Cluster); err != nil {
 				return err
 			}
 			return nil
@@ -162,6 +162,32 @@ func (self *Provisioner) InstallHAProxy() error {
 
 	return nil
 }
+func (self *Provisioner) InitExternalEtcd() error {
+	var ips string
+	var hosts string
+
+	for _, machine := range self.ControlPlaneMachines {
+		ips += fmt.Sprintf("%s ", machine.PrivateIP)
+		hosts += fmt.Sprintf("%s %s ", machine.Name, machine.PrivateIP)
+	}
+	if _, err := self.leader.executeSSH("sudo echo '%s'>$HOME/.ssh/id_rsa; sudo chmod 600 $HOME/.ssh/id_rsa", self.leader.Credential); err != nil {
+		return errors.New(fmt.Sprintf("Failed to create private-key."))
+	}
+
+	if _, err := self.leader.executeSSH(REMOTE_TARGET_PATH+"/etcd-ca.sh %s", ips); err != nil {
+		return errors.New(fmt.Sprintf("Failed to create etcd certificates. (etcd-ca.sh)"))
+	}
+	for _, machine := range self.ControlPlaneMachines {
+		if _, err := self.leader.executeSSH("scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r /tmp/ca/* cb-user@%s:", machine.PublicIP); err != nil {
+			return errors.New(fmt.Sprintf("[%s] Failed to copy certificate.", machine.Name))
+		}
+
+		if _, err := machine.executeSSH(REMOTE_TARGET_PATH+"/etcd-conf.sh %s", hosts); err != nil {
+			return errors.New(fmt.Sprintf("[%s] Failed to configure etcd cluster. (etcd-conf.sh)", machine.Name))
+		}
+	}
+	return nil
+}
 
 // coantrol-plane init
 func (self *Provisioner) InitControlPlane(kubernetesConfigReq app.ClusterConfigKubernetesReq) ([]string, string, error) {
@@ -173,12 +199,26 @@ func (self *Provisioner) InitControlPlane(kubernetesConfigReq app.ClusterConfigK
 	} else {
 		port = "6443"
 	}
-	if output, err := self.leader.executeSSH("cd %s;./%s %s %s %s %s %s", REMOTE_TARGET_PATH, "k8s-init.sh", kubernetesConfigReq.PodCidr, kubernetesConfigReq.ServiceCidr, kubernetesConfigReq.ServiceDnsDomain, self.leader.PublicIP, port); err != nil {
-		return nil, "", errors.New("Failed to initialize control-plane. (k8s-init.sh)")
-	} else if strings.Contains(output, "Your Kubernetes control-plane has initialized successfully") {
-		joinCmd = getJoinCmd(output)
+	if self.Cluster.Etcd == app.ETCD_LOCAL {
+		if output, err := self.leader.executeSSH("cd %s;./%s %s %s %s %s %s", REMOTE_TARGET_PATH, "k8s-init.sh", kubernetesConfigReq.PodCidr, kubernetesConfigReq.ServiceCidr, kubernetesConfigReq.ServiceDnsDomain, self.leader.PublicIP, port); err != nil {
+			return nil, "", errors.New("Failed to initialize control-plane. (k8s-init.sh)")
+		} else if strings.Contains(output, "Your Kubernetes control-plane has initialized successfully") {
+			joinCmd = getJoinCmd(output)
+		} else {
+			return nil, "", errors.New("to initialize control-plane (the output not contains 'Your Kubernetes control-plane has initialized successfully')")
+		}
 	} else {
-		return nil, "", errors.New("to initialize control-plane (the output not contains 'Your Kubernetes control-plane has initialized successfully')")
+		var etcdIp string
+		for _, machine := range self.ControlPlaneMachines {
+			etcdIp += fmt.Sprintf("%s ", machine.PrivateIP)
+		}
+		if output, err := self.leader.executeSSH("cd %s;./%s %s %s %s %s %s %s", REMOTE_TARGET_PATH, "k8s-init-etcd.sh", kubernetesConfigReq.PodCidr, kubernetesConfigReq.ServiceCidr, kubernetesConfigReq.ServiceDnsDomain, self.leader.PublicIP, port, etcdIp); err != nil {
+			return nil, "", errors.New("Failed to initialize control-plane. (k8s-init-etcd.sh)")
+		} else if strings.Contains(output, "Your Kubernetes control-plane has initialized successfully") {
+			joinCmd = getJoinCmd(output)
+		} else {
+			return nil, "", errors.New("to initialize control-plane (the output not contains 'Your Kubernetes control-plane has initialized successfully')")
+		}
 	}
 
 	ouput, _ := self.leader.executeSSH("sudo cat /etc/kubernetes/admin.conf")

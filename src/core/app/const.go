@@ -5,6 +5,8 @@ type ROLE string
 type Kind string
 type NetworkCni string
 type StatusCode int
+type Loadbalancer string
+type Etcd string
 
 const (
 	CSP_AWS       CSP = "aws"
@@ -32,8 +34,11 @@ const (
 	NETWORKCNI_KILO  NetworkCni = "kilo"
 	NETWORKCNI_CANAL NetworkCni = "canal"
 
-	LB_HAPROXY = "haproxy"
-	LB_NLB     = "nlb"
+	LB_HAPROXY Loadbalancer = "haproxy"
+	LB_NLB     Loadbalancer = "nlb"
+
+	ETCD_LOCAL    Etcd = "local"
+	ETCD_EXTERNAL Etcd = "external"
 
 	POD_CIDR       = "10.244.0.0/16"
 	SERVICE_CIDR   = "10.96.0.0/12"
@@ -90,7 +95,8 @@ type ClusterConfigKubernetesReq struct {
 	StorageClass     struct {
 		Nfs ClusterStorageClassNfsReq `json:"nfs"`
 	} `json:"storageclass"`
-	Loadbalancer string `json:"loadbalancer" example:"haproxy"`
+	Loadbalancer Loadbalancer `json:"loadbalancer" example:"haproxy" enums:"haproxy,nlb"`
+	Etcd         Etcd         `json:"etcd" example:"local" enums:"local,external"`
 }
 
 type ClusterStorageClassNfsReq struct {

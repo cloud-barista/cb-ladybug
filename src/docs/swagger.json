@@ -75,24 +75,30 @@
                         "required": true
                     },
                     {
+                        "minimum": 1,
                         "type": "integer",
                         "description": "if Control-Plane, \u003e= 2",
                         "name": "cpu-min",
                         "in": "query"
                     },
                     {
+                        "maximum": 99999,
+                        "minimum": 1,
                         "type": "integer",
                         "description": " \u003c= 99999",
                         "name": "cpu-max",
                         "in": "query"
                     },
                     {
+                        "minimum": 1,
                         "type": "integer",
                         "description": " if Control-Plane, \u003e= 2",
                         "name": "memory-min",
                         "in": "query"
                     },
                     {
+                        "maximum": 99999,
+                        "minimum": 1,
                         "type": "integer",
                         "description": " \u003c= 99999",
                         "name": "memory-max",
@@ -534,9 +540,20 @@
         "app.ClusterConfigKubernetesReq": {
             "type": "object",
             "properties": {
+                "etcd": {
+                    "type": "string",
+                    "enum": [
+                        "local",
+                        "external"
+                    ],
+                    "example": "local"
+                },
                 "loadbalancer": {
                     "type": "string",
-                    "default": "haproxy",
+                    "enum": [
+                        "haproxy",
+                        "nlb"
+                    ],
                     "example": "haproxy"
                 },
                 "networkCni": {
@@ -563,7 +580,6 @@
                     "type": "object",
                     "properties": {
                         "nfs": {
-                            "type": "object",
                             "$ref": "#/definitions/app.ClusterStorageClassNfsReq"
                         }
                     }
@@ -579,11 +595,9 @@
             "properties": {
                 "installMonAgent": {
                     "type": "string",
-                    "default": "yes",
                     "example": "no"
                 },
                 "kubernetes": {
-                    "type": "object",
                     "$ref": "#/definitions/app.ClusterConfigKubernetesReq"
                 }
             }
@@ -592,7 +606,6 @@
             "type": "object",
             "properties": {
                 "config": {
-                    "type": "object",
                     "$ref": "#/definitions/app.ClusterConfigReq"
                 },
                 "controlPlane": {
@@ -713,6 +726,15 @@
                 "description": {
                     "type": "string"
                 },
+                "etcd": {
+                    "type": "string",
+                    "default": "local",
+                    "enum": [
+                        "local",
+                        "external"
+                    ],
+                    "example": "local"
+                },
                 "installMonAgent": {
                     "type": "string",
                     "default": "yes",
@@ -730,6 +752,10 @@
                 "loadbalancer": {
                     "type": "string",
                     "default": "haproxy",
+                    "enum": [
+                        "haproxy",
+                        "nlb"
+                    ],
                     "example": "haproxy"
                 },
                 "mcis": {
@@ -755,7 +781,6 @@
                     }
                 },
                 "status": {
-                    "type": "object",
                     "$ref": "#/definitions/model.ClusterStatus"
                 }
             }
