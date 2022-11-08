@@ -36,12 +36,8 @@ func NewNLB(ns string, mcisName string, groupId string) *NLBReq {
 		},
 		HealthChecker: HealthCheckReq{
 			NLBProtocolBase: NLBProtocolBase{Protocol: "TCP", Port: "22"},
-			Interval:        "10", Threshold: "3",
+			Interval:        "default", Threshold: "default", Timeout: "default",
 		},
-	}
-
-	if !strings.Contains(nlb.NLBBase.Config, string(app.CSP_AWS)) && !strings.Contains(nlb.NLBBase.Config, string(app.CSP_AZURE)) {
-		nlb.HealthChecker.Timeout = "9"
 	}
 
 	if strings.Contains(nlb.NLBBase.Config, string(app.CSP_GCP)) {

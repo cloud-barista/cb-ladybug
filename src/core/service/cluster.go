@@ -56,10 +56,6 @@ func CreateCluster(namespace string, req *app.ClusterReq) (*model.Cluster, error
 	if err := verifyNamespace(namespace); err != nil {
 		return nil, err
 	}
-	loadbalancer := req.Config.Kubernetes.Loadbalancer
-	if req.Config.Kubernetes.Loadbalancer == "" {
-		loadbalancer = "haproxy"
-	}
 	// ibm, cloudit 일 경우에는 현재 haproxy만 사용하도록 함. 추후 지원 예정
 	if req.Config.Kubernetes.Loadbalancer != app.LB_HAPROXY {
 		connection := tumblebug.NewConnection(req.ControlPlane[0].Connection)
@@ -113,7 +109,8 @@ func CreateCluster(namespace string, req *app.ClusterReq) (*model.Cluster, error
 	cluster.NetworkCni = req.Config.Kubernetes.NetworkCni
 	cluster.Label = req.Label
 	cluster.InstallMonAgent = req.Config.InstallMonAgent
-	cluster.Loadbalancer = loadbalancer
+	cluster.Loadbalancer = req.Config.Kubernetes.Loadbalancer
+	cluster.Etcd = req.Config.Kubernetes.Etcd
 	cluster.Description = req.Description
 	provisioner := provision.NewProvisioner(cluster)
 
@@ -199,7 +196,7 @@ func CreateCluster(namespace string, req *app.ClusterReq) (*model.Cluster, error
 				cluster.FailReason(model.CreateNLBFailedReason, fmt.Sprintf("Failed to create a NLB. (cause='%v')", err))
 				return nil, errors.New(cluster.Status.Message)
 			}
-			logger.Infof("[%s] NLB creation has been completed. (%s)", req.ControlPlane[0].Connection, mcir.nlbName)
+			logger.Infof("[%s] NLB creation has been completed. (%s)", req.ControlPlane[0].Connection, NLB.TargetGroup.VmGroupId)
 		}
 	}
 
@@ -233,6 +230,16 @@ func CreateCluster(namespace string, req *app.ClusterReq) (*model.Cluster, error
 			return nil, errors.New(cluster.Status.Message)
 		}
 		logger.Infof("[%s.%s] HAProxy installation has been completed.", namespace, clusterName)
+	}
+
+	if cluster.Etcd == app.ETCD_EXTERNAL {
+		time.Sleep(2 * time.Second)
+		if err := provisioner.InitExternalEtcd(); err != nil {
+			cluster.FailReason(model.InitExternalEtcdFailedReason, fmt.Sprintf("Failed to initialize External etcd. (cause='%v')", err))
+			cleanUpCluster(*cluster, mcis)
+			return nil, errors.New(cluster.Status.Message)
+		}
+		logger.Infof("[%s.%s] External etcd initialize has been completed.", namespace, clusterName)
 	}
 
 	// kubernetes provisioning :control-plane init

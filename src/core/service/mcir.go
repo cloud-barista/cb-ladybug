@@ -22,7 +22,6 @@ type MCIR struct {
 	spec         string //prameter
 	vmCount      int    //prameter
 	credential   string
-	nlbName      string
 	subnetName   string
 	vpcName      string
 	firewallName string
@@ -43,7 +42,6 @@ func NewMCIR(namespace string, role app.ROLE, nodeSetReq app.NodeSetReq) *MCIR {
 		config:       nodeSetReq.Connection,
 		spec:         nodeSetReq.Spec,
 		vmCount:      nodeSetReq.Count,
-		nlbName:      fmt.Sprintf("%s-nlb", nodeSetReq.Connection),
 		vpcName:      fmt.Sprintf("%s-vpc", nodeSetReq.Connection),
 		firewallName: fmt.Sprintf("%s-sg", nodeSetReq.Connection),
 		sshkeyName:   fmt.Sprintf("%s-sshkey", nodeSetReq.Connection),

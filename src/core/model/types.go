@@ -30,6 +30,7 @@ const (
 	SetupBoostrapFailedReason                 = ClusterReason("SetupBoostrapFailedReason")
 	SetupHaproxyFailedReason                  = ClusterReason("SetupHaproxyFailedReason")
 	InitControlPlaneFailedReason              = ClusterReason("InitControlPlaneFailedReason")
+	InitExternalEtcdFailedReason              = ClusterReason("InitExternalEtcdFailedReason")
 	SetupNetworkCNIFailedReason               = ClusterReason("SetupNetworkCNIFailedReason")
 	SetupStorageClassFailedReason             = ClusterReason("SetupStorageClassFailedReason")
 	JoinControlPlaneFailedReason              = ClusterReason("JoinControlPlaneFailedReason")
@@ -46,20 +47,21 @@ type ListModel struct {
 
 type Cluster struct {
 	Model
-	Status          ClusterStatus  `json:"status"`
-	MCIS            string         `json:"mcis"`
-	Namespace       string         `json:"namespace"`
-	Version         string         `json:"k8sVersion"`
-	ClusterConfig   string         `json:"clusterConfig"`
-	CpLeader        string         `json:"cpLeader"`
-	CpGroup         string         `json:"cpGroup"`
-	NetworkCni      app.NetworkCni `json:"networkCni" enums:"canal,kilo"`
-	Label           string         `json:"label"`
-	InstallMonAgent string         `json:"installMonAgent" example:"no" default:"yes"`
-	Loadbalancer    string         `json:"loadbalancer" example:"haproxy" default:"haproxy"`
-	Description     string         `json:"description"`
-	CreatedTime     string         `json:"createdTime" example:"2022-01-02T12:00:00Z" default:""`
-	Nodes           []*Node        `json:"nodes"`
+	Status          ClusterStatus    `json:"status"`
+	MCIS            string           `json:"mcis"`
+	Namespace       string           `json:"namespace"`
+	Version         string           `json:"k8sVersion"`
+	ClusterConfig   string           `json:"clusterConfig"`
+	CpLeader        string           `json:"cpLeader"`
+	CpGroup         string           `json:"cpGroup"`
+	NetworkCni      app.NetworkCni   `json:"networkCni" enums:"canal,kilo"`
+	Label           string           `json:"label"`
+	InstallMonAgent string           `json:"installMonAgent" example:"no" default:"yes"`
+	Loadbalancer    app.Loadbalancer `json:"loadbalancer" enums:"haproxy,nlb" example:"haproxy" default:"haproxy"`
+	Etcd            app.Etcd         `json:"etcd" enums:"local,external" example:"local" default:"local"`
+	Description     string           `json:"description"`
+	CreatedTime     string           `json:"createdTime" example:"2022-01-02T12:00:00Z" default:""`
+	Nodes           []*Node          `json:"nodes"`
 }
 
 type ClusterStatus struct {

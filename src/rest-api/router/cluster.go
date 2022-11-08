@@ -135,7 +135,12 @@ func validateCreateClusterReq(clusterReq *app.ClusterReq) error {
 	clusterReq.Config.Kubernetes.PodCidr = lang.NVL(clusterReq.Config.Kubernetes.PodCidr, app.POD_CIDR)
 	clusterReq.Config.Kubernetes.ServiceCidr = lang.NVL(clusterReq.Config.Kubernetes.ServiceCidr, app.SERVICE_CIDR)
 	clusterReq.Config.Kubernetes.ServiceDnsDomain = lang.NVL(clusterReq.Config.Kubernetes.ServiceDnsDomain, app.SERVICE_DOMAIN)
-	clusterReq.Config.Kubernetes.Loadbalancer = lang.NVL(clusterReq.Config.Kubernetes.Loadbalancer, app.LB_HAPROXY)
+	if len(clusterReq.Config.Kubernetes.Loadbalancer) == 0 {
+		clusterReq.Config.Kubernetes.Loadbalancer = app.LB_HAPROXY
+	}
+	if len(clusterReq.Config.Kubernetes.Loadbalancer) == 0 {
+		clusterReq.Config.Kubernetes.Etcd = app.ETCD_LOCAL
+	}
 	if len(clusterReq.Config.Kubernetes.NetworkCni) == 0 {
 		clusterReq.Config.Kubernetes.NetworkCni = app.NETWORKCNI_KILO
 	}
@@ -155,6 +160,9 @@ func validateCreateClusterReq(clusterReq *app.ClusterReq) error {
 	}
 	if len(clusterReq.Config.Kubernetes.Loadbalancer) != 0 && !(clusterReq.Config.Kubernetes.Loadbalancer == app.LB_HAPROXY || clusterReq.Config.Kubernetes.Loadbalancer == app.LB_NLB) {
 		return errors.New("loadbalancer allows only haproxy or nlb")
+	}
+	if clusterReq.Config.Kubernetes.Etcd == app.ETCD_EXTERNAL && (clusterReq.ControlPlane[0].Count != 3 && clusterReq.ControlPlane[0].Count != 5 && clusterReq.ControlPlane[0].Count != 7) {
+		return errors.New("External etcd must have 3,5,7 controlPlane count")
 	}
 	if len(clusterReq.Name) == 0 {
 		return errors.New("Cluster name is empty")
