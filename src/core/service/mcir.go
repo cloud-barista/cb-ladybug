@@ -64,7 +64,7 @@ func (self *MCIR) CreateIfNotExist() (model.ClusterReason, string) {
 
 	//validate a CSP
 	exists := false
-	for _, c := range []string{string(app.CSP_AWS), string(app.CSP_GCP), string(app.CSP_AZURE), string(app.CSP_ALIBABA), string(app.CSP_TENCENT), string(app.CSP_OPENSTACK), string(app.CSP_IBM), string(app.CSP_CLOUDIT)} {
+	for _, c := range []string{string(app.CSP_AWS), string(app.CSP_GCP), string(app.CSP_AZURE), string(app.CSP_ALIBABA), string(app.CSP_TENCENT), string(app.CSP_OPENSTACK), string(app.CSP_IBM), string(app.CSP_CLOUDIT), string(app.CSP_NCPVPC), string(app.CSP_NCP)} {
 		if string(self.csp) == c {
 			exists = true
 			break
@@ -112,6 +112,8 @@ func (self *MCIR) CreateIfNotExist() (model.ClusterReason, string) {
 	self.subnetName = vpc.Subnets[0].Name
 
 	// Create a Firewall
+	/* NCP Classic CSP는 Security Group 생성 및 삭제를 REST API를 통해서는 지원하지 않음. 조회만 가능함.
+	 * mcks명명규칙에 맞춰 console에서 미리 생성해야 정상 동작함. 예) mcks-config-ncp-kr-sg  (mcks=namespace, kr=region 나머지는 고정)*/
 	fw := tumblebug.NewFirewall(self.csp, self.namespace, self.firewallName, self.config)
 	fw.VPCId = self.vpcName
 	exists, err = fw.GET()
