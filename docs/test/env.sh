@@ -2,7 +2,7 @@
 # -----------------------------------------------------------------
 # usage
 if [ "$#" -lt 1 ]; then 
-	echo "./env.sh [AWS/GCP/AZURE/ALBIABA/TENCENT/OPENSTACK] <credential file>"
+	echo "./env.sh [AWS/GCP/AZURE/ALBIABA/TENCENT/OPENSTACK/IBM] <credential file>"
 	echo "./env.sh AWS ~/.aws/credential"
 	exit 0; 
 fi

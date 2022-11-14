@@ -170,10 +170,9 @@ func (self *Provisioner) InitExternalEtcd() error {
 		ips += fmt.Sprintf("%s ", machine.PrivateIP)
 		hosts += fmt.Sprintf("%s %s ", machine.Name, machine.PrivateIP)
 	}
-	if _, err := self.leader.executeSSH("sudo echo '%s'>$HOME/.ssh/id_rsa; sudo chmod 600 $HOME/.ssh/id_rsa", self.leader.Credential); err != nil {
+	if _, err := self.leader.executeSSH("sudo echo '%s'>$HOME/id_rsa; sudo mv $HOME/id_rsa $HOME/.ssh/id_rsa; sudo chmod 600 $HOME/.ssh/id_rsa", self.leader.Credential); err != nil {
 		return errors.New(fmt.Sprintf("Failed to create private-key."))
 	}
-
 	if _, err := self.leader.executeSSH(REMOTE_TARGET_PATH+"/etcd-ca.sh %s", ips); err != nil {
 		return errors.New(fmt.Sprintf("Failed to create etcd certificates. (etcd-ca.sh)"))
 	}

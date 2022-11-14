@@ -2,7 +2,7 @@
 # ------------------------------------------------------------------------------
 # usage
 if [ "$#" -lt 1 ]; then
-	echo "./connectioninfo-create.sh [AWS/GCP/AZURE/ALIBABA/TENCENT/OPENSTACK/IBM] <option>"
+	echo "./connectioninfo-create.sh [AWS/GCP/AZURE/ALIBABA/TENCENT/OPENSTACK/IBM/CLOUDIT/NCPVPC/NCP] <option>"
 	echo "./connectioninfo-create.sh GCP"
 	echo "./connectioninfo-create.sh AWS add"
 	exit 0
@@ -21,11 +21,11 @@ source ./conf.env
 # 1. CSP
 if [ "$#" -gt 0 ]; then v_CSP="$1"; else	v_CSP="${CSP}"; fi
 if [ "${v_CSP}" == "" ]; then 
-	read -e -p "Cloud ? [AWS(default) or GCP or AZURE or ALIBABA or TENCENT or OPENSTACK or IBM or CLOUDIT] : "  v_CSP
+	read -e -p "Cloud ? [AWS(default) or GCP or AZURE or ALIBABA or TENCENT or OPENSTACK or IBM or CLOUDIT or NCPVPC or NCP] : "  v_CSP
 fi
 
 if [ "${v_CSP}" == "" ]; then v_CSP="AWS"; fi
-if [ "${v_CSP}" != "GCP" ] && [ "${v_CSP}" != "AWS" ] && [ "${v_CSP}" != "AZURE" ] && [ "${v_CSP}" != "ALIBABA" ] && [ "${v_CSP}" != "TENCENT" ] && [ "${v_CSP}" != "OPENSTACK" ] && [ "${v_CSP}" != "IBM" ] && [ "${v_CSP}" != "CLOUDIT" ]; then echo "[ERROR] missing <cloud>"; exit -1;fi
+if [ "${v_CSP}" != "GCP" ] && [ "${v_CSP}" != "AWS" ] && [ "${v_CSP}" != "AZURE" ] && [ "${v_CSP}" != "ALIBABA" ] && [ "${v_CSP}" != "TENCENT" ] && [ "${v_CSP}" != "OPENSTACK" ] && [ "${v_CSP}" != "IBM" ] && [ "${v_CSP}" != "CLOUDIT" ] && [ "${v_CSP}" != "NCPVPC" ] && [ "${v_CSP}" != "NCP" ]; then echo "[ERROR] missing <cloud>"; exit -1;fi
 
 v_CSP_LOWER="$(echo ${v_CSP} | tr [:upper:] [:lower:])"
 
@@ -50,6 +50,10 @@ elif [ "${v_CSP}" == "IBM" ]; then
 	v_DRIVER="${c_IBM_DRIVER}"
 elif [ "${v_CSP}" == "CLOUDIT" ]; then
 	v_DRIVER="${c_CLOUDIT_DRIVER}"
+elif [ "${v_CSP}" == "NCPVPC" ]; then
+	v_DRIVER="${c_NCPVPC_DRIVER}"
+elif [ "${v_CSP}" == "NCP" ]; then
+	v_DRIVER="${c_NCP_DRIVER}"
 fi
 
 
@@ -341,7 +345,7 @@ if [ "${v_CSP}" == "CLOUDIT" ]; then
 
 		v_CLOUDIT_USERNAME="${CI_USERNAME}"
 		if [ "${v_CLOUDIT_USERNAME}" == "" ]; then
-			read -e -p "Username ? [예:mcks] : "  v_OPENSTACK_USERNAME
+			read -e -p "Username ? [예:mcks] : "  v_CLOUDIT_USERNAME
 			if [ "${v_CLOUDIT_USERNAME}" == "" ]; then echo "[ERROR] missing <cloudit username>"; exit -1;fi
 		fi
 
@@ -378,7 +382,72 @@ if [ "${v_CSP}" == "CLOUDIT" ]; then
 		if [ "${v_ZONE}" == "" ]; then v_ZONE="default";fi
 	fi
 fi
+# NCPVPC
+if [ "${v_CSP}" == "NCPVPC" ]; then
 
+	if [ "${v_OPTION}" != "add" ]; then
+
+		v_NCPVPC_ID="${NCPVPC_CLIENT_ID}"
+		if [ "${v_NCPVPC_ID}" == "" ]; then
+			read -e -p "Access ClientId ? [예:AH24UUA2ZGNOP6DKKIA6] : "  v_NCPVPC_ID
+			if [ "${v_NCPVPC_ID}" == "" ]; then echo "[ERROR] missing <ncpvpc_client_id>"; exit -1;fi
+		fi
+
+		v_NCPVPC_SECRET="${NCPVPC_CLIENT_SECRET}"
+		if [ "${v_NCPVPC_SECRET}" == "" ]; then
+			read -e -p "Access-key ClientSecret ? [예:y76ZWz6A/vwqGanDAI926TTPCJrrMo1VbPOh8X7K] : "  v_NCPVPC_SECRET
+			if [ "${v_NCPVPC_SECRET}" == "" ]; then echo "[ERROR] missing <ncpvpc_client_secret>"; exit -1;fi
+		fi
+
+	fi
+
+	# region
+	v_REGION="${NCPVPC_REGION}"
+	if [ "${v_REGION}" == "" ]; then
+		read -e -p "region ? [예:KR] : "  v_REGION
+		if [ "${v_REGION}" == "" ]; then echo "[ERROR] missing region"; exit -1;fi
+	fi
+
+	# zone
+	v_ZONE="${NCPVPC_ZONE}"
+	if [ "${v_ZONE}" == "" ]; then
+		read -e -p "zone ? [예:KR-1] : "  v_ZONE
+		if [ "${v_ZONE}" == "" ]; then v_ZONE="${v_REGION}-1";fi
+	fi
+fi
+# NCP
+if [ "${v_CSP}" == "NCP" ]; then
+
+	if [ "${v_OPTION}" != "add" ]; then
+
+		v_NCP_ID="${NCPVPC_CLIENT_ID}"
+		if [ "${v_NCP_ID}" == "" ]; then
+			read -e -p "Access ClientId ? [예:AH24UUA2ZGNOP6DKKIA6] : "  v_NCP_ID
+			if [ "${v_NCP_ID}" == "" ]; then echo "[ERROR] missing <ncp_client_id>"; exit -1;fi
+		fi
+
+		v_NCP_SECRET="${NCP_CLIENT_SECRET}"
+		if [ "${v_NCP_SECRET}" == "" ]; then
+			read -e -p "Access-key ClientSecret ? [예:y76ZWz6A/vwqGanDAI926TTPCJrrMo1VbPOh8X7K] : "  v_NCP_SECRET
+			if [ "${v_NCP_SECRET}" == "" ]; then echo "[ERROR] missing <ncp_client_secret>"; exit -1;fi
+		fi
+
+	fi
+
+	# region
+	v_REGION="${NCP_REGION}"
+	if [ "${v_REGION}" == "" ]; then
+		read -e -p "region ? [예:KR] : "  v_REGION
+		if [ "${v_REGION}" == "" ]; then echo "[ERROR] missing region"; exit -1;fi
+	fi
+
+	# zone
+	v_ZONE="${NCP_ZONE}"
+	if [ "${v_ZONE}" == "" ]; then
+		read -e -p "zone ? [예:KR-1] : "  v_ZONE
+		if [ "${v_ZONE}" == "" ]; then v_ZONE="${v_REGION}-1";fi
+	fi
+fi
 v_REGION_LOWER="$(echo ${v_REGION} | tr [:upper:] [:lower:])"
 
 NM_CREDENTIAL="credential-${v_CSP_LOWER}"
@@ -432,7 +501,14 @@ elif [ "${v_CSP}" == "CLOUDIT" ]; then
 	echo "- cloudit_password  			is '${v_CLOUDIT_PASSWORD}'"
 	echo "- cloudit_auth_token			is '${v_CLOUDIT_AUTHTOKEN}'"
 	echo "- cloudit_tenantid	 		is '${v_CLOUDIT_TENANTID}'"
-
+elif [ "${v_CSP}" == "NCPVPC" ]; then
+	echo "- Zone                       is '${v_ZONE}'"
+ 	echo "- ncpvpc_client_id     	   is '${v_NCPVPC_ID}'"
+	echo "- ncpvpc_client_secret  	   is '${v_NCPVPC_SECRET}'"
+elif [ "${v_CSP}" == "NCP" ]; then
+	echo "- Zone                       is '${v_ZONE}'"
+ 	echo "- ncp_client_id     	   is '${v_NCP_ID}'"
+	echo "- ncp_client_secret  	   is '${v_NCP_SECRET}'"
 fi
 echo "- (Name of credential)       is '${NM_CREDENTIAL}'"
 echo "- (Name of region)           is '${NM_REGION}'"
@@ -556,7 +632,32 @@ EOF
 				{"Key" : "Username",    		"Value" : "${v_CLOUDIT_USERNAME}"},
 				{"Key" : "Password",			"Value" : "${v_CLOUDIT_PASSWORD}"},
 				{"Key" : "AuthToken",			"Value" : "${v_CLOUDIT_AUTHTOKEN}"},
-				{"Key" : "TenantId",			"Value" : "${v_CLOUDIT_TENANTID}"}
+				{"Key" : "TenantId",			"Value" : "${v_CLOUDIT_TENANTID}"},
+				{"Key" : "ClusterId", 			"Value" : "CL"}
+			]
+			}
+EOF
+		elif [ "${v_CSP}" == "NCPVPC" ]; then
+			curl -sX DELETE ${c_URL_SPIDER}/credential/${NM_CREDENTIAL} -H "${c_CT}" -o /dev/null -w "CREDENTIAL.delete():%{http_code}\n"
+			curl -sX POST   ${c_URL_SPIDER}/credential                  -H "${c_CT}" -o /dev/null -w "CREDENTIAL.regist():%{http_code}\n" -d @- <<EOF
+			{
+			"CredentialName"   : "${NM_CREDENTIAL}",
+			"ProviderName"     : "${v_CSP}",
+			"KeyValueInfoList" : [
+				{"Key" : "ClientId",	    "Value" : "${v_NCPVPC_ID}"},
+				{"Key" : "ClientSecret",    "Value" : "${v_NCPVPC_SECRET}"}
+			]
+			}
+EOF
+		elif [ "${v_CSP}" == "NCP" ]; then
+			curl -sX DELETE ${c_URL_SPIDER}/credential/${NM_CREDENTIAL} -H "${c_CT}" -o /dev/null -w "CREDENTIAL.delete():%{http_code}\n"
+			curl -sX POST   ${c_URL_SPIDER}/credential                  -H "${c_CT}" -o /dev/null -w "CREDENTIAL.regist():%{http_code}\n" -d @- <<EOF
+			{
+			"CredentialName"   : "${NM_CREDENTIAL}",
+			"ProviderName"     : "${v_CSP}",
+			"KeyValueInfoList" : [
+				{"Key" : "ClientId",	    "Value" : "${v_NCP_ID}"},
+				{"Key" : "ClientSecret",    "Value" : "${v_NCP_SECRET}"}
 			]
 			}
 EOF

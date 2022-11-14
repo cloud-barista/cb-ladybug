@@ -61,7 +61,7 @@ func CreateCluster(namespace string, req *app.ClusterReq) (*model.Cluster, error
 		connection := tumblebug.NewConnection(req.ControlPlane[0].Connection)
 		exists, _ := connection.GET()
 		if exists {
-			if strings.ToLower(connection.ProviderName) == string(app.CSP_IBM) || strings.ToLower(connection.ProviderName) == string(app.CSP_CLOUDIT) {
+			if strings.ToLower(connection.ProviderName) == string(app.CSP_IBM) || strings.ToLower(connection.ProviderName) == string(app.CSP_NCP) || strings.ToLower(connection.ProviderName) == string(app.CSP_NCPVPC) {
 				return nil, errors.New(fmt.Sprintf("%s does not yet supported nlb loadbalancer.", strings.ToLower(connection.ProviderName)))
 			}
 		}

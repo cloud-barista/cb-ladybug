@@ -17,6 +17,8 @@ const (
 	ALIBABA_IMAGE_ID = "ubuntu_18_04_x64_20G_alibase_20210521.vhd"
 	TENCENT_IMAGE_ID = "img-pi0ii46r"
 	CLOUDIT_IMAGE_ID = "ac2696a8-ecf7-4aab-bfbf-9ab5f3256ca2"
+	NCPVPC_IMAGE_ID  = "SW.VSVR.OS.LNX64.UBNTU.SVR1804.B050"
+	NCP_IMAGE_ID     = "SPSW0LINUX000130"
 )
 
 // region별 AMI :  (AMI 이름 : ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-20200908, 소유자:099720109477 )
@@ -76,6 +78,9 @@ func getCSPCidrBlock(csp app.CSP) string {
 		return fmt.Sprintf("192.168.%d.0/24", 70+rand.Intn(10))
 	case app.CSP_CLOUDIT:
 		return "10.0.244.0/22"
+	case app.CSP_NCPVPC:
+	case app.CSP_NCP:
+		return fmt.Sprintf("192.168.%d.0/24", 80+rand.Intn(10))
 	}
 
 	return "192.168.255.0/24"
@@ -94,6 +99,10 @@ func getCSPImageId(csp app.CSP, configName string, region *tumblebug.Region) (st
 		return TENCENT_IMAGE_ID, nil
 	} else if csp == app.CSP_CLOUDIT {
 		return CLOUDIT_IMAGE_ID, nil
+	} else if csp == app.CSP_NCP {
+		return NCP_IMAGE_ID, nil
+	} else if csp == app.CSP_NCPVPC {
+		return NCPVPC_IMAGE_ID, nil
 	} else if csp == app.CSP_OPENSTACK {
 		// openstack : lookupImages를 통해 사용자가 등록한 이미지를 검색하여, 이미지 이름에 'ubuntu'와 '1804'가 포함된 이미지 정보 가져오기
 		lookupImages := tumblebug.NewLookupImages(configName)

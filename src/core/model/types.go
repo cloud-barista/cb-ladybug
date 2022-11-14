@@ -84,7 +84,7 @@ type Node struct {
 	PublicIP    string   `json:"publicIp"`
 	Role        app.ROLE `json:"role" enums:"control-plane,worker"`
 	Spec        string   `json:"spec"`
-	Csp         app.CSP  `json:"csp" enums:"aws,gcp,azure,alibaba,tencent,openstack,ibm,cloudit"`
+	Csp         app.CSP  `json:"csp" enums:"aws,gcp,azure,alibaba,tencent,openstack,ibm,cloudit,ncp,ncpvpc"`
 	CreatedTime string   `json:"createdTime" example:"2022-01-02T12:00:00Z" default:""`
 	CspLabel    string   `json:"cspLabel"`
 	RegionLabel string   `json:"regionLabel"`

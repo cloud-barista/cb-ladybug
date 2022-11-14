@@ -16,6 +16,8 @@ const (
 	CSP_TENCENT   CSP = "tencent"
 	CSP_OPENSTACK CSP = "openstack"
 	CSP_IBM       CSP = "ibm"
+	CSP_NCPVPC    CSP = "ncpvpc"
+	CSP_NCP       CSP = "ncp"
 	CSP_CLOUDIT   CSP = "cloudit"
 
 	CONTROL_PLANE ROLE = "control-plane"

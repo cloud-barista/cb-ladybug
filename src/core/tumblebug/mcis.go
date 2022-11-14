@@ -40,6 +40,10 @@ func NewNLB(ns string, mcisName string, groupId string) *NLBReq {
 		},
 	}
 
+	if strings.Contains(nlb.NLBBase.Config, string(app.CSP_NCPVPC)) {
+		nlb.HealthChecker.Timeout = "-1"
+	}
+
 	if strings.Contains(nlb.NLBBase.Config, string(app.CSP_GCP)) {
 		nlb.HealthChecker.NLBProtocolBase.Protocol = "HTTP"
 		nlb.HealthChecker.NLBProtocolBase.Port = "80"
