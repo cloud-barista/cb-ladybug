@@ -113,7 +113,7 @@ func AddNode(namespace string, clusterName string, req *app.NodeReq) (*model.Nod
 					return nil, err
 				}
 				vms = append(vms, vm)
-				provisioner.AppendWorkerNodeMachine(name, mcir.csp, mcir.region, mcir.zone, mcir.credential)
+				provisioner.AppendWorkerNodeMachine(vm.Name, mcir.csp, mcir.region, mcir.zone, mcir.credential)
 				idx = idx + 1
 			}
 		}

@@ -161,6 +161,9 @@ func validateCreateClusterReq(clusterReq *app.ClusterReq) error {
 	if len(clusterReq.Config.Kubernetes.Loadbalancer) != 0 && !(clusterReq.Config.Kubernetes.Loadbalancer == app.LB_HAPROXY || clusterReq.Config.Kubernetes.Loadbalancer == app.LB_NLB) {
 		return errors.New("loadbalancer allows only haproxy or nlb")
 	}
+	if !(clusterReq.Config.Kubernetes.Etcd == app.ETCD_LOCAL || clusterReq.Config.Kubernetes.Etcd == app.ETCD_EXTERNAL) {
+		return errors.New("etcd allows only local or external")
+	}
 	if clusterReq.Config.Kubernetes.Etcd == app.ETCD_EXTERNAL && (clusterReq.ControlPlane[0].Count != 3 && clusterReq.ControlPlane[0].Count != 5 && clusterReq.ControlPlane[0].Count != 7) {
 		return errors.New("External etcd must have 3,5,7 controlPlane count")
 	}

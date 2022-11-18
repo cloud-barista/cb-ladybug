@@ -164,8 +164,8 @@ type MCIS struct {
 type VM struct {
 	Model
 	mcisName      string   //private
-	VmGroupId     string   `json:"vmGroupId"`
-	VmGroupSize   string   `json:"vmGroupSize"`
+	VmGroupId     string   `json:"subGroupId"`
+	VmGroupSize   string   `json:"subGroupSize"`
 	Config        string   `json:"connectionName"`
 	VPC           string   `json:"vNetId"`
 	Subnet        string   `json:"subnetId"`
@@ -215,7 +215,7 @@ type HealthCheckRes struct {
 type TargetGroup struct {
 	NLBProtocolBase
 	MCIS      string `json:"mcis"`
-	VmGroupId string `json:"vmGroupId"`
+	VmGroupId string `json:"subGroupId"`
 }
 
 // NLB

@@ -198,21 +198,21 @@ func (self *Provisioner) InitControlPlane(kubernetesConfigReq app.ClusterConfigK
 	} else {
 		port = "6443"
 	}
-	if self.Cluster.Etcd == app.ETCD_LOCAL {
-		if output, err := self.leader.executeSSH("cd %s;./%s %s %s %s %s %s", REMOTE_TARGET_PATH, "k8s-init.sh", kubernetesConfigReq.PodCidr, kubernetesConfigReq.ServiceCidr, kubernetesConfigReq.ServiceDnsDomain, self.leader.PublicIP, port); err != nil {
-			return nil, "", errors.New("Failed to initialize control-plane. (k8s-init.sh)")
-		} else if strings.Contains(output, "Your Kubernetes control-plane has initialized successfully") {
-			joinCmd = getJoinCmd(output)
-		} else {
-			return nil, "", errors.New("to initialize control-plane (the output not contains 'Your Kubernetes control-plane has initialized successfully')")
-		}
-	} else {
+	if self.Cluster.Etcd == app.ETCD_EXTERNAL {
 		var etcdIp string
 		for _, machine := range self.ControlPlaneMachines {
 			etcdIp += fmt.Sprintf("%s ", machine.PrivateIP)
 		}
 		if output, err := self.leader.executeSSH("cd %s;./%s %s %s %s %s %s %s", REMOTE_TARGET_PATH, "k8s-init-etcd.sh", kubernetesConfigReq.PodCidr, kubernetesConfigReq.ServiceCidr, kubernetesConfigReq.ServiceDnsDomain, self.leader.PublicIP, port, etcdIp); err != nil {
 			return nil, "", errors.New("Failed to initialize control-plane. (k8s-init-etcd.sh)")
+		} else if strings.Contains(output, "Your Kubernetes control-plane has initialized successfully") {
+			joinCmd = getJoinCmd(output)
+		} else {
+			return nil, "", errors.New("to initialize control-plane (the output not contains 'Your Kubernetes control-plane has initialized successfully')")
+		}
+	} else {
+		if output, err := self.leader.executeSSH("cd %s;./%s %s %s %s %s %s", REMOTE_TARGET_PATH, "k8s-init.sh", kubernetesConfigReq.PodCidr, kubernetesConfigReq.ServiceCidr, kubernetesConfigReq.ServiceDnsDomain, self.leader.PublicIP, port); err != nil {
+			return nil, "", errors.New("Failed to initialize control-plane. (k8s-init.sh)")
 		} else if strings.Contains(output, "Your Kubernetes control-plane has initialized successfully") {
 			joinCmd = getJoinCmd(output)
 		} else {

@@ -204,8 +204,7 @@ func (self *MCIR) NewVM(namespace string, name string, mcisName string, vmCount 
 }
 
 func (self *MCIR) NewNLB(namespace string, mcisName string, groupId string) tumblebug.NLBReq {
-	nlb := tumblebug.NewNLB(namespace, mcisName, groupId)
-	nlb.Config = self.config
+	nlb := tumblebug.NewNLB(namespace, mcisName, groupId, self.config)
 	nlb.VPC = self.vpcName
 	return *nlb
 }
