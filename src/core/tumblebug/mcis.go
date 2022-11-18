@@ -26,12 +26,13 @@ func NewVM(namespace string, name string, mcisName string) *VM {
 }
 
 /* new instance of NLB */
-func NewNLB(ns string, mcisName string, groupId string) *NLBReq {
+func NewNLB(ns string, mcisName string, groupId string, config string) *NLBReq {
 	nlb := &NLBReq{
 		NLBBase: NLBBase{
-			Model: Model{Name: groupId, Namespace: ns},
-			Type:  "PUBLIC",
-			Scope: "REGION", Listener: NLBProtocolBase{Protocol: "TCP", Port: "6443"},
+			Model:  Model{Name: groupId, Namespace: ns},
+			Config: config,
+			Type:   "PUBLIC",
+			Scope:  "REGION", Listener: NLBProtocolBase{Protocol: "TCP", Port: "6443"},
 			TargetGroup: TargetGroup{NLBProtocolBase: NLBProtocolBase{Protocol: "TCP", Port: "6443"}, MCIS: mcisName, VmGroupId: groupId},
 		},
 		HealthChecker: HealthCheckReq{
@@ -39,11 +40,9 @@ func NewNLB(ns string, mcisName string, groupId string) *NLBReq {
 			Interval:        "default", Threshold: "default", Timeout: "default",
 		},
 	}
-
-	if strings.Contains(nlb.NLBBase.Config, string(app.CSP_NCPVPC)) {
+	if strings.Contains(config, string(app.CSP_NCPVPC)) || strings.Contains(config, string(app.CSP_AZURE)) {
 		nlb.HealthChecker.Timeout = "-1"
 	}
-
 	if strings.Contains(nlb.NLBBase.Config, string(app.CSP_GCP)) {
 		nlb.HealthChecker.NLBProtocolBase.Protocol = "HTTP"
 		nlb.HealthChecker.NLBProtocolBase.Port = "80"

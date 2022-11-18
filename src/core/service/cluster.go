@@ -158,7 +158,7 @@ func CreateCluster(namespace string, req *app.ClusterReq) (*model.Cluster, error
 			for i := 0; i < mcir.vmCount; i++ {
 				name := lang.GenerateNewNodeName(string(app.WORKER), idx+1)
 				mcis.VMs = append(mcis.VMs, mcir.NewVM(namespace, name, mcisName, "", worker.RootDisk.Type, worker.RootDisk.Size))
-				provisioner.AppendWorkerNodeMachine(name, mcir.csp, mcir.region, mcir.zone, mcir.credential)
+				provisioner.AppendWorkerNodeMachine(name+"-1", mcir.csp, mcir.region, mcir.zone, mcir.credential)
 				idx = idx + 1
 			}
 		}
@@ -179,12 +179,11 @@ func CreateCluster(namespace string, req *app.ClusterReq) (*model.Cluster, error
 	logger.Infof("[%s.%s] MCIS creation has been completed.", namespace, clusterName)
 	cluster.CpLeader = mcis.VMs[0].Name
 
-	for i := 0; i < len(mcis.VMs); i++ {
-		if cluster.CpGroup == mcis.VMs[i].VmGroupId {
-			provisioner.AppendControlPlaneMachine(mcis.VMs[i].Name, mcir.csp, mcir.region, mcir.zone, mcir.credential)
+	for _, vms := range mcis.VMs {
+		if cluster.CpGroup == vms.VmGroupId {
+			provisioner.AppendControlPlaneMachine(vms.Name, mcir.csp, mcir.region, mcir.zone, mcir.credential)
 		}
 	}
-
 	//create a NLB (contains control-plane)
 	if cluster.Loadbalancer != app.LB_HAPROXY {
 		NLB := mcir.NewNLB(namespace, mcisName, cluster.CpGroup)
@@ -193,7 +192,7 @@ func CreateCluster(namespace string, req *app.ClusterReq) (*model.Cluster, error
 			return nil, errors.New(cluster.Status.Message)
 		} else if !exists {
 			if err := NLB.POST(); err != nil {
-				cluster.FailReason(model.CreateNLBFailedReason, fmt.Sprintf("Failed to create a NLB. (cause='%v')", err))
+				cluster.FailReason(model.CreateNLBFailedReason, fmt.Sprintf("Failed to create a NLB. (cause='%v')", NLB))
 				return nil, errors.New(cluster.Status.Message)
 			}
 			logger.Infof("[%s] NLB creation has been completed. (%s)", req.ControlPlane[0].Connection, NLB.TargetGroup.VmGroupId)
