@@ -91,7 +91,6 @@ export CI_ZONE="default"
 ./connectioninfo-create.sh CLOUDIT
 
 # NCPVPC
-
 export NCPVPC_CLIENT_ID="XXXXXXXXXXXXXXX"
 export NCPVPC_CLIENT_SECRET="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 export NCPVPC_REGION="KR"
@@ -100,10 +99,20 @@ export NCPVPC_ZONE="KR-1"
 ./connectioninfo-create.sh NCPVPC
 
 # Ncp
-
 export NCP_CLIENT_ID="XXXXXXXXXXXXXXX"
 export NCP_CLIENT_SECRET="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 export NCP_REGION="KR"
 export NCP_ZONE="KR-1"
 
 ./connectioninfo-create.sh NCP
+
+# NHN Cloud
+export NHN_IDENTITY_ENDPOINT="https://api-identity.infrastructure.cloud.toast.com"
+export NHN_USERNAME="XXX@XXXXX.XXX"
+export NHN_PASSWORD="XXXXXX"
+export NHN_TENANT_ID="xxxxxxxxxxxxxxxxxxxxxx"
+export NHN_DOMAINNAME="default"
+export NHN_REGION="KR1"
+export NHN_ZONE="kr-pub-a"
+
+./connectioninfo-create.sh NHNCLOUD

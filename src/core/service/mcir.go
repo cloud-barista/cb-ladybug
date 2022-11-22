@@ -64,7 +64,7 @@ func (self *MCIR) CreateIfNotExist() (model.ClusterReason, string) {
 
 	//validate a CSP
 	exists := false
-	for _, c := range []string{string(app.CSP_AWS), string(app.CSP_GCP), string(app.CSP_AZURE), string(app.CSP_ALIBABA), string(app.CSP_TENCENT), string(app.CSP_OPENSTACK), string(app.CSP_IBM), string(app.CSP_CLOUDIT), string(app.CSP_NCPVPC), string(app.CSP_NCP)} {
+	for _, c := range []string{string(app.CSP_AWS), string(app.CSP_GCP), string(app.CSP_AZURE), string(app.CSP_ALIBABA), string(app.CSP_TENCENT), string(app.CSP_OPENSTACK), string(app.CSP_IBM), string(app.CSP_CLOUDIT), string(app.CSP_NCPVPC), string(app.CSP_NCP), string(app.CSP_NHNCLOUD)} {
 		if string(self.csp) == c {
 			exists = true
 			break

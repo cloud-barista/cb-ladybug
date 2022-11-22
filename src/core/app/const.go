@@ -19,6 +19,7 @@ const (
 	CSP_NCPVPC    CSP = "ncpvpc"
 	CSP_NCP       CSP = "ncp"
 	CSP_CLOUDIT   CSP = "cloudit"
+	CSP_NHNCLOUD  CSP = "nhncloud"
 
 	CONTROL_PLANE ROLE = "control-plane"
 	WORKER        ROLE = "worker"

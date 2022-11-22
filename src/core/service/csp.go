@@ -22,7 +22,7 @@ const (
 )
 
 // region별 AMI :  (AMI 이름 : ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-20200908, 소유자:099720109477 )
-var imageMap = map[string]string{
+var awsImageMap = map[string]string{
 	"us-east-1":      "ami-0817d428a6fb68645", //미국 동부 (버지니아 북부)
 	"us-east-2":      "ami-0e82959d4ed12de3f", //미국 동부 (오하이오)
 	"us-west-1":      "ami-03fac5402e10ea93b", //미국서부 (캘리포니아)
@@ -58,6 +58,12 @@ var ibmImageMap = map[string]string{
 	"jp-tok":   "r022-61fdadec-6b03-4bd2-bfca-62cd16f5673f", //일본 (도쿄)
 }
 
+var nhnImageMap = map[string]string{
+	"KR1": "5396655e-166a-4875-80d2-ed8613aa054f", //판교
+	"KR2": "71893505-923c-4982-b0eb-844eb520661c", //평촌
+	"JP1": "ca69fad9-92f3-4c9b-a6e4-7e8b0e4d3a58", //일본
+}
+
 // get a cidr-block
 func getCSPCidrBlock(csp app.CSP) string {
 
@@ -79,8 +85,9 @@ func getCSPCidrBlock(csp app.CSP) string {
 	case app.CSP_CLOUDIT:
 		return "10.0.244.0/22"
 	case app.CSP_NCPVPC:
-	case app.CSP_NCP:
 		return fmt.Sprintf("192.168.%d.0/24", 80+rand.Intn(10))
+	case app.CSP_NCP:
+		return fmt.Sprintf("192.168.%d.0/24", 90+rand.Intn(10))
 	}
 
 	return "192.168.255.0/24"
@@ -103,6 +110,30 @@ func getCSPImageId(csp app.CSP, configName string, region *tumblebug.Region) (st
 		return NCP_IMAGE_ID, nil
 	} else if csp == app.CSP_NCPVPC {
 		return NCPVPC_IMAGE_ID, nil
+	} else if csp == app.CSP_NHNCLOUD || csp == app.CSP_AWS || csp == app.CSP_IBM {
+		regionName := ""
+		for _, info := range region.KeyValueInfoList {
+			if info.Key == "Region" {
+				regionName = info.Value //get region name
+				break
+			}
+		}
+
+		if regionName == "" {
+			return "", errors.New(fmt.Sprintf("Could not be found a image. (cause = region name is empty, connection=%s, region=%s)", configName, region.RegionName))
+		}
+		imageId := ibmImageMap[regionName]
+		if csp == app.CSP_NHNCLOUD {
+			imageId = nhnImageMap[regionName]
+		} else if csp == app.CSP_AWS {
+			imageId = awsImageMap[regionName]
+		}
+
+		if imageId == "" {
+			return "", errors.New(fmt.Sprintf("Could not be found a image map. (connection=%s, region=%s)", configName, regionName))
+		}
+
+		return imageId, nil
 	} else if csp == app.CSP_OPENSTACK {
 		// openstack : lookupImages를 통해 사용자가 등록한 이미지를 검색하여, 이미지 이름에 'ubuntu'와 '1804'가 포함된 이미지 정보 가져오기
 		lookupImages := tumblebug.NewLookupImages(configName)
@@ -122,49 +153,6 @@ func getCSPImageId(csp app.CSP, configName string, region *tumblebug.Region) (st
 
 		return "", errors.New(fmt.Sprintf("Could not be found a ubuntu 18.04 image on openstack. please create an image based on Ubuntu 18.04 The image name must include 'ubuntu' and '18.04'. (connection=%s)", configName))
 
-	} else if csp == app.CSP_AWS {
-		// AWS : 리전별 AMI 가져오기
-		regionName := ""
-		for _, info := range region.KeyValueInfoList {
-			if info.Key == "Region" {
-				regionName = info.Value //get region name
-				break
-			}
-		}
-
-		if regionName == "" {
-			return "", errors.New(fmt.Sprintf("Could not be found a AMI on AWS. (cause = region name is empty, connection=%s, region=%s)", configName, region.RegionName))
-		}
-
-		// TODO [update/hard-coding] region별 image id
-		imageId := imageMap[regionName]
-		if imageId == "" {
-			return "", errors.New(fmt.Sprintf("Could not be found a AMI on AWS image map. (connection=%s, region=%s)", configName, regionName))
-		}
-
-		return imageId, nil
-
-	} else if csp == app.CSP_IBM {
-		// IBM : 리전별 image 가져오기
-		regionName := ""
-		for _, info := range region.KeyValueInfoList {
-			if info.Key == "Region" {
-				regionName = info.Value //get region name
-				break
-			}
-		}
-
-		if regionName == "" {
-			return "", errors.New(fmt.Sprintf("Could not be found a image on IBM. (cause = region name is empty, connection=%s, region=%s)", configName, region.RegionName))
-		}
-
-		// TODO [update/hard-coding] region별 image id
-		imageId := ibmImageMap[regionName]
-		if imageId == "" {
-			return "", errors.New(fmt.Sprintf("Could not be found a image on IBM image map. (connection=%s, region=%s)", configName, regionName))
-		}
-
-		return imageId, nil
 	} else {
 		return "", errors.New(fmt.Sprintf("CSP '%s' is not supported. (could not be found 'vm-machine-image')", csp))
 	}

@@ -2,7 +2,7 @@
 # ------------------------------------------------------------------------------
 # usage
 if [ "$#" -lt 1 ]; then
-	echo "./connectioninfo-create.sh [AWS/GCP/AZURE/ALIBABA/TENCENT/OPENSTACK/IBM/CLOUDIT/NCPVPC/NCP] <option>"
+	echo "./connectioninfo-create.sh [AWS/GCP/AZURE/ALIBABA/TENCENT/OPENSTACK/IBM/CLOUDIT/NCPVPC/NCP/NHNCLOUD] <option>"
 	echo "./connectioninfo-create.sh GCP"
 	echo "./connectioninfo-create.sh AWS add"
 	exit 0
@@ -21,11 +21,11 @@ source ./conf.env
 # 1. CSP
 if [ "$#" -gt 0 ]; then v_CSP="$1"; else	v_CSP="${CSP}"; fi
 if [ "${v_CSP}" == "" ]; then 
-	read -e -p "Cloud ? [AWS(default) or GCP or AZURE or ALIBABA or TENCENT or OPENSTACK or IBM or CLOUDIT or NCPVPC or NCP] : "  v_CSP
+	read -e -p "Cloud ? [AWS(default) or GCP or AZURE or ALIBABA or TENCENT or OPENSTACK or IBM or CLOUDIT or NCPVPC or NCP or NHNCLOUD] : "  v_CSP
 fi
 
 if [ "${v_CSP}" == "" ]; then v_CSP="AWS"; fi
-if [ "${v_CSP}" != "GCP" ] && [ "${v_CSP}" != "AWS" ] && [ "${v_CSP}" != "AZURE" ] && [ "${v_CSP}" != "ALIBABA" ] && [ "${v_CSP}" != "TENCENT" ] && [ "${v_CSP}" != "OPENSTACK" ] && [ "${v_CSP}" != "IBM" ] && [ "${v_CSP}" != "CLOUDIT" ] && [ "${v_CSP}" != "NCPVPC" ] && [ "${v_CSP}" != "NCP" ]; then echo "[ERROR] missing <cloud>"; exit -1;fi
+if [ "${v_CSP}" != "GCP" ] && [ "${v_CSP}" != "AWS" ] && [ "${v_CSP}" != "AZURE" ] && [ "${v_CSP}" != "ALIBABA" ] && [ "${v_CSP}" != "TENCENT" ] && [ "${v_CSP}" != "OPENSTACK" ] && [ "${v_CSP}" != "IBM" ] && [ "${v_CSP}" != "CLOUDIT" ] && [ "${v_CSP}" != "NCPVPC" ] && [ "${v_CSP}" != "NCP" ] && [ "${v_CSP}" != "NHNCLOUD" ]; then echo "[ERROR] missing <cloud>"; exit -1;fi
 
 v_CSP_LOWER="$(echo ${v_CSP} | tr [:upper:] [:lower:])"
 
@@ -53,7 +53,9 @@ elif [ "${v_CSP}" == "CLOUDIT" ]; then
 elif [ "${v_CSP}" == "NCPVPC" ]; then
 	v_DRIVER="${c_NCPVPC_DRIVER}"
 elif [ "${v_CSP}" == "NCP" ]; then
-	v_DRIVER="${c_NCP_DRIVER}"
+	v_DRIVER="${c_NHNCLOUD_DRIVER}"
+elif [ "${v_CSP}" == "NHNCLOUD" ]; then
+	v_DRIVER="${c_NHNCLOUD_DRIVER}"
 fi
 
 
@@ -448,6 +450,64 @@ if [ "${v_CSP}" == "NCP" ]; then
 		if [ "${v_ZONE}" == "" ]; then v_ZONE="${v_REGION}-1";fi
 	fi
 fi
+
+# NHNCLOUD
+if [ "${v_CSP}" == "NHNCLOUD" ]; then
+
+	if [ "${v_OPTION}" != "add" ]; then
+
+		v_NHNCLOUD_ENDPOINT="${NHN_IDENTITY_ENDPOINT}"
+		if [ "${v_NHNCLOUD_ENDPOINT}" == "" ]; then
+			read -e -p "Identity Endpoint ? [예:https://api-identity.infrastructure.cloud.toast.com] : "  v_NHNCLOUD_ENDPOINT
+			if [ "${v_NHNCLOUD_ENDPOINT}" == "" ]; then echo "[ERROR] missing <nhncloud identity endpoint>"; exit -1;fi
+		fi
+
+		v_NHNCLOUD_USERNAME="${NHN_USERNAME}"
+		if [ "${v_NHNCLOUD_USERNAME}" == "" ]; then
+			read -e -p "Username ? [예:mcks] : "  v_NHNCLOUD_USERNAME
+			if [ "${v_NHNCLOUD_USERNAME}" == "" ]; then echo "[ERROR] missing <nhncloud username>"; exit -1;fi
+		fi
+
+		v_NHNCLOUD_PASSWORD="${NHN_PASSWORD}"
+		if [ "${v_NHNCLOUD_PASSWORD}" == "" ]; then
+			read -e -p "Password ? [예:asdfqwer12] : "  v_NHNCLOUD_PASSWORD
+			if [ "${v_NHNCLOUD_PASSWORD}" == "" ]; then echo "[ERROR] missing <nhncloud password>"; exit -1;fi
+		fi
+
+		v_NHNCLOUD_TENANT_ID="${NHN_TENANT_ID}"
+		if [ "${v_NHNCLOUD_TENANT_ID}" == "" ]; then
+			read -e -p "Tenant Id ? [예:edfasdfsasdff] : "  v_NHNCLOUD_TENANT_ID
+			if [ "${v_NHNCLOUD_TENANT_ID}" == "" ]; then echo "[ERROR] missing <nhncloud tenant id>"; exit -1;fi
+		fi
+
+		v_NHNCLOUD_DOMAIN="${NHN_DOMAINNAME}"
+		if [ "${v_NHNCLOUD_DOMAIN}" == "" ]; then
+			read -e -p "Domain Name ? [예:default] : "  v_NHNCLOUD_DOMAIN
+			if [ "${v_NHNCLOUD_DOMAIN}" == "" ]; then echo "[ERROR] missing <nhncloud domainname>"; exit -1;fi
+		fi
+
+	fi
+
+	# region
+	v_REGION="${NHN_REGION}"
+	if [ "${v_REGION}" == "" ]; then
+		read -e -p "region ? [예:KR1] : "  v_REGION
+		if [ "${v_REGION}" == "" ]; then echo "[ERROR] missing region"; exit -1;fi
+	fi
+
+	# zone
+	v_ZONE="${NHN_ZONE}"
+	if [ "${v_ZONE}" == "" ]; then
+		read -e -p "zone ? [예:kr-pub-a] : "  v_ZONE
+		if [ "${v_ZONE}" == "" ]; then
+			if [[ "${v_REGION}" =~ "1" ]]; then
+				v_REGION_LOWER="$(echo ${v_REGION} | tr [:upper:] [:lower:] | tr -cd 'a-z')"
+			else
+				v_REGION_LOWER="$(echo ${v_REGION} | tr [:upper:] [:lower:])"
+			fi
+		v_ZONE="${v_REGION_LOWER}-pub-a";fi
+	fi
+fi
 v_REGION_LOWER="$(echo ${v_REGION} | tr [:upper:] [:lower:])"
 
 NM_CREDENTIAL="credential-${v_CSP_LOWER}"
@@ -509,6 +569,13 @@ elif [ "${v_CSP}" == "NCP" ]; then
 	echo "- Zone                       is '${v_ZONE}'"
  	echo "- ncp_client_id     	   is '${v_NCP_ID}'"
 	echo "- ncp_client_secret  	   is '${v_NCP_SECRET}'"
+elif [ "${v_CSP}" == "NHNCLOUD" ]; then
+	echo "- Zone                        is '${v_ZONE}'"
+ 	echo "- nhncloud_identity_endpoint 	is '${v_NHNCLOUD_ENDPOINT}'"
+	echo "- nhncloud_username  			is '${v_NHNCLOUD_USERNAME}'"
+	echo "- nhncloud_password  			is '${v_NHNCLOUD_PASSWORD}'"
+	echo "- nhncloud_domainname			is '${v_NHNCLOUD_DOMAIN}'"
+	echo "- nhncloud_tenantid		 	is '${v_NHNCLOUD_TENANT_ID}'"
 fi
 echo "- (Name of credential)       is '${NM_CREDENTIAL}'"
 echo "- (Name of region)           is '${NM_REGION}'"
@@ -658,6 +725,21 @@ EOF
 			"KeyValueInfoList" : [
 				{"Key" : "ClientId",	    "Value" : "${v_NCP_ID}"},
 				{"Key" : "ClientSecret",    "Value" : "${v_NCP_SECRET}"}
+			]
+			}
+EOF
+		elif [ "${v_CSP}" == "NHNCLOUD" ]; then
+			curl -sX DELETE ${c_URL_SPIDER}/credential/${NM_CREDENTIAL} -H "${c_CT}" -o /dev/null -w "CREDENTIAL.delete():%{http_code}\n"
+			curl -sX POST   ${c_URL_SPIDER}/credential                  -H "${c_CT}" -o /dev/null -w "CREDENTIAL.regist():%{http_code}\n" -d @- <<EOF
+			{
+			"CredentialName":"${NM_CREDENTIAL}",
+			"ProviderName":"${v_CSP}",
+			"KeyValueInfoList": [
+				{"Key":"IdentityEndpoint", "Value":"${v_NHNCLOUD_ENDPOINT}"},
+				{"Key":"Username", "Value":"${v_NHNCLOUD_USERNAME}"},
+				{"Key":"Password", "Value":"${v_NHNCLOUD_PASSWORD}"},
+				{"Key":"DomainName", "Value":"${v_NHNCLOUD_DOMAIN}"},
+				{"Key":"TenantId", "Value":"${v_NHNCLOUD_TENANT_ID}"}
 			]
 			}
 EOF
