@@ -1,5 +1,52 @@
 # Cloud-Barista Multi-Cloud Kubernetes Service Framework (CB-MCKS) ChangeLog
 
+## v0.7.0 (Cortado, 2022.11.25.)
+
+### Tested with
+
+- CB-Spider (https://github.com/cloud-barista/cb-spider/releases/tag/v0.7.0)
+- CB-Tumblebug (https://github.com/cloud-barista/cb-tumblebug/releases/tag/v0.7.0)
+
+### API Change
+
+- Create a cluster api request structure [#154](https://github.com/cloud-barista/cb-mcks/pull/156)
+
+### Feature
+
+- Add support for storageclass nfs featurenew feature [#141](https://github.com/cloud-barista/cb-mcks/pull/141)
+- Add GuestOs to openstack image search condition enhancementNew feature or request [#142](https://github.com/cloud-barista/cb-mcks/pull/142)
+- Add support for loadbalancer NLB enhancement New feature or requestfeaturenew feature [#144](https://github.com/cloud-barista/cb-mcks/pull/144)
+- Add RootDiskType & RootDiskSize param to Create Cluster enhancementNew feature or request [#146](https://github.com/cloud-barista/cb-mcks/pull/146)
+- Implements NLB for create a cluster [#149](https://github.com/cloud-barista/cb-mcks/pull/149)
+- Supported external etcd topology [#156](https://github.com/cloud-barista/cb-mcks/pull/156)
+- Add support for Naver Cloud Platform [#158](https://github.com/cloud-barista/cb-mcks/pull/158)
+- Add support for NHN Cloud [#160](https://github.com/cloud-barista/cb-mcks/pull/160)
+
+### Bug Fix
+
+- boostrap.sh output check [#150](https://github.com/cloud-barista/cb-mcks/pull/150)
+- Set default account(cb-user) for VM [#152](https://github.com/cloud-barista/cb-mcks/pull/152)
+- SSH handshake logs [#152](https://github.com/cloud-barista/cb-mcks/pull/152)
+- boostrap.sh "permission" error log hidden [#152](https://github.com/cloud-barista/cb-mcks/pull/152) 
+- datastore "bucket not" error [#152](https://github.com/cloud-barista/cb-mcks/pull/152)
+
+### Refactoring
+
+- Upgrade to go 1.19 & Update go.mod dependenciesPull requests that update a dependency file [#145](https://github.com/cloud-barista/cb-mcks/pull/145)
+- Create a cluster api request structure [#154](https://github.com/cloud-barista/cb-mcks/pull/156)
+
+### Dependencies
+
+- bump github.com/labstack/echo/v4 from 4.7.2 to 4.9.0 [#147](https://github.com/cloud-barista/cb-mcks/pull/147)
+- Clean up dependencies [#148](https://github.com/cloud-barista/cb-mcks/pull/148)
+
+### Note
+
+- Full Changelog: https://github.com/cloud-barista/cb-mcks/compare/v0.6.0...v0.7.0
+
+***
+
+
 ## v0.6.0 (CafeLatte, 2022.07.08.)
 
 ### Tested with

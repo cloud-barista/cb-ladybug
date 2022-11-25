@@ -12,7 +12,7 @@
 
 ```
 [NOTE]
-CB-MCKS is currently under development. (The latest version is v0.6.0 (Cafe Latte))
+CB-MCKS is currently under development. (The latest version is v0.7.0 (Cortado))
 So, we do not recommend using the current release in production.
 Please note that the functionalities of CB-MCKS are not stable and secure yet.
 If you have any difficulties in using CB-MCKS, please let us know.
@@ -23,12 +23,12 @@ If you have any difficulties in using CB-MCKS, please let us know.
 
 ### Preparation
 
-* Golang 1.16.+ ([Download and install](https://golang.org/doc/install))
+* Golang 1.19.+ ([Download and install](https://golang.org/doc/install))
 
 ### Dependencies
 
-* CB-Tumblebug [v0.6.0](https://github.com/cloud-barista/cb-tumblebug/releases/tag/v0.6.0)
-* CB-Spider [v0.6.0](https://github.com/cloud-barista/cb-spider/releases/tag/v0.6.0)
+* CB-Tumblebug [v0.7.0](https://github.com/cloud-barista/cb-tumblebug/releases/tag/v0.7.0)
+* CB-Spider [v0.7.0](https://github.com/cloud-barista/cb-spider/releases/tag/v0.7.0)
 
 
 ### Clone

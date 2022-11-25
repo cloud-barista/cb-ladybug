@@ -1,6 +1,6 @@
 @startuml
 
-header **Cloud-Barista MCKS** (v0.6.0-cafelatte)
+header **Cloud-Barista MCKS** (v0.7.0-cortado)
 title Remove a node
 hide footbox
 
