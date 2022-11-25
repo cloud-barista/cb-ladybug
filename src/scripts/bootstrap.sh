@@ -165,31 +165,39 @@ else # ${SERVICE_TYPE} == "single"
 if [ "${CSP}" == "aws" ]; then
 
 echo -e '#!/bin/sh
-IFACE="$(ip route get 8.8.8.8 | awk \047{ print $5; exit }\047)"
 INSTANCE_ID="$(curl http://169.254.169.254/latest/meta-data/instance-id)"
-#PUBLIC_IP="{{PUBLIC_IP}}"
-#ifconfig ${IFACE}:1 ${PUBLIC_IP} netmask 255.255.255.255  broadcast 0.0.0.0 up
 echo "KUBELET_EXTRA_ARGS=\"--hostname-override={{HOSTNAME}} --provider-id=aws:///${INSTANCE_ID}\"" > /etc/default/kubelet
 if [ -f "/etc/kubernetes/kubelet.conf" ]; then
   systemctl restart kubelet
 fi
 exit 0' | sed "s/{{HOSTNAME}}/${HOSTNAME}/g" | sed "s/{{PUBLIC_IP}}/${PUBLIC_IP}/g" | sudo tee /lib/systemd/system/mcks-bootstrap > /dev/null
 
-else
+elif [ "${CSP}" == "openstack" ]; then
 
 echo -e '#!/bin/sh
-IFACE="$(ip route get 8.8.8.8 | awk \047{ print $5; exit }\047)"
-#PUBLIC_IP="{{PUBLIC_IP}}"
-#ifconfig ${IFACE}:1 ${PUBLIC_IP} netmask 255.255.255.255  broadcast 0.0.0.0 up
 echo "KUBELET_EXTRA_ARGS=\"--hostname-override={{HOSTNAME}}\"" > /etc/default/kubelet
+
 if [ -f "/etc/kubernetes/kubelet.conf" ]; then
   systemctl restart kubelet
 fi
 exit 0' | sed "s/{{HOSTNAME}}/${HOSTNAME}/g" | sed "s/{{PUBLIC_IP}}/${PUBLIC_IP}/g" | sudo tee /lib/systemd/system/mcks-bootstrap > /dev/null
 
+elif [ "${CSP}" == "ncpvpc" ]; then
+
+echo -e '#!/bin/sh
+INSTANCE_NO="$(curl http://169.254.169.254/latest/meta-data/serverInstanceNo)"
+echo "KUBELET_EXTRA_ARGS=\"--hostname-override={{HOSTNAME}} --provider-id=ncp:///${INSTANCE_NO}\"" > /etc/default/kubelet
+if [ -f "/etc/kubernetes/kubelet.conf" ]; then
+  systemctl restart kubelet
+fi
+exit 0' | sed "s/{{HOSTNAME}}/${HOSTNAME}/g" | sudo tee /lib/systemd/system/mcks-bootstrap > /dev/null
+
 fi
 
 sudo chmod +x /lib/systemd/system/mcks-bootstrap
+
+# Generate initial kubelet configuration (/etc/default/kubelet) before starting kubelet service
+sudo sh /lib/systemd/system/mcks-bootstrap
 
 fi # ${SERVICE_TYPE} == "multi"
 
@@ -210,4 +218,5 @@ WantedBy=kubelet.service
 EOF'
 sudo systemctl daemon-reload
 sudo systemctl enable mcks-bootstrap
+
 

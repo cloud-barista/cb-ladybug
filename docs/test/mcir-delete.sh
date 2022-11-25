@@ -48,15 +48,15 @@ NM_TUMBLEBUG_NS="${c_URL_TUMBLEBUG}/ns/${v_NAMESPACE}"
 delete() {
 
 	# image
-	if [[ "${v_QUERY}" == *"image"* ]]; then	echo "@_IMAGE_@";		curl -sX DELETE ${NM_TUMBLEBUG_NS}/resources/image   -H "${c_AUTH}" -H "${c_CT}" -o /dev/null -w "IMAGE.delete():%{http_code}\n"; fi
+	if [[ "${v_QUERY}" == *"image"* ]]; then	echo "@_IMAGE_@";		curl -sX DELETE ${NM_TUMBLEBUG_NS}/resources/image?option=force   -H "${c_AUTH}" -H "${c_CT}" -o /dev/null -w "IMAGE.delete():%{http_code}\n"; fi
 	# spec
-	if [[ "${v_QUERY}" == *"spec"* ]]; then	echo "@_SPEC_@";		curl -sX DELETE ${NM_TUMBLEBUG_NS}/resources/spec   -H "${c_AUTH}" -H "${c_CT}" -o /dev/null -w "SPEC.delete():%{http_code}\n"; fi
+	if [[ "${v_QUERY}" == *"spec"* ]]; then	echo "@_SPEC_@";		curl -sX DELETE ${NM_TUMBLEBUG_NS}/resources/spec?option=force   -H "${c_AUTH}" -H "${c_CT}" -o /dev/null -w "SPEC.delete():%{http_code}\n"; fi
 	# sshKey
-	if [[ "${v_QUERY}" == *"ssh"* ]]; then	echo "@_SSHKEY_@";		curl -sX DELETE ${NM_TUMBLEBUG_NS}/resources/sshKey   -H "${c_AUTH}" -H "${c_CT}" -o /dev/null -w "SSHKEY.delete():%{http_code}\n"; fi
+	if [[ "${v_QUERY}" == *"ssh"* ]]; then	echo "@_SSHKEY_@";		curl -sX DELETE ${NM_TUMBLEBUG_NS}/resources/sshKey?option=force   -H "${c_AUTH}" -H "${c_CT}" -o /dev/null -w "SSHKEY.delete():%{http_code}\n"; fi
 	# securityGroup
-	if [[ "${v_QUERY}" == *"sg"* ]]; then	echo "@_SECURITYGROUP_@";		curl -sX DELETE ${NM_TUMBLEBUG_NS}/resources/securityGroup   -H "${c_AUTH}" -H "${c_CT}" -o /dev/null -w "SECURITYGROUP.delete():%{http_code}\n"; fi
+	if [[ "${v_QUERY}" == *"sg"* ]]; then	echo "@_SECURITYGROUP_@";		curl -sX DELETE ${NM_TUMBLEBUG_NS}/resources/securityGroup?option=force   -H "${c_AUTH}" -H "${c_CT}" -o /dev/null -w "SECURITYGROUP.delete():%{http_code}\n"; fi
 	# vpc
-	if [[ "${v_QUERY}" == *"vpc"* ]]; then	echo "@_VPC_@";		curl -sX DELETE ${NM_TUMBLEBUG_NS}/resources/vNet   -H "${c_AUTH}" -H "${c_CT}" -o /dev/null -w "VNET.delete():%{http_code}\n"; fi
+	if [[ "${v_QUERY}" == *"vpc"* ]]; then	echo "@_VPC_@";		curl -sX DELETE ${NM_TUMBLEBUG_NS}/resources/vNet?option=force   -H "${c_AUTH}" -H "${c_CT}" -o /dev/null -w "VNET.delete():%{http_code}\n"; fi
 	
 
 }

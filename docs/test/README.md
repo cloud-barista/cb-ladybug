@@ -4,6 +4,9 @@ Test shell scripts 사용법
 ## Prerequisites 
 > 클러스터 생성/삭제 기능을 이용하기 위해서는 Cloud Connection 정보를 등록해야 합니다.
 
+> AWS 대상 싱글클라우드 타입 클러스터 생성을 위해서는
+> [AWS IAM 정책을 생성][1]하고 해당 IAM 정책을 적용한 역할(role)의 생성이 필요합니다.
+
 ### jq 설치
 * shell 에서 json parsing 시 `jq` 유틸리티를 활용합니다.
 * https://stedolan.github.io/jq/
@@ -325,7 +328,9 @@ $ ./cluster-create.sh <namespace> <cluster name> single
 $ ./cluster-create.sh cb-mcks-ns cluster-01 single
 ```
 
-
+> AWS의 경우 [Prerequisites](#Prerequisites)에서 생성한 역할(role)을 클러스터 생성 파라미터 중
+> controlPlane.role과 worker.role에 각각 설정해 주어야 합니다.
+> * `cluster-create-aws.sh` 내용 참조
 
 ### 클러스터 확인
 ```
@@ -514,3 +519,6 @@ $ ./mcir-delete.sh <namespace> [all/image/spec/ssh/sg/vpc]
 # 예
 $ ./mcir-delete.sh cb-mcks-ns all
 ```
+
+
+[1]: https://cloud-provider-aws.sigs.k8s.io/prerequisites/

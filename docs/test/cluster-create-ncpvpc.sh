@@ -63,7 +63,7 @@ create() {
 			"config": {
 				"installMonAgent": "",
 				"kubernetes": {
-					"version": "1.23.14",
+					"version": "1.23.13",
 					"etcd": "local",
 					"loadbalancer": "haproxy",
 					"networkCni": "flannel",
@@ -74,9 +74,9 @@ create() {
 			},
 			"controlPlane": [
 				{
-					"connection": "config-openstack-regionone",
+					"connection": "config-ncpvpc-kr",
 					"count": 1,
-					"spec": "ds2G",
+					"spec": "SVR.VSVR.STAND.C002.M008.NET.SSD.B050.G002",
 					"rootDisk": {
 						"type": "",
 						"size": ""
@@ -86,9 +86,9 @@ create() {
 			],
 			"worker": [
 				{
-					"connection": "config-openstack-regionone",
+					"connection": "config-ncpvpc-kr",
 					"count": 1,
-					"spec": "ds2G",
+					"spec": "SVR.VSVR.STAND.C002.M008.NET.SSD.B050.G002",
 					"rootDisk": {
 						"type": "",
 						"size": ""

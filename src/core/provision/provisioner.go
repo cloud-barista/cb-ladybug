@@ -41,6 +41,28 @@ func NewProvisioner(cluster *model.Cluster) *Provisioner {
 	return provisioner
 }
 
+func (self *Provisioner) BuildAllMachines() error {
+	if self.Cluster == nil {
+		return errors.New(fmt.Sprintf("Invalid cluster"))
+	}
+
+	for _, node := range self.Cluster.Nodes {
+		if node.Role == app.CONTROL_PLANE {
+			self.AppendControlPlaneMachine(node.Name, node.Csp, node.RegionLabel, node.ZoneLabel, node.Credential)
+		} else if node.Role == app.WORKER {
+			self.AppendWorkerNodeMachine(node.Name, node.Csp, node.RegionLabel, node.ZoneLabel, node.Credential)
+		} else {
+			return errors.New(fmt.Sprintf("Invalid node's role"))
+		}
+
+		if self.Cluster.CpLeader == node.Name {
+			self.leader = self.ControlPlaneMachines[node.Name]
+		}
+	}
+
+	return nil
+}
+
 /* append a control-plane-machine */
 func (self *Provisioner) AppendControlPlaneMachine(name string, csp app.CSP, region string, zone string, credential string) {
 
@@ -119,9 +141,9 @@ func (self *Provisioner) BindVM(vms []tumblebug.VM) ([]*model.Node, error) {
 			nodes = append(nodes, machine.NewNode())
 			nameInCsp, err := vm.GetNameInCsp()
 			if err != nil {
-				return nil, errors.New(fmt.Sprintf("Can't get a name in CSP of node '%s'", vm.Name))
+				logger.Infof("[%s.%s.%s] nameInCsp is empty", vm.Namespace, vm.McisName, vm.Name)
 			}
-			machine.NameInCsp = nameInCsp
+			machine.NameInCsp = lang.NVL(nameInCsp, "")
 		} else {
 			return nil, errors.New(fmt.Sprintf("Can't be found node by name '%s'", vm.Name))
 		}
@@ -238,6 +260,8 @@ func (self *Provisioner) InitControlPlane(kubernetesConfigReq app.ClusterConfigK
 			return nil, "", errors.New("to initialize control-plane (the output not contains 'Your Kubernetes control-plane has initialized successfully')")
 		}
 	} else {
+		//		ver := strings.TrimSuffix(self.Cluster.Version, "-00")
+		//		if output, err := self.leader.executeSSH("cd %s;./%s %s %s %s %s %s %s %s %s", REMOTE_TARGET_PATH, "k8s-init.sh", kubernetesConfigReq.PodCidr, kubernetesConfigReq.ServiceCidr, kubernetesConfigReq.ServiceDnsDomain, self.leader.PublicIP, self.leader.PrivateIP, port, self.Cluster.ServiceType, ver); err != nil {
 		if output, err := self.leader.executeSSH("cd %s;./%s %s %s %s %s %s %s %s", REMOTE_TARGET_PATH, "k8s-init.sh", kubernetesConfigReq.PodCidr, kubernetesConfigReq.ServiceCidr, kubernetesConfigReq.ServiceDnsDomain, self.leader.PublicIP, self.leader.PrivateIP, port, self.Cluster.ServiceType); err != nil {
 			return nil, "", errors.New("Failed to initialize control-plane. (k8s-init.sh)")
 		} else if strings.Contains(output, "Your Kubernetes control-plane has initialized successfully") {
@@ -318,16 +342,16 @@ func (self *Provisioner) InstallCcm(cloudConfig string) error {
 	if self.leader.CSP == app.CSP_AWS {
 		ccmYamls = append(ccmYamls, CCM_AWS_ROLE_SA_FILE)
 		ccmYamls = append(ccmYamls, CCM_AWS_DS_FILE)
-
-		if _, err := self.Kubectl("create secret -n kube-system generic cloud-config --from-file=cloud.conf=%s/%s", REMOTE_TARGET_PATH, CCM_CLOUD_CONFIG_FILE); err != nil {
-			return err
-		}
-
 	} else if self.leader.CSP == app.CSP_OPENSTACK {
 		ccmYamls = append(ccmYamls, CCM_OPENSTACK_ROLE_BINDINGS_FILE)
 		ccmYamls = append(ccmYamls, CCM_OPENSTACK_ROLES_FILE)
 		ccmYamls = append(ccmYamls, CCM_OPENSTACK_DS_FILE)
+	} else if self.leader.CSP == app.CSP_NCPVPC {
+		ccmYamls = append(ccmYamls, CCM_NCPVPC_ROLE_SA_FILE)
+		ccmYamls = append(ccmYamls, CCM_NCPVPC_DS_FILE)
+	}
 
+	if len(ccmYamls) > 0 {
 		if _, err := self.Kubectl("create secret -n kube-system generic cloud-config --from-file=cloud.conf=%s/%s", REMOTE_TARGET_PATH, CCM_CLOUD_CONFIG_FILE); err != nil {
 			return err
 		}

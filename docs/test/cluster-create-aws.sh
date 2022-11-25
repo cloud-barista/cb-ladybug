@@ -63,7 +63,7 @@ create() {
 			"config": {
 				"installMonAgent": "",
 				"kubernetes": {
-					"version": "1.23.13",
+					"version": "1.23.14",
 					"etcd": "local",
 					"loadbalancer": "haproxy",
 					"networkCni": "flannel",
@@ -87,7 +87,7 @@ create() {
 			"worker": [
 				{
 					"connection": "config-aws-ap-northeast-2",
-					"count": 2,
+					"count": 1,
 					"spec": "t2.medium",
 					"rootDisk": {
 						"type": "",
@@ -130,7 +130,7 @@ EOF
 					"worker": [
 						{
 							"connection": "config-aws-ap-northeast-2",
-							"count": 2,
+							"count": 1,
 							"spec": "t2.medium",
 							"role": "k8s-worker-role-for-ccm"
 						}
