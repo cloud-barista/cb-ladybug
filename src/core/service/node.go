@@ -103,10 +103,16 @@ func AddNode(namespace string, clusterName string, req *app.NodeReq) (*model.Nod
 	// get a provisioner
 	provisioner := provision.NewProvisioner(cluster)
 
+	/*
+		if err := provisioner.BuildAllMachines(); err != nil {
+			return nil, errors.New(fmt.Sprintf("Failed to build provisioner's map: %v", err))
+		}
+	*/
+
 	// get join command
 	workerJoinCmd, err := provisioner.NewWorkerJoinCommand()
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("failed to get join-command (cause='%v')", err))
+		return nil, errors.New(fmt.Sprintf("Failed to get join-command (cause='%v')", err))
 	}
 	logger.Infof("[%s.%s] Worker join-command inquiry has been completed. (command=%s)", namespace, clusterName, workerJoinCmd)
 
@@ -145,6 +151,8 @@ func AddNode(namespace string, clusterName string, req *app.NodeReq) (*model.Nod
 	for _, mcisvm := range mcis.VMs {
 		for _, grupid := range vmgroupid {
 			if mcisvm.VmGroupId == grupid {
+				mcisvm.Namespace = namespace
+				mcisvm.McisName = mcisName
 				vms = append(vms, mcisvm)
 			}
 		}
@@ -281,10 +289,24 @@ func RemoveNode(namespace string, clusterName string, nodeName string) (*app.Sta
 	} else if !exists {
 		return nil, errors.New(fmt.Sprintf("Can't be found a MCIS '%s'.", cluster.MCIS))
 	}
+	// fill non-returned data
+	for i, _ := range mcis.VMs {
+		mcis.VMs[i].Namespace = mcis.Namespace
+		mcis.VMs[i].McisName = mcis.Name
+	}
+
 	logger.Infof("[%s.%s] The inquiry has been completed..", namespace, clusterName)
 
 	// get a provisioner
 	provisioner := provision.NewProvisioner(cluster)
+
+	if err := provisioner.BuildAllMachines(); err != nil {
+		return nil, errors.New(fmt.Sprintf("Failed to build provisioner's map: %v", err))
+	}
+
+	if _, err := provisioner.BindVM(mcis.VMs); err != nil {
+		return nil, errors.New(fmt.Sprintf("Failed to bind VM's data: %v", err))
+	}
 
 	// delete node (kubernetes) & vm (mcis)
 	if err := provisioner.DrainAndDeleteNode(nodeName); err != nil {

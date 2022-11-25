@@ -24,6 +24,8 @@ const (
 	CCM_OPENSTACK_ROLE_BINDINGS_FILE = "addons/ccm/openstack/cloud-controller-manager-role-bindings.yaml"
 	CCM_OPENSTACK_ROLES_FILE         = "addons/ccm/openstack/cloud-controller-manager-roles.yaml"
 	CCM_OPENSTACK_DS_FILE            = "addons/ccm/openstack/openstack-cloud-controller-manager-ds.yaml"
+	CCM_NCPVPC_ROLE_SA_FILE          = "addons/ccm/ncpvpc/clusterrole-service-account.yaml"
+	CCM_NCPVPC_DS_FILE               = "addons/ccm/ncpvpc/ncp-cloud-controller-manager-daemonset.yaml"
 )
 
 type Machine struct {

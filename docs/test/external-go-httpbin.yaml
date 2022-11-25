@@ -1,0 +1,36 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: external-go-httpbin-deployment
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: go-httpbin 
+  template:
+    metadata:
+      labels:
+        app: go-httpbin 
+    spec:
+      containers:
+      - name: go-httpbin
+        image: mccutchen/go-httpbin
+        env:
+        - name: PORT
+          value: "8080"
+        ports:
+        - containerPort: 8080
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: external-go-httpbin-service
+spec:
+  selector:
+    app: go-httpbin
+  type: LoadBalancer
+  ports:
+  - name: go-httpbin
+    port: 80
+    targetPort: 8080

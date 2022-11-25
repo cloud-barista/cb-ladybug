@@ -1,32 +1,24 @@
 ---
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: cloud-controller-manager
-  namespace: kube-system
----
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: openstack-cloud-controller-manager
+  name: ncp-cloud-controller-manager
   namespace: kube-system
   labels:
-    k8s-app: openstack-cloud-controller-manager
+    k8s-app: ncp-cloud-controller-manager
 spec:
   selector:
     matchLabels:
-      k8s-app: openstack-cloud-controller-manager
+      k8s-app: ncp-cloud-controller-manager
   updateStrategy:
     type: RollingUpdate
   template:
     metadata:
       labels:
-        k8s-app: openstack-cloud-controller-manager
+        k8s-app: ncp-cloud-controller-manager
     spec:
       nodeSelector:
         node-role.kubernetes.io/master: ""
-      securityContext:
-        runAsUser: 1001
       tolerations:
       - key: node.cloudprovider.kubernetes.io/uninitialized
         value: "true"
@@ -35,22 +27,17 @@ spec:
         effect: NoSchedule
       serviceAccountName: cloud-controller-manager
       containers:
-        - name: openstack-cloud-controller-manager
-          image: docker.io/k8scloudprovider/openstack-cloud-controller-manager:v1.23.4
+        - name: ncp-cloud-controller-manager
+          image: ghcr.io/sykim-etri/cloud-controller-manager:v0.1.0
           args:
-            - /bin/openstack-cloud-controller-manager
-            - --v=4
+            - --v=5
             - --cloud-config=$(CLOUD_CONFIG)
-            - --cloud-provider=openstack
+            - --cloud-provider=ncp
+            # Use the superset-role overlay if you don't want a token per controller
             - --use-service-account-credentials=true
-            - --bind-address=127.0.0.1
+            # Set --configure-cloud-routes=true if required by your CNI
+            - --configure-cloud-routes=false
           volumeMounts:
-            - mountPath: /etc/kubernetes/pki
-              name: k8s-certs
-              readOnly: true
-            - mountPath: /etc/ssl/certs
-              name: ca-certs
-              readOnly: true
             - mountPath: /etc/config
               name: cloud-config-volume
               readOnly: true
@@ -62,14 +49,6 @@ spec:
               value: /etc/config/cloud.conf
       hostNetwork: true
       volumes:
-      - hostPath:
-          path: /etc/kubernetes/pki
-          type: DirectoryOrCreate
-        name: k8s-certs
-      - hostPath:
-          path: /etc/ssl/certs
-          type: DirectoryOrCreate
-        name: ca-certs
       - name: cloud-config-volume
         secret:
           secretName: cloud-config

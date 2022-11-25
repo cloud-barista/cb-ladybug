@@ -88,8 +88,19 @@ func CreateCluster(namespace string, req *app.ClusterReq) (*model.Cluster, error
 			}
 		}
 	}
+
 	if req.ServiceType == app.ST_SINGLE {
 		connection := req.ControlPlane[0].Connection
+
+		/*
+			// Currently, cb-spider can only support a load balancer in public subnet that are available only SGN and JPN region.
+			if strings.ToLower(connection.ProviderName) == string(app.CSP_NCPVPC) {
+				if !strings.Contains(strings.ToLower(connection.RegionName), "sgn") && !strings.Contains(strings.ToLower(connection.RegionName), "jpn") {
+					return nil, errors.New(fmt.Sprintf("To use single cloud type in %s, must use SGN, JPN region", strings.ToLower(connection.ProviderName)))
+				}
+			}
+		*/
+
 		for _, worker := range req.Worker {
 			if worker.Connection != connection {
 				return nil, errors.New(fmt.Sprintf("All nodes must be the same connection config. (connection=%s)", worker.Connection))
@@ -198,13 +209,14 @@ func CreateCluster(namespace string, req *app.ClusterReq) (*model.Cluster, error
 	logger.Infof("[%s.%s] MCIS creation has been completed.", namespace, clusterName)
 	cluster.CpLeader = mcis.VMs[0].Name
 
-	for _, vms := range mcis.VMs {
-		vms.Namespace = namespace
-		vms.McisName = mcisName
-		if cluster.CpGroup == vms.VmGroupId {
-			provisioner.AppendControlPlaneMachine(vms.Name, mcir.csp, mcir.region, mcir.zone, mcir.credential)
+	for i, vm := range mcis.VMs {
+		mcis.VMs[i].Namespace = mcis.Namespace
+		mcis.VMs[i].McisName = mcis.Name
+		if cluster.CpGroup == vm.VmGroupId {
+			provisioner.AppendControlPlaneMachine(vm.Name, mcir.csp, mcir.region, mcir.zone, mcir.credential)
 		}
 	}
+
 	//create a NLB (contains control-plane)
 	if cluster.Loadbalancer != app.LB_HAPROXY {
 		NLB := mcir.NewNLB(namespace, mcisName, cluster.CpGroup)
@@ -385,6 +397,14 @@ func CreateCluster(namespace string, req *app.ClusterReq) (*model.Cluster, error
 			} else {
 				// Success
 			}
+		} else if cpLeaderCSP == app.CSP_NCPVPC {
+			if cloudConfig, err = ncpvpcBuildCloudConfig(req.ControlPlane[0].Connection, nil); err != nil {
+				bFail = true
+				cluster.FailReason(model.SetupCCMFailedReason, fmt.Sprintf("Failed to get cloud config: %v", err))
+			} else {
+				// Success
+			}
+
 		} else {
 			// Not supported CSP
 		}
@@ -436,6 +456,8 @@ func DeleteCluster(namespace string, clusterName string) (*app.Status, error) {
 
 	// delete all kubernetes resources
 	provisioner := provision.NewProvisioner(cluster)
+	provisioner = provisioner
+
 	if err := provisioner.CleanupAllResources(); err != nil {
 		logger.Infof("[%s.%s] Fail to clean up all resources: err=%v", namespace, clusterName, err)
 	}

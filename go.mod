@@ -16,6 +16,7 @@ require (
 	github.com/cloud-barista/cb-spider v0.6.6
 	github.com/cloud-barista/cb-store v0.6.0
 	github.com/cloud-barista/cb-tumblebug v0.6.1
+	github.com/davecgh/go-spew v1.1.1
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/gogo/protobuf v1.3.2

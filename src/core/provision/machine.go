@@ -114,6 +114,8 @@ func (self *Machine) GetHostname() (string, error) {
 		return awsGetMetadataLocalHostname(self)
 	} else if self.CSP == app.CSP_OPENSTACK {
 		return self.NameInCsp, nil
+	} else if self.CSP == app.CSP_NCPVPC {
+		return ncpvpcGetMetadataServerName(self)
 	} else {
 		return "", errors.New(fmt.Sprintf("Failed to get the fullname: no CSP (node=%s)", self.Name))
 	}
@@ -165,6 +167,10 @@ func (self *Machine) bootstrap(clusterInfo *model.Cluster) error {
 					CCM_OPENSTACK_ROLE_BINDINGS_FILE,
 					CCM_OPENSTACK_ROLES_FILE,
 					CCM_OPENSTACK_DS_FILE)
+			} else if self.CSP == app.CSP_NCPVPC {
+				sourceFiles = append(sourceFiles,
+					CCM_NCPVPC_ROLE_SA_FILE,
+					CCM_NCPVPC_DS_FILE)
 			}
 		}
 

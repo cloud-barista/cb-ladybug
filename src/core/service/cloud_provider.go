@@ -225,6 +225,27 @@ func openstackBuildCloudConfig(connectionName string, additional []spider.KeyVal
 	return bufGlobal.String() + bufLoadBalancer.String(), nil
 }
 
+const ncpvpcCloudConfigGlobalTemplate string = `[Global]{{range $key, $val := .}}\n{{$key}}={{$val}}{{end}}`
+
+func ncpvpcBuildCloudConfig(connectionName string, additional []spider.KeyValue) (string, error) {
+	var configGlobal = make(map[string]string)
+
+	configGlobal["cluster-name"] = ""
+	configGlobal["access-key"] = ""
+	configGlobal["secret-key"] = ""
+	configGlobal["subnet-no"] = ""
+	configGlobal["lb-subnet-no"] = ""
+
+	var bufGlobal bytes.Buffer
+
+	tplGlobal := template.Must(template.New("configGlobal").Parse(ncpvpcCloudConfigGlobalTemplate))
+	if err := tplGlobal.Execute(&bufGlobal, configGlobal); err != nil {
+		return "", errors.New(fmt.Sprintf("Failed to execute the cloud config template: %v", err))
+	}
+
+	return bufGlobal.String(), nil
+}
+
 const spider_key = "cloud-barista-cb-spider-cloud-ba" // 32 bytes
 
 // from cb-spider/cloud-info-manager/credential-info-manager/CredentialInfoManager.go

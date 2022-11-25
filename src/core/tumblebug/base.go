@@ -52,7 +52,7 @@ func (self *Model) execute(method string, url string, body interface{}, result i
 /* execute HTTP */
 func executeHTTP(method string, url string, body interface{}, result interface{}) (*resty.Response, error) {
 
-	req := resty.New().SetDisableWarn(true).R().SetBasicAuth(*app.Config.Username, *app.Config.Password)
+	req := resty.New().SetDisableWarn(true).SetDebug(false).R().SetBasicAuth(*app.Config.Username, *app.Config.Password)
 
 	if body != nil {
 		req.SetBody(body)
