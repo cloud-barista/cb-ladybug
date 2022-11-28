@@ -98,7 +98,7 @@ func AddNode(namespace string, clusterName string, req *app.NodeReq) (*model.Nod
 
 	// create a MCIR & MCIS-vm
 	idx := cluster.NextNodeIndex(app.WORKER)
-	vms := []tumblebug.VM{}
+	var vmgroupid []string
 	for _, worker := range req.Worker {
 		mcir := NewMCIR(namespace, app.WORKER, *worker)
 		reason, msg := mcir.CreateIfNotExist()
@@ -112,9 +112,21 @@ func AddNode(namespace string, clusterName string, req *app.NodeReq) (*model.Nod
 					cleanUpNodes(*provisioner)
 					return nil, err
 				}
-				vms = append(vms, vm)
-				provisioner.AppendWorkerNodeMachine(vm.Name, mcir.csp, mcir.region, mcir.zone, mcir.credential)
+				vmgroupid = append(vmgroupid, name)
+				provisioner.AppendWorkerNodeMachine(name+"-1", mcir.csp, mcir.region, mcir.zone, mcir.credential)
 				idx = idx + 1
+			}
+		}
+	}
+	// Pull out the added VMlist
+	if _, err := mcis.GET(); err != nil {
+		return nil, err
+	}
+	vms := []tumblebug.VM{}
+	for _, mcisvm := range mcis.VMs {
+		for _, grupid := range vmgroupid {
+			if mcisvm.VmGroupId == grupid {
+				vms = append(vms, mcisvm)
 			}
 		}
 	}
