@@ -61,8 +61,13 @@ func CreateCluster(namespace string, req *app.ClusterReq) (*model.Cluster, error
 		connection := tumblebug.NewConnection(req.ControlPlane[0].Connection)
 		exists, _ := connection.GET()
 		if exists {
-			if strings.ToLower(connection.ProviderName) == string(app.CSP_IBM) || strings.ToLower(connection.ProviderName) == string(app.CSP_NCP) || strings.ToLower(connection.ProviderName) == string(app.CSP_NCPVPC) {
+			if strings.ToLower(connection.ProviderName) == string(app.CSP_IBM) || strings.ToLower(connection.ProviderName) == string(app.CSP_NCP) {
 				return nil, errors.New(fmt.Sprintf("%s does not yet supported nlb loadbalancer.", strings.ToLower(connection.ProviderName)))
+			}
+			if strings.ToLower(connection.ProviderName) == string(app.CSP_NCPVPC) {
+				if !strings.Contains(connection.RegionName, "sgn") && !strings.Contains(connection.RegionName, "jpn") {
+					return nil, errors.New(fmt.Sprintf("To use nlb in %s, must use SGN, JPN region", strings.ToLower(connection.ProviderName)))
+				}
 			}
 		}
 	}

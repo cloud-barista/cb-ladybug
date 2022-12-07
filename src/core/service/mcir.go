@@ -96,7 +96,13 @@ func (self *MCIR) CreateIfNotExist() (model.ClusterReason, string) {
 	}
 
 	// Create a VPC
-	vpc := tumblebug.NewVPC(self.namespace, self.vpcName, self.config, getCSPCidrBlock(self.csp))
+	cidr := getCSPCidrBlock(self.csp)
+	cidrSubnet := cidr
+	if self.csp == app.CSP_NCPVPC {
+		cidrSubnet = fmt.Sprintf("%s28", cidr[:len(cidr)-2])
+
+	}
+	vpc := tumblebug.NewVPC(self.namespace, self.vpcName, self.config, cidr, cidrSubnet)
 	exists, err := vpc.GET()
 	if err != nil {
 		return model.CreateVpcFailedReason, fmt.Sprintf("Failed to create a VPC. (cause='%v')", err)

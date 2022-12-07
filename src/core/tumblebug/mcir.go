@@ -9,7 +9,7 @@ import (
 )
 
 /* new instance of VPC */
-func NewVPC(ns string, name string, conf string, cidrBlock string) *VPC {
+func NewVPC(ns string, name string, conf string, cidrBlock string, cidrSubnet string) *VPC {
 
 	return &VPC{
 		Model:     Model{Name: name, Namespace: ns},
@@ -18,7 +18,7 @@ func NewVPC(ns string, name string, conf string, cidrBlock string) *VPC {
 		Subnets: []Subnet{
 			{
 				Name:      fmt.Sprintf("%s-subnet", conf),
-				CidrBlock: cidrBlock},
+				CidrBlock: cidrSubnet},
 		},
 	}
 }
