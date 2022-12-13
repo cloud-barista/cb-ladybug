@@ -347,8 +347,12 @@ func (self *Provisioner) InstallCcm(cloudConfig string) error {
 		ccmYamls = append(ccmYamls, CCM_OPENSTACK_ROLES_FILE)
 		ccmYamls = append(ccmYamls, CCM_OPENSTACK_DS_FILE)
 	} else if self.leader.CSP == app.CSP_NCPVPC {
-		ccmYamls = append(ccmYamls, CCM_NCPVPC_ROLE_SA_FILE)
-		ccmYamls = append(ccmYamls, CCM_NCPVPC_DS_FILE)
+		// 현재 CB-Spider를 통해서는 Load Balancer용 Subnet을 생성할 수 없는 상황이므로,
+		// NCP용 CCM은 사용자가 직접 설치하도록 함.
+		if false {
+			ccmYamls = append(ccmYamls, CCM_NCPVPC_ROLE_SA_FILE)
+			ccmYamls = append(ccmYamls, CCM_NCPVPC_DS_FILE)
+		}
 	}
 
 	if len(ccmYamls) > 0 {
