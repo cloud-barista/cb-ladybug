@@ -4,19 +4,27 @@ header **Cloud-Barista MCKS** (v0.7.0-cortado)
 title Delete a cluster
 hide footbox
 
-participant	"Webtool"		as webtool		#d1e0ff
+participant	"Client"	as webtool		#d1e0ff
 participant	"MCKS"		as provider
 database	"MCKS data"	as db
-participant	"Tumblebug"		as tumblebug	#d1e0ff
+participant	"Tumblebug"	as tumblebug	#d1e0ff
 
 
 activate webtool
 	webtool		->	provider		: DELETE\n/ns/:ns/clusters/:cluster
 
 	activate provider
+
+		provider	->	tumblebug	: GET /ns/:ns
+		tumblebug	-->	provider	: {namespace}
+		provider	->	webtool		: error (if it does not exist)
+
 		provider	->	tumblebug	: GET\n/ns/:ns/mcis/:mcis
 		tumblebug	-->	provider	: {mcis}
-		alt if mcis does exist 
+
+		provider	->	db			: UpdatePhase()
+
+		alt if mcis exists
 
 			provider	->	tumblebug	: GET\n/ns/:ns/control/mcis/:mcis?action=terminate
 			tumblebug	-->	provider
@@ -25,7 +33,7 @@ activate webtool
 			tumblebug	-->	provider
 
 			alt if there is an error
-				provider	->	tumblebug	: [if it does exist]\nGET\n/ns/:ns/control/mcis/:mcis?action=refine
+				provider	->	tumblebug	: [if it exists]\nGET\n/ns/:ns/control/mcis/:mcis?action=refine
 				tumblebug	-->	provider	: {status}
 				
 				provider	->	tumblebug	: DELETE\n/ns/:ns/mcis/:mcis

@@ -4,9 +4,9 @@ header **Cloud-Barista MCKS** (v0.7.0-cortado)
 title Remove a node
 hide footbox
 
-participant	"Webtool"		as webtool		#d1e0ff
-participant	"MCKS"		as provider
-database	"MCKS data"	as db
+participant	"Client"		as webtool		#d1e0ff
+participant	"MCKS"			as provider
+database	"MCKS data"		as db
 participant	"Tumblebug"		as tumblebug	#d1e0ff
 participant	"Worker nodes"	as wNodes		#eeeeee
 
