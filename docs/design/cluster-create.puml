@@ -4,11 +4,9 @@ header **Cloud-Barista MCKS** (v0.7.0-cortado)
 title Create a cluster
 hide footbox
 
-participant	"Webtool"		as webtool		#d1e0ff
-
-participant	"MCKS"		as provider
-database	"MCKS data"	as db
-
+participant	"Client"		as webtool		#d1e0ff
+participant	"MCKS"			as provider
+database	"MCKS data"		as db
 participant	"Tumblebug"		as tumblebug	#d1e0ff
 participant	"Nodes"			as nodes		#eeeeee
 participant	"Control plane"	as mNodes		#eeeeee
@@ -22,94 +20,147 @@ skinparam sequence {
 activate webtool
 	webtool		->	provider		: POST/ns/:ns/clusters/:cluster\n{name, controlPlane:{}, workrer:{}, config:{}}
 
-
 		activate provider
 
-			'-- 1.infra
-			'-- 1.1. namespace
-			provider	->	tumblebug	: GET /ns/:ns
-			tumblebug	-->	provider	: {namespace}
-			provider	->	webtool		: error (if namespace does not exist)
+			'-- 1.validation
+			alt validation
+				'-- 1.1. namespace
+				provider	->	tumblebug	: GET /ns/:ns
+				tumblebug	-->	provider	: {namespace}
+				provider	->	webtool		: error (if it does not exist)
 
-			'-- 1.2. MCIS
-			provider	->	tumblebug	: GET /ns/:ns/mcis/:mcis
-			tumblebug	-->	provider	: {mcis}
-			provider	->	webtool		: [if mcis does exist] error 
+				'-- 1.2. connection
+				provider	->	tumblebug	: GET /connConfig/:connection
+				tumblebug	-->	provider	: {connection}
+				provider	->	webtool		: error (if it does not exist)
 
-			'-- 
-			provider	->	db			: insert {cluster}
+				'-- 1.2. connection
+				provider	->	provider	: check control-plane & worker count
+				provider	->	webtool		: error (if it is wrong)
 
-			'-- 1.3. vpc
-			provider	->	tumblebug	: GET /ns/:ns/resources/vNet/:vpc
-			tumblebug	-->	provider	: {vpc}
-			provider	->	tumblebug	: [if it does not exist]\nPOST s/:ns/resources/vNet
-			tumblebug	-->	provider	: {vpc}
-			provider	->	webtool		: [if there is an error] error
+				'-- 1.3. MCKS
+				provider	->	db			: select()
+				db			-->	provider	: {mcks}
+				provider	->	webtool		: [if it exists] error 
 
-			'-- 1.4. sg(fw)
-			provider	->	tumblebug	: GET /ns/:ns/resources/securityGroup/:sg
-			tumblebug	-->	provider	: {sg}
-			provider	->	tumblebug	: [if it does not exist]\nPOST /ns/:ns/resources/securityGroup
-			tumblebug	-->	provider	: {sg}
-			provider	->	webtool		: [if there is an error] error
+				'-- 1.4. UpdatePhase
+				provider	->	db			: UpdatePhase()
 
-			'-- 1.5. ssh
-			provider	->	tumblebug	: GET /ns/:ns/resources/sshKey/:key
-			tumblebug	-->	provider	: {keypair}
-			provider	->	tumblebug	: [if it does not exist] POST /ns/:ns/resources/sshKey
-			tumblebug	-->	provider	: {keypair}
-			provider	->	webtool		: [if there is an error] error
-			
-			'-- 1.6. image
-			provider	->	tumblebug	: GET /ns/:ns/resources/image/:image
-			tumblebug	-->	provider	: {image}
-			provider	->	tumblebug 	: [if it does not exist]\nPOST /ns/:ns/resources/image
-			tumblebug	-->	provider	: {image}
-			provider	->	webtool		: [if there is an error] error
+				'-- 1.6. validate exists a MCIS
+				provider	->	tumblebug	: GET /ns/:ns/mcis/:mcis
+				tumblebug	-->	provider	: {mcis}
+				provider	->	webtool		: [if it exists] error 
 
-			'-- 1.7. spec
-			provider	->	tumblebug	: GET /ns/:ns/resources/spec/:spec
-			tumblebug	-->	provider	: {image}
-			provider	->	tumblebug 	: [if it does not exist]\nPOST /ns/:ns/resources/spec
-			tumblebug	-->	provider	: {image}
-			provider	->	webtool		: [if there is an error] error
+			end
 
-			'-- 1.8. mcis (vm)
-			provider	->	provider	: append VMs (while node count)
-			provider	->	tumblebug	: POST /ns/:ns/mcis/:mcis
-			tumblebug	-->	provider	: {mcis}
-			provider	->	webtool		: [if there is an error] error
+			'-- 2.Create a MCIR 
+			loop target connections(regions)
 
-			'--
-			provider	->	db						: update {cluster}
 
-			' -- 2.1. boostrap
-			loop nodes
-				provider	<->o	nodes		: test ssh connection
-				provider	<->o	nodes		: copy scripts
-				provider	<->o	nodes		: systemd
-				provider	<->o	nodes		: bootstrap
+				alt validate MCIR
+					'-- 2.1 validate CSP
+					provider	->	provider	: validate CSP
+					provider	->	webtool		: error (if CSP does not exist)
+
+					'-- 2.2 validate spec.
+					provider	->	tumblebug	: POST /lookupSpec
+					tumblebug	-->	provider	: {spec}
+					provider	->	webtool	: [if it does not exist]
+
+
+					'-- 2.3 validate region
+					provider	->	tumblebug	: GET /region/:region
+					tumblebug	-->	provider	: {region}
+					provider	->	webtool	: [if it does not exist]
+
+				end
+
+				alt create a MCIR
+
+					'-- 2.4. vpc
+					provider	->	tumblebug	: GET /ns/:ns/resources/vNet/:vpc
+					tumblebug	-->	provider	: {vpc}
+					provider	->	tumblebug	: [if it does not exist]\nPOST s/:ns/resources/vNet
+					tumblebug	-->	provider	: {vpc}
+					provider	->	webtool		: [if there is an error] error
+
+
+					'-- 2.5. sg(fw)
+					provider	->	tumblebug	: GET /ns/:ns/resources/securityGroup/:sg
+					tumblebug	-->	provider	: {securityGroup}
+					provider	->	tumblebug	: [if it does not exist]\nPOST /ns/:ns/resources/securityGroup
+					tumblebug	-->	provider	: {securityGroup}
+					provider	->	webtool		: [if there is an error] error
+
+					'-- 2.6. ssh
+					provider	->	tumblebug	: GET /ns/:ns/resources/sshKey/:key
+					tumblebug	-->	provider	: {keypair}
+					provider	->	tumblebug	: [if it does not exist] POST /ns/:ns/resources/sshKey
+					tumblebug	-->	provider	: {keypair}
+					provider	->	webtool		: [if there is an error] error
+
+				
+					'-- 2.7. image
+					provider	->	tumblebug	: GET /ns/:ns/resources/image/:image
+					tumblebug	-->	provider	: {image}
+					provider	->	tumblebug 	: [if it does not exist]\nPOST /ns/:ns/resources/image
+					tumblebug	-->	provider	: {image}
+					provider	->	webtool		: [if there is an error] error
+
+					'-- 2.8. spec
+					provider	->	tumblebug	: GET /ns/:ns/resources/spec/:spec
+					tumblebug	-->	provider	: {spec}
+					provider	->	tumblebug 	: [if it does not exist]\nPOST /ns/:ns/resources/spec
+					tumblebug	-->	provider	: {spec}
+					provider	->	webtool		: [if there is an error] error
+
+				end
+
+			end
+
+			'-- 3. create a MCIS
+			alt create a MCIS (VMs)
+				provider	->	provider	: append VMs (while node count)
+				provider	->	tumblebug	: POST /ns/:ns/mcis/:mcis
+				tumblebug	-->	provider	: {mcis}
+				provider	->	webtool		: [if there is an error] error
+			end
+
+
+			' -- 4. boostrap
+			alt bootstrap
+				loop VMs
+					provider	<->o	nodes		: test ssh connection
+					provider	<->o	nodes		: copy scripts
+					provider	<->o	nodes		: systemd
+					provider	<->o	nodes		: bootstrap
+					provider	->		webtool		: [if there is an error] error
+				end
+			end
+
+			' -- 5 control-plane init
+			alt control-plane init (leader of control-plane VM)
+				provider	<->o	mNodes		: haproxy / nlb
+				provider	<->o	mNodes		: init
+				provider	<->o	mNodes		: install network CNI
 				provider	->		webtool		: [if there is an error] error
 			end
 
-			' -- 2.2. 
-			alt leader of control-plane  nodes
-				provider	<->o	mNodes		: haproxy
-				provider	<->o	mNodes		: init
-				provider	<->o	mNodes		: network CNI
-				provider	->	webtool			: [if there is an error] error
+			' -- 6. control-plane join
+			alt control-plane join
+				loop not leader of control-plane VMs
+					provider	<->o	mNodes		: join (not leader of control-plane VMs)
+					provider	->		webtool		: [if there is an error] error
+				end
 			end
 
-			' -- 2.3. 
-			alt not leader of control-plane nodes
-				provider	<->o	mNodes		: join (not leader of control-plane nodes)
-				provider	->	webtool			: [if there is an error] error
-			end
 
-			' -- 2.3. 
-			alt woker nodes
-				provider	<->o	wNodes		: join
-				provider	->	webtool			: [if there is an error] error
+			' -- 67 worker join
+			alt wokers join
+				loop woker VMs
+					provider	<->o	wNodes		: join
+					provider	->	webtool			: [if there is an error] error
+				end
 			end
 
 		deactivate provider
