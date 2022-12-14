@@ -198,18 +198,11 @@ type NLBProtocolBase struct {
 	Ip       string `json:"ip"`
 }
 
-type HealthCheckReq struct {
+type HealthCheck struct {
 	NLBProtocolBase
-	Interval  string `json:"interval"`  // secs, Interval time between health checks.
-	Timeout   string `json:"timeout"`   // secs, Waiting time to decide an unhealthy VM when no response.
-	Threshold string `json:"threshold"` // num, The number of continuous health checks to change the VM status.
-}
-
-type HealthCheckRes struct {
-	NLBProtocolBase
-	Interval  int `json:"interval"`  // secs, Interval time between health checks.
-	Timeout   int `json:"timeout"`   // secs, Waiting time to decide an unhealthy VM when no response.
-	Threshold int `json:"threshold"` // num, The number of continuous health checks to change the VM status.
+	Interval  interface{} `json:"interval"`  // secs, Interval time between health checks.
+	Timeout   interface{} `json:"timeout"`   // secs, Waiting time to decide an unhealthy VM when no response.
+	Threshold interface{} `json:"threshold"` // num, The number of continuous health checks to change the VM status.
 }
 
 type TargetGroup struct {
@@ -229,12 +222,7 @@ type NLBBase struct {
 	TargetGroup TargetGroup     `json:"targetGroup"`
 }
 
-type NLBRes struct {
+type NLB struct {
 	NLBBase
-	HealthChecker HealthCheckRes `json:"healthChecker"`
-}
-
-type NLBReq struct {
-	NLBBase
-	HealthChecker HealthCheckReq `json:"healthChecker"`
+	HealthChecker HealthCheck `json:"healthChecker"`
 }

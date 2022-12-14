@@ -209,7 +209,7 @@ func (self *MCIR) NewVM(namespace string, name string, mcisName string, vmCount 
 	return *vm
 }
 
-func (self *MCIR) NewNLB(namespace string, mcisName string, groupId string) tumblebug.NLBReq {
+func (self *MCIR) NewNLB(namespace string, mcisName string, groupId string) tumblebug.NLB {
 	nlb := tumblebug.NewNLB(namespace, mcisName, groupId, self.config)
 	nlb.VPC = self.vpcName
 	return *nlb

@@ -26,8 +26,8 @@ func NewVM(namespace string, name string, mcisName string) *VM {
 }
 
 /* new instance of NLB */
-func NewNLB(ns string, mcisName string, groupId string, config string) *NLBReq {
-	nlb := &NLBReq{
+func NewNLB(ns string, mcisName string, groupId string, config string) *NLB {
+	nlb := &NLB{
 		NLBBase: NLBBase{
 			Model:  Model{Name: groupId, Namespace: ns},
 			Config: config,
@@ -35,7 +35,7 @@ func NewNLB(ns string, mcisName string, groupId string, config string) *NLBReq {
 			Scope:  "REGION", Listener: NLBProtocolBase{Protocol: "TCP", Port: "6443"},
 			TargetGroup: TargetGroup{NLBProtocolBase: NLBProtocolBase{Protocol: "TCP", Port: "6443"}, MCIS: mcisName, VmGroupId: groupId},
 		},
-		HealthChecker: HealthCheckReq{
+		HealthChecker: HealthCheck{
 			NLBProtocolBase: NLBProtocolBase{Protocol: "TCP", Port: "22"},
 			Interval:        "default", Threshold: "default", Timeout: "default",
 		},
@@ -135,15 +135,13 @@ func (self *VM) DELETE() (bool, error) {
 }
 
 // NLB
-func (self *NLBReq) GET() (bool, error) {
-	NLBRes := new(NLBRes)
-	return self.execute(http.MethodGet, fmt.Sprintf("/ns/%s/mcis/%s/nlb/%s", self.Namespace, self.TargetGroup.MCIS, self.Name), nil, &NLBRes)
+func (self *NLB) GET() (bool, error) {
+	return self.execute(http.MethodGet, fmt.Sprintf("/ns/%s/mcis/%s/nlb/%s", self.Namespace, self.TargetGroup.MCIS, self.Name), nil, &self)
 
 }
 
-func (self *NLBReq) POST() error {
-	NLBRes := new(NLBRes)
-	_, err := self.execute(http.MethodPost, fmt.Sprintf("/ns/%s/mcis/%s/nlb", self.Namespace, self.TargetGroup.MCIS), self, &NLBRes)
+func (self *NLB) POST() error {
+	_, err := self.execute(http.MethodPost, fmt.Sprintf("/ns/%s/mcis/%s/nlb", self.Namespace, self.TargetGroup.MCIS), self, &self)
 	if err != nil {
 		return err
 	}
@@ -151,7 +149,7 @@ func (self *NLBReq) POST() error {
 	return nil
 }
 
-func (self *NLBReq) DELETE() (bool, error) {
+func (self *NLB) DELETE() (bool, error) {
 	exist, err := self.GET()
 	if err != nil {
 		return exist, err
