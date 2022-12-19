@@ -150,7 +150,8 @@ func (self *Machine) bootstrap(clusterInfo *model.Cluster) error {
 		} else { // clusterInfo.ServiceType == app.ST_SINGLE
 			if clusterInfo.NetworkCni == app.NETWORKCNI_FLANNEL {
 				sourceFiles = append(sourceFiles, CNI_FLANNEL_FILE)
-			} else {
+			} else if clusterInfo.NetworkCni == app.NETWORKCNI_CALICO {
+				sourceFiles = append(sourceFiles, CNI_CALICO_FILE)
 			}
 
 			sourceFiles = append(sourceFiles, "gen-cloud-config.sh")
