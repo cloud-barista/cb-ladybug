@@ -25,8 +25,8 @@ $ docker run -d -p 1323:1323 --name cb-tumblebug --link cb-spider:cb-spider clou
 
 * 예
 ```
-$ docker run -d -p 1024:1024 --name cb-spider cloudbaristaorg/cb-spider:0.5.0
-$ docker run -d -p 1323:1323 --name cb-tumblebug --link cb-spider:cb-spider cloudbaristaorg/cb-tumblebug:0.5.0
+$ docker run -d -p 1024:1024 --name cb-spider cloudbaristaorg/cb-spider:0.7.0
+$ docker run -d -p 1323:1323 --name cb-tumblebug --link cb-spider:cb-spider cloudbaristaorg/cb-tumblebug:0.7.0
 ```
 
 ### CB-Dragonfly 실행 (모니터링 에이전트 설치를 원할 경우)
