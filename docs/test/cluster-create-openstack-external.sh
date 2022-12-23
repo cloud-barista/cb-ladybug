@@ -3,7 +3,7 @@
 # usage
 if [ "$#" -lt 1 ]; then
 	echo "./cluster-create.sh <namespace> <clsuter name> <service type>"
-	echo "./cluster-create.sh cb-mcks-ns cluster-01 <multi or single>"
+	echo "./cluster-create.sh cb-ladybug-ns cluster-01 <multi or single>"
 	exit 0;
 fi
 
@@ -38,7 +38,7 @@ fi
 if [ "${v_SERVICE_TYPE}" == ""  ]; then echo "[ERROR] missing <service type>"; exit -1; fi
 
 
-c_URL_MCKS_NS="${c_URL_MCKS}/ns/${v_NAMESPACE}"
+c_URL_LADYBUG_NS="${c_URL_LADYBUG}/ns/${v_NAMESPACE}"
 
 
 # ------------------------------------------------------------------------------
@@ -53,8 +53,8 @@ echo "- Service type               is '${v_SERVICE_TYPE}'"
 # Create a cluster
 create() {
 
-	if [ "$MCKS_CALL_METHOD" == "REST" ]; then
-		resp=$(curl -sX POST ${c_URL_MCKS_NS}/clusters -H "${c_CT}" -d @- <<EOF
+	if [ "$LADYBUG_CALL_METHOD" == "REST" ]; then
+		resp=$(curl -sX POST ${c_URL_LADYBUG_NS}/clusters -H "${c_CT}" -d @- <<EOF
 		{
 			"name": "${v_CLUSTER_NAME}",
 			"label": "",
@@ -101,7 +101,7 @@ EOF
 		); 
 		echo ${resp} | jq;
 
-	elif [ "$MCKS_CALL_METHOD" == "GRPC" ]; then
+	elif [ "$LADYBUG_CALL_METHOD" == "GRPC" ]; then
 
 		$APP_ROOT/src/grpc-api/cbadm/cbadm cluster create --config $APP_ROOT/src/grpc-api/cbadm/grpc_conf.yaml -i json -o json -d \
 		'{
@@ -149,7 +149,7 @@ EOF
 		}'
 
 	else
-		echo "[ERROR] missing MCKS_CALL_METHOD"; exit -1;
+		echo "[ERROR] missing LADYBUG_CALL_METHOD"; exit -1;
 	fi
 
 }

@@ -10,7 +10,7 @@ ADD . /usr/src/app
 
 WORKDIR /usr/src/app
 
-RUN GOOS=linux CGO_ENABLED=0 go build -ldflags '-w -extldflags "-static"' -tags cb-mcks -o cb-mcks -v src/main.go
+RUN GOOS=linux CGO_ENABLED=0 go build -ldflags '-w -extldflags "-static"' -tags cb-ladybug -o cb-ladybug -v src/main.go
 
 #-------------------------------------------
 # STEP 2 : build a image
@@ -18,7 +18,7 @@ RUN GOOS=linux CGO_ENABLED=0 go build -ldflags '-w -extldflags "-static"' -tags 
 FROM scratch as prod
 
 COPY --from=builder /usr/src/app/conf/ /app/conf/
-COPY --from=builder /usr/src/app/cb-mcks /app/
+COPY --from=builder /usr/src/app/cb-ladybug /app/
 COPY --from=builder /usr/src/app/src/scripts/ /app/src/scripts/
 
 ENV CBLOG_ROOT "/app"
@@ -29,13 +29,13 @@ ENV SPIDER_CALL_METHOD REST
 ENV TUMBLEBUG_CALL_METHOD REST
 ENV SPIDER_URL http://cb-spider:1024/spider
 ENV TUMBLEBUG_URL http://cb-tumblebug:1323/tumblebug
-ENV BASE_PATH /mcks
+ENV BASE_PATH /ladybug
 ENV LOG_LEVEL "info"
 
 ENV API_USERNAME default
 ENV API_PASSWORD default
 
-ENTRYPOINT [ "/app/cb-mcks" ]
+ENTRYPOINT [ "/app/cb-ladybug" ]
 
 EXPOSE 1470
 EXPOSE 50254

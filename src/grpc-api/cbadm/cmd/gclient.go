@@ -6,9 +6,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/cloud-barista/cb-mcks/src/grpc-api/cbadm/app"
-	"github.com/cloud-barista/cb-mcks/src/grpc-api/logger"
-	lb_api "github.com/cloud-barista/cb-mcks/src/grpc-api/request"
+	"github.com/cloud-barista/cb-ladybug/src/grpc-api/cbadm/app"
+	"github.com/cloud-barista/cb-ladybug/src/grpc-api/logger"
+	lb_api "github.com/cloud-barista/cb-ladybug/src/grpc-api/request"
 )
 
 // ===== [ Constants and Variables ] =====
@@ -21,7 +21,7 @@ import (
 
 // ===== [ Public Functions ] =====
 
-// SetupAndRun - MCKS GRPC CLI 구동
+// SetupAndRun - Ladybug GRPC CLI 구동
 func SetupAndRun(cmd *cobra.Command, o *app.Options) {
 	logger := logger.NewLogger()
 
@@ -46,21 +46,21 @@ func SetupAndRun(cmd *cobra.Command, o *app.Options) {
 
 	if cmd.Name() == "cluster" || cmd.Name() == "node" || cmd.Name() == "healthy" {
 		// LB API 설정
-		mckscli := app.Config.GetCurrentContext().Mckscli
+		ladybugcli := app.Config.GetCurrentContext().Ladybugcli
 
-		err := mcar.SetServerAddr(mckscli.ServerAddr)
+		err := mcar.SetServerAddr(ladybugcli.ServerAddr)
 		if err != nil {
 			logger.Error("server_addr set failed", err)
 		}
 
-		timeout, _ := time.ParseDuration(mckscli.Timeout)
+		timeout, _ := time.ParseDuration(ladybugcli.Timeout)
 		err = mcar.SetTimeout(timeout)
 		if err != nil {
 			logger.Error("timeout set failed", err)
 		}
 		err = mcar.Open()
 		if err != nil {
-			logger.Error("mcks api open failed : ", err)
+			logger.Error("ladybug api open failed : ", err)
 			return
 		}
 		defer mcar.Close()

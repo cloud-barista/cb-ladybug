@@ -5,8 +5,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/cloud-barista/cb-mcks/src/grpc-api/cbadm/app"
-	"github.com/cloud-barista/cb-mcks/src/utils/lang"
+	"github.com/cloud-barista/cb-ladybug/src/grpc-api/cbadm/app"
+	"github.com/cloud-barista/cb-ladybug/src/utils/lang"
 )
 
 // returns a cobra command

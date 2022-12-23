@@ -1,6 +1,6 @@
 version: 1
 grpc:
-  mckscli:
+  ladybugcli:
     server_addr: 127.0.0.1:50254
     timeout: 1000s
     #tls:
@@ -11,5 +11,5 @@ grpc:
       opentracing:
         jaeger:
           endpoint: localhost:6834
-          service_name: mcks grpc client
+          service_name: ladybug grpc client
           sample_rate: 1

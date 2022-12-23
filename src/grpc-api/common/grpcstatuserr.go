@@ -4,7 +4,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/cloud-barista/cb-mcks/src/grpc-api/logger"
+	"github.com/cloud-barista/cb-ladybug/src/grpc-api/logger"
 )
 
 // ===== [ Constants and Variables ] =====

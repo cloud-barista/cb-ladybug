@@ -11,7 +11,7 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
 
-	"github.com/cloud-barista/cb-mcks/src/utils/lang"
+	"github.com/cloud-barista/cb-ladybug/src/utils/lang"
 )
 
 func ValidateError(c *cobra.Command, err error) {

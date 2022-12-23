@@ -15,7 +15,7 @@
         "version": "latest"
     },
     "host": "localhost:1470",
-    "basePath": "/mcks",
+    "basePath": "/ladybug",
     "paths": {
         "/healthy": {
             "get": {

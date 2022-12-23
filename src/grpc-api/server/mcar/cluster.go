@@ -3,12 +3,12 @@ package mcar
 import (
 	"context"
 
-	gc "github.com/cloud-barista/cb-mcks/src/grpc-api/common"
-	"github.com/cloud-barista/cb-mcks/src/grpc-api/logger"
-	pb "github.com/cloud-barista/cb-mcks/src/grpc-api/protobuf/cbmcks"
+	gc "github.com/cloud-barista/cb-ladybug/src/grpc-api/common"
+	"github.com/cloud-barista/cb-ladybug/src/grpc-api/logger"
+	pb "github.com/cloud-barista/cb-ladybug/src/grpc-api/protobuf/cbladybug"
 
-	"github.com/cloud-barista/cb-mcks/src/core/app"
-	"github.com/cloud-barista/cb-mcks/src/core/service"
+	"github.com/cloud-barista/cb-ladybug/src/core/app"
+	"github.com/cloud-barista/cb-ladybug/src/core/service"
 )
 
 // ===== [ Constants and Variables ] =====
@@ -23,7 +23,7 @@ func (s *MCARService) CreateCluster(ctx context.Context, req *pb.ClusterCreateRe
 
 	logger.Debug("calling MCARService.CreateCluster()")
 
-	// GRPC 메시지에서 MCKS 객체로 복사
+	// GRPC 메시지에서 Ladybug 객체로 복사
 	var mcarObj app.ClusterReq
 	err := gc.CopySrcToDest(&req.Item, &mcarObj)
 	if err != nil {
@@ -41,7 +41,7 @@ func (s *MCARService) CreateCluster(ctx context.Context, req *pb.ClusterCreateRe
 		return nil, gc.ConvGrpcStatusErr(err, "", "MCARService.CreateCluster()")
 	}
 
-	// MCKS 객체에서 GRPC 메시지로 복사
+	// Ladybug 객체에서 GRPC 메시지로 복사
 	var grpcObj pb.ClusterInfo
 	err = gc.CopySrcToDest(&cluster, &grpcObj)
 	if err != nil {
@@ -63,7 +63,7 @@ func (s *MCARService) ListCluster(ctx context.Context, req *pb.ClusterAllQryRequ
 		return nil, gc.ConvGrpcStatusErr(err, "", "MCARService.ListCluster()")
 	}
 
-	// MCKS 객체에서 GRPC 메시지로 복사
+	// Ladybug 객체에서 GRPC 메시지로 복사
 	var grpcObj pb.ListClusterInfoResponse
 	err = gc.CopySrcToDest(&clusterList, &grpcObj)
 	if err != nil {
@@ -88,7 +88,7 @@ func (s *MCARService) GetCluster(ctx context.Context, req *pb.ClusterQryRequest)
 		return nil, gc.ConvGrpcStatusErr(err, "", "MCARService.GetCluster()")
 	}
 
-	// MCKS 객체에서 GRPC 메시지로 복사
+	// Ladybug 객체에서 GRPC 메시지로 복사
 	var grpcObj pb.ClusterInfo
 	err = gc.CopySrcToDest(&cluster, &grpcObj)
 	if err != nil {
@@ -114,7 +114,7 @@ func (s *MCARService) DeleteCluster(ctx context.Context, req *pb.ClusterQryReque
 		return nil, gc.ConvGrpcStatusErr(err, "", "MCARService.DeleteCluster()")
 	}
 
-	// MCKS 객체에서 GRPC 메시지로 복사
+	// Ladybug 객체에서 GRPC 메시지로 복사
 	var grpcObj pb.StatusResponse
 	err = gc.CopySrcToDest(&status, &grpcObj)
 	if err != nil {

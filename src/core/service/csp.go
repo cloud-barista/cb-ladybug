@@ -6,9 +6,9 @@ import (
 	"math/rand"
 	"strings"
 
-	"github.com/cloud-barista/cb-mcks/src/core/app"
-	"github.com/cloud-barista/cb-mcks/src/core/tumblebug"
-	"github.com/cloud-barista/cb-mcks/src/utils/lang"
+	"github.com/cloud-barista/cb-ladybug/src/core/app"
+	"github.com/cloud-barista/cb-ladybug/src/core/tumblebug"
+	"github.com/cloud-barista/cb-ladybug/src/utils/lang"
 )
 
 const (

@@ -16,5 +16,5 @@ import (
 // @Success 200 {string} string "ok"
 // @Router /healthy [get]
 func Healthy(c echo.Context) error {
-	return c.String(http.StatusOK, "cb-barista cb-mcks")
+	return c.String(http.StatusOK, "cb-barista cb-ladybug")
 }

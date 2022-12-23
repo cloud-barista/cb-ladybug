@@ -3,7 +3,7 @@
 # usage
 if [ "$#" -lt 1 ]; then
 	echo "./node-add.sh <namespace> <clsuter name>"
-	echo "./node-add.sh cb-mcks-ns cluster-01"
+	echo "./node-add.sh cb-ladybug-ns cluster-01"
 	exit 0;
 fi
 
@@ -31,7 +31,7 @@ fi
 if [ "${v_CLUSTER_NAME}" == "" ]; then echo "[ERROR] missing <cluster name>"; exit -1; fi
 
 
-c_URL_MCKS_NS="${c_URL_MCKS}/ns/${v_NAMESPACE}"
+c_URL_LADYBUG_NS="${c_URL_LADYBUG}/ns/${v_NAMESPACE}"
 
 
 # ------------------------------------------------------------------------------
@@ -46,9 +46,9 @@ echo "- Cluster name               is '${v_CLUSTER_NAME}'"
 # Add Node
 create() {
 
-	if [ "$MCKS_CALL_METHOD" == "REST" ]; then
+	if [ "$LADYBUG_CALL_METHOD" == "REST" ]; then
 
-		resp=$(curl -sX POST ${c_URL_MCKS_NS}/clusters/${v_CLUSTER_NAME}/nodes -H "${c_CT}" -d @- <<EOF
+		resp=$(curl -sX POST ${c_URL_LADYBUG_NS}/clusters/${v_CLUSTER_NAME}/nodes -H "${c_CT}" -d @- <<EOF
 		{
 
 			"worker": [
@@ -62,7 +62,7 @@ create() {
 EOF
 		); echo ${resp} | jq
 
-	elif [ "$MCKS_CALL_METHOD" == "GRPC" ]; then
+	elif [ "$LADYBUG_CALL_METHOD" == "GRPC" ]; then
 
 		$APP_ROOT/src/grpc-api/cbadm/cbadm node add --config $APP_ROOT/src/grpc-api/cbadm/grpc_conf.yaml -i json -o json -d \
 		'{
@@ -80,7 +80,7 @@ EOF
 		}'
 
 	else
-		echo "[ERROR] missing MCKS_CALL_METHOD"; exit -1;
+		echo "[ERROR] missing LADYBUG_CALL_METHOD"; exit -1;
 	fi
 
 }

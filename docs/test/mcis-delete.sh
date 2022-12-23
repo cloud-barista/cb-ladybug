@@ -3,7 +3,7 @@
 # usage
 if [ "$#" -lt 1 ]; then 
 	echo "./mcis-delete.sh <namespace> <mcis name>"
-	echo "./mcis-delete.sh cb-mcks-ns cluster-01"
+	echo "./mcis-delete.sh cb-ladybug-ns cluster-01"
 	exit 0
 fi
 

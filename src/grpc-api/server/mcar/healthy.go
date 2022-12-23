@@ -3,8 +3,8 @@ package mcar
 import (
 	"context"
 
-	"github.com/cloud-barista/cb-mcks/src/grpc-api/logger"
-	pb "github.com/cloud-barista/cb-mcks/src/grpc-api/protobuf/cbmcks"
+	"github.com/cloud-barista/cb-ladybug/src/grpc-api/logger"
+	pb "github.com/cloud-barista/cb-ladybug/src/grpc-api/protobuf/cbladybug"
 )
 
 // ===== [ Constants and Variables ] =====
@@ -19,7 +19,7 @@ func (s *MCARService) Healthy(ctx context.Context, req *pb.Empty) (*pb.MessageRe
 
 	logger.Debug("calling MCARService.Healthy()")
 
-	resp := &pb.MessageResponse{Message: "cb-barista cb-mcks"}
+	resp := &pb.MessageResponse{Message: "cb-barista cb-ladybug"}
 	return resp, nil
 }
 

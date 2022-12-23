@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/cloud-barista/cb-mcks/src/grpc-api/logger"
+	"github.com/cloud-barista/cb-ladybug/src/grpc-api/logger"
 	"github.com/golang-jwt/jwt/v4"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"

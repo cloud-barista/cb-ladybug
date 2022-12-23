@@ -3,12 +3,12 @@ package mcar
 import (
 	"context"
 
-	gc "github.com/cloud-barista/cb-mcks/src/grpc-api/common"
-	"github.com/cloud-barista/cb-mcks/src/grpc-api/logger"
-	pb "github.com/cloud-barista/cb-mcks/src/grpc-api/protobuf/cbmcks"
+	gc "github.com/cloud-barista/cb-ladybug/src/grpc-api/common"
+	"github.com/cloud-barista/cb-ladybug/src/grpc-api/logger"
+	pb "github.com/cloud-barista/cb-ladybug/src/grpc-api/protobuf/cbladybug"
 
-	"github.com/cloud-barista/cb-mcks/src/core/app"
-	"github.com/cloud-barista/cb-mcks/src/core/service"
+	"github.com/cloud-barista/cb-ladybug/src/core/app"
+	"github.com/cloud-barista/cb-ladybug/src/core/service"
 )
 
 // ===== [ Constants and Variables ] =====
@@ -27,7 +27,7 @@ func (s *MCARService) AddNode(ctx context.Context, req *pb.NodeCreateRequest) (*
 		return nil, gc.ConvGrpcStatusErr(err, "", "MCARService.AddNode()")
 	}
 
-	// GRPC 메시지에서 MCKS 객체로 복사
+	// GRPC 메시지에서 Ladybug 객체로 복사
 	var mcarObj app.NodeReq
 	err := gc.CopySrcToDest(&req.Item, &mcarObj)
 	if err != nil {
@@ -44,7 +44,7 @@ func (s *MCARService) AddNode(ctx context.Context, req *pb.NodeCreateRequest) (*
 		return nil, gc.ConvGrpcStatusErr(err, "", "MCARService.AddNode()")
 	}
 
-	// MCKS 객체에서 GRPC 메시지로 복사
+	// Ladybug 객체에서 GRPC 메시지로 복사
 	var grpcObj pb.ListNodeInfoResponse
 	err = gc.CopySrcToDest(&node, &grpcObj)
 	if err != nil {
@@ -69,7 +69,7 @@ func (s *MCARService) ListNode(ctx context.Context, req *pb.NodeAllQryRequest) (
 		return nil, gc.ConvGrpcStatusErr(err, "", "MCARService.ListNode()")
 	}
 
-	// MCKS 객체에서 GRPC 메시지로 복사
+	// Ladybug 객체에서 GRPC 메시지로 복사
 	var grpcObj pb.ListNodeInfoResponse
 	err = gc.CopySrcToDest(&nodeList, &grpcObj)
 	if err != nil {
@@ -94,7 +94,7 @@ func (s *MCARService) GetNode(ctx context.Context, req *pb.NodeQryRequest) (*pb.
 		return nil, gc.ConvGrpcStatusErr(err, "", "MCARService.GetNode()")
 	}
 
-	// MCKS 객체에서 GRPC 메시지로 복사
+	// Ladybug 객체에서 GRPC 메시지로 복사
 	var grpcObj pb.NodeInfo
 	err = gc.CopySrcToDest(&node, &grpcObj)
 	if err != nil {
@@ -120,7 +120,7 @@ func (s *MCARService) RemoveNode(ctx context.Context, req *pb.NodeQryRequest) (*
 		return nil, gc.ConvGrpcStatusErr(err, "", "MCARService.RemoveNode()")
 	}
 
-	// MCKS 객체에서 GRPC 메시지로 복사
+	// Ladybug 객체에서 GRPC 메시지로 복사
 	var grpcObj pb.StatusResponse
 	err = gc.CopySrcToDest(&status, &grpcObj)
 	if err != nil {

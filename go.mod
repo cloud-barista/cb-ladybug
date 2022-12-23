@@ -1,4 +1,4 @@
-module github.com/cloud-barista/cb-mcks
+module github.com/cloud-barista/cb-ladybug
 
 go 1.19
 

@@ -3,7 +3,7 @@
 # usage
 if [ "$#" -lt 1 ]; then 
 	echo "./ns-delete.sh <namespace>"
-	echo "./ns-delete.sh cb-mcks-ns "
+	echo "./ns-delete.sh cb-ladybug-ns "
 	exit 0
 fi
 

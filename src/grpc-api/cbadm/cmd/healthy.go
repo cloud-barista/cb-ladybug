@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/cloud-barista/cb-mcks/src/grpc-api/cbadm/app"
+	"github.com/cloud-barista/cb-ladybug/src/grpc-api/cbadm/app"
 	"github.com/spf13/cobra"
 )
 
@@ -15,13 +15,13 @@ import (
 
 // ===== [ Public Functions ] =====
 
-// NewHealthyCmd - MCKS 상태를 수행하는 Cobra Command 생성
+// NewHealthyCmd - Ladybug 상태를 수행하는 Cobra Command 생성
 func NewHealthyCmd(o *app.Options) *cobra.Command {
 
 	healthyCmd := &cobra.Command{
 		Use:   "healthy",
-		Short: "Healthy command for checking mcks",
-		Long:  "This is a healthy command for checking mcks",
+		Short: "Healthy command for checking ladybug",
+		Long:  "This is a healthy command for checking ladybug",
 		Run: func(cmd *cobra.Command, args []string) {
 			SetupAndRun(cmd, o)
 		},

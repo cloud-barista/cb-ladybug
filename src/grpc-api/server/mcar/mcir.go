@@ -4,11 +4,11 @@ import (
 	"context"
 	"strconv"
 
-	gc "github.com/cloud-barista/cb-mcks/src/grpc-api/common"
-	"github.com/cloud-barista/cb-mcks/src/grpc-api/logger"
-	pb "github.com/cloud-barista/cb-mcks/src/grpc-api/protobuf/cbmcks"
+	gc "github.com/cloud-barista/cb-ladybug/src/grpc-api/common"
+	"github.com/cloud-barista/cb-ladybug/src/grpc-api/logger"
+	pb "github.com/cloud-barista/cb-ladybug/src/grpc-api/protobuf/cbladybug"
 
-	"github.com/cloud-barista/cb-mcks/src/core/service"
+	"github.com/cloud-barista/cb-ladybug/src/core/service"
 )
 
 func (s *MCARService) ListSpec(ctx context.Context, req *pb.SpecQryRequest) (*pb.ListSpecInfoResponse, error) {
@@ -54,7 +54,7 @@ func (s *MCARService) ListSpec(ctx context.Context, req *pb.SpecQryRequest) (*pb
 		return nil, gc.ConvGrpcStatusErr(err, "", "MCARService.ListSpec()")
 	}
 
-	// MCKS 객체에서 GRPC 메시지로 복사
+	// Ladybug 객체에서 GRPC 메시지로 복사
 	var grpcObj pb.ListSpecInfoResponse
 	err = gc.CopySrcToDest(&specList, &grpcObj)
 	if err != nil {

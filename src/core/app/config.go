@@ -4,7 +4,7 @@ import (
 	"flag"
 	"os"
 
-	"github.com/cloud-barista/cb-mcks/src/utils/lang"
+	"github.com/cloud-barista/cb-ladybug/src/utils/lang"
 	"github.com/sirupsen/logrus"
 
 	logger "github.com/sirupsen/logrus"
@@ -30,7 +30,7 @@ func Setup() {
 
 	Config = &conf{
 		AppRootPath:         flag.String("app-root", lang.NVL(os.Getenv("APP_ROOT"), ""), "application root path"),
-		RootURL:             flag.String("root-url", lang.NVL(os.Getenv("BASE_URL"), "/mcks"), "root url"),
+		RootURL:             flag.String("root-url", lang.NVL(os.Getenv("BASE_URL"), "/ladybug"), "root url"),
 		SpiderCallMethod:    flag.String("spider-call-method", lang.NVL(os.Getenv("SPIDER_CALL_METHOD"), "REST"), "Method of calling CB-Spider (REST/gRPC)"),
 		TumblebugCallMethod: flag.String("tumblebug-call-method", lang.NVL(os.Getenv("TUMBLEBUG_CALL_METHOD"), "REST"), "Method of calling CB-Tumblebug (REST/gRPC)"),
 		SpiderUrl:           flag.String("spider-url", lang.NVL(os.Getenv("SPIDER_URL"), "http://localhost:1024/spider"), "cb-spider service end-point url"),
