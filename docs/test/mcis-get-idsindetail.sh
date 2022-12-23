@@ -3,7 +3,7 @@
 # usage
 if [ "$#" -lt 1 ]; then 
 	echo "./mcis-get-idsindetail.sh <namespace> <mcis name> <vm name>"
-	echo "./mcis-get-idsindetail.sh cb-mcks-ns cluster-01 vm-01"
+	echo "./mcis-get-idsindetail.sh cb-ladybug-ns cluster-01 vm-01"
 	exit 0
 fi
 

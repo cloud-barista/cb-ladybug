@@ -6,21 +6,21 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 
-	"github.com/cloud-barista/cb-mcks/src/grpc-api/cbadm/app"
+	"github.com/cloud-barista/cb-ladybug/src/grpc-api/cbadm/app"
 )
 
 type ConfigOptions struct {
 	*app.Options
-	Mcks_Server_addr    string
-	Mcks_Timeout        string
-	Mcks_Endpoint       string
-	Mcks_Service_name   string
-	Mcks_Sample_rate    string
-	Spider_Server_addr  string
-	Spider_Timeout      string
-	Spider_Endpoint     string
-	Spider_Service_name string
-	Spider_Sample_rate  string
+	Ladybug_Server_addr  string
+	Ladybug_Timeout      string
+	Ladybug_Endpoint     string
+	Ladybug_Service_name string
+	Ladybug_Sample_rate  string
+	Spider_Server_addr   string
+	Spider_Timeout       string
+	Spider_Endpoint      string
+	Spider_Service_name  string
+	Spider_Sample_rate   string
 }
 
 func (o *ConfigOptions) writeYaml(in interface{}) {
@@ -71,17 +71,17 @@ func NewCommandConfig(options *app.Options) *cobra.Command {
 
 					var gConf *app.CliConfig = new(app.CliConfig)
 
-					gConf.ServerAddr = o.Mcks_Server_addr
-					gConf.Timeout = o.Mcks_Timeout
-					gConf.Interceptors.Opentracing.Jaeger.Endpoint = o.Mcks_Endpoint
-					gConf.Interceptors.Opentracing.Jaeger.ServiceName = o.Mcks_Service_name
-					gConf.Interceptors.Opentracing.Jaeger.SampleRate = o.Mcks_Sample_rate
+					gConf.ServerAddr = o.Ladybug_Server_addr
+					gConf.Timeout = o.Ladybug_Timeout
+					gConf.Interceptors.Opentracing.Jaeger.Endpoint = o.Ladybug_Endpoint
+					gConf.Interceptors.Opentracing.Jaeger.ServiceName = o.Ladybug_Service_name
+					gConf.Interceptors.Opentracing.Jaeger.SampleRate = o.Ladybug_Sample_rate
 
 					app.Config.Contexts[o.Name] = &app.ConfigContext{
-						Name:      o.Name,
-						Namespace: o.Namespace,
-						Mckscli:   gConf,
-						Spidercli: sConf,
+						Name:       o.Name,
+						Namespace:  o.Namespace,
+						Ladybugcli: gConf,
+						Spidercli:  sConf,
 					}
 				}
 				app.Config.WriteConfig()
@@ -90,11 +90,11 @@ func NewCommandConfig(options *app.Options) *cobra.Command {
 			}())
 		},
 	}
-	cmdC.Flags().StringVarP(&o.Mcks_Server_addr, "mcks_server_addr", "", "127.0.0.1:50254", "Server Addr URL")
-	cmdC.Flags().StringVarP(&o.Mcks_Timeout, "mcks_timeout", "", "1000s", "Timeout")
-	cmdC.Flags().StringVarP(&o.Mcks_Endpoint, "mcks_endpoint", "", "localhost:6834", "endpoint URL")
-	cmdC.Flags().StringVarP(&o.Mcks_Service_name, "mcks_service_name", "", "mcks grpc client", "Service Name")
-	cmdC.Flags().StringVarP(&o.Mcks_Sample_rate, "mcks_sample_rate", "", "1", "sample rate")
+	cmdC.Flags().StringVarP(&o.Ladybug_Server_addr, "ladybug_server_addr", "", "127.0.0.1:50254", "Server Addr URL")
+	cmdC.Flags().StringVarP(&o.Ladybug_Timeout, "ladybug_timeout", "", "1000s", "Timeout")
+	cmdC.Flags().StringVarP(&o.Ladybug_Endpoint, "ladybug_endpoint", "", "localhost:6834", "endpoint URL")
+	cmdC.Flags().StringVarP(&o.Ladybug_Service_name, "ladybug_service_name", "", "ladybug grpc client", "Service Name")
+	cmdC.Flags().StringVarP(&o.Ladybug_Sample_rate, "ladybug_sample_rate", "", "1", "sample rate")
 	cmdC.Flags().StringVarP(&o.Spider_Server_addr, "spider_server_addr", "", "127.0.0.1:2048", "Server Addr URL")
 	cmdC.Flags().StringVarP(&o.Spider_Timeout, "spider_timeout", "", "1000s", "Timeout")
 	cmdC.Flags().StringVarP(&o.Spider_Endpoint, "spider_endpoint", "", "localhost:6832", "endpoint URL")
@@ -147,20 +147,20 @@ func NewCommandConfig(options *app.Options) *cobra.Command {
 					c.Help()
 				} else if app.Config.Contexts[o.Name] != nil {
 					app.Config.Contexts[o.Name].Name = o.Name
-					if o.Mcks_Server_addr != "" {
-						app.Config.Contexts[o.Name].Mckscli.ServerAddr = o.Mcks_Server_addr
+					if o.Ladybug_Server_addr != "" {
+						app.Config.Contexts[o.Name].Ladybugcli.ServerAddr = o.Ladybug_Server_addr
 					}
-					if o.Mcks_Timeout != "" {
-						app.Config.Contexts[o.Name].Mckscli.Timeout = o.Mcks_Timeout
+					if o.Ladybug_Timeout != "" {
+						app.Config.Contexts[o.Name].Ladybugcli.Timeout = o.Ladybug_Timeout
 					}
-					if o.Mcks_Endpoint != "" {
-						app.Config.Contexts[o.Name].Mckscli.Interceptors.Opentracing.Jaeger.Endpoint = o.Mcks_Endpoint
+					if o.Ladybug_Endpoint != "" {
+						app.Config.Contexts[o.Name].Ladybugcli.Interceptors.Opentracing.Jaeger.Endpoint = o.Ladybug_Endpoint
 					}
-					if o.Mcks_Service_name != "" {
-						app.Config.Contexts[o.Name].Mckscli.Interceptors.Opentracing.Jaeger.ServiceName = o.Mcks_Service_name
+					if o.Ladybug_Service_name != "" {
+						app.Config.Contexts[o.Name].Ladybugcli.Interceptors.Opentracing.Jaeger.ServiceName = o.Ladybug_Service_name
 					}
-					if o.Mcks_Sample_rate != "" {
-						app.Config.Contexts[o.Name].Mckscli.Interceptors.Opentracing.Jaeger.SampleRate = o.Mcks_Sample_rate
+					if o.Ladybug_Sample_rate != "" {
+						app.Config.Contexts[o.Name].Ladybugcli.Interceptors.Opentracing.Jaeger.SampleRate = o.Ladybug_Sample_rate
 					}
 					if o.Spider_Server_addr != "" {
 						app.Config.Contexts[o.Name].Spidercli.ServerAddr = o.Spider_Server_addr
@@ -185,11 +185,11 @@ func NewCommandConfig(options *app.Options) *cobra.Command {
 			}())
 		},
 	}
-	cmdS.Flags().StringVarP(&o.Mcks_Server_addr, "mcks_server_addr", "", "127.0.0.1:50254", "Server Addr URL")
-	cmdS.Flags().StringVarP(&o.Mcks_Timeout, "mcks_timeout", "", "1000s", "Timeout")
-	cmdS.Flags().StringVarP(&o.Mcks_Endpoint, "mcks_endpoint", "", "localhost:6834", "endpoint URL")
-	cmdS.Flags().StringVarP(&o.Mcks_Service_name, "mcks_service_name", "", "mcks grpc client", "Service Name")
-	cmdS.Flags().StringVarP(&o.Mcks_Sample_rate, "mcks_sample_rate", "", "1", "sample rate")
+	cmdS.Flags().StringVarP(&o.Ladybug_Server_addr, "ladybug_server_addr", "", "127.0.0.1:50254", "Server Addr URL")
+	cmdS.Flags().StringVarP(&o.Ladybug_Timeout, "ladybug_timeout", "", "1000s", "Timeout")
+	cmdS.Flags().StringVarP(&o.Ladybug_Endpoint, "ladybug_endpoint", "", "localhost:6834", "endpoint URL")
+	cmdS.Flags().StringVarP(&o.Ladybug_Service_name, "ladybug_service_name", "", "ladybug grpc client", "Service Name")
+	cmdS.Flags().StringVarP(&o.Ladybug_Sample_rate, "ladybug_sample_rate", "", "1", "sample rate")
 	cmdS.Flags().StringVarP(&o.Spider_Server_addr, "spider_server_addr", "", "127.0.0.1:2048", "Server Addr URL")
 	cmdS.Flags().StringVarP(&o.Spider_Timeout, "spider_timeout", "", "1000s", "Timeout")
 	cmdS.Flags().StringVarP(&o.Spider_Endpoint, "spider_endpoint", "", "localhost:6832", "endpoint URL")

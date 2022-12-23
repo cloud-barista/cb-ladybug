@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/beego/beego/v2/core/validation"
-	"github.com/cloud-barista/cb-mcks/src/core/app"
+	"github.com/cloud-barista/cb-ladybug/src/core/app"
 	"github.com/go-resty/resty/v2"
 
 	logger "github.com/sirupsen/logrus"

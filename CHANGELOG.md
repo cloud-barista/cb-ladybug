@@ -1,4 +1,4 @@
-# Cloud-Barista Multi-Cloud Kubernetes Service Framework (CB-MCKS) ChangeLog
+# Cloud-Barista Application Runtime Management Framework (CB-Ladybug) ChangeLog
 
 ## v0.7.0 (Cortado, 2022.11.25.)
 
@@ -9,40 +9,40 @@
 
 ### API Change
 
-- Create a cluster api request structure [#154](https://github.com/cloud-barista/cb-mcks/pull/156)
+- Create a cluster api request structure [#154](https://github.com/cloud-barista/cb-ladybug/pull/156)
 
 ### Feature
 
-- Add support for storageclass nfs featurenew feature [#141](https://github.com/cloud-barista/cb-mcks/pull/141)
-- Add GuestOs to openstack image search condition enhancementNew feature or request [#142](https://github.com/cloud-barista/cb-mcks/pull/142)
-- Add support for loadbalancer NLB enhancement New feature or requestfeaturenew feature [#144](https://github.com/cloud-barista/cb-mcks/pull/144)
-- Add RootDiskType & RootDiskSize param to Create Cluster enhancementNew feature or request [#146](https://github.com/cloud-barista/cb-mcks/pull/146)
-- Implements NLB for create a cluster [#149](https://github.com/cloud-barista/cb-mcks/pull/149)
-- Supported external etcd topology [#156](https://github.com/cloud-barista/cb-mcks/pull/156)
-- Add support for Naver Cloud Platform [#158](https://github.com/cloud-barista/cb-mcks/pull/158)
-- Add support for NHN Cloud [#160](https://github.com/cloud-barista/cb-mcks/pull/160)
+- Add support for storageclass nfs [#141](https://github.com/cloud-barista/cb-ladybug/pull/141)
+- Add GuestOs to openstack image search condition enhancement [#142](https://github.com/cloud-barista/cb-ladybug/pull/142)
+- Add support for loadbalancer NLB enhancement [#144](https://github.com/cloud-barista/cb-ladybug/pull/144)
+- Add RootDiskType & RootDiskSize param to Create Cluster enhancement [#146](https://github.com/cloud-barista/cb-ladybug/pull/146)
+- Implements NLB for create a cluster [#149](https://github.com/cloud-barista/cb-ladybug/pull/149)
+- Supported external etcd topology [#156](https://github.com/cloud-barista/cb-ladybug/pull/156)
+- Add support for Naver Cloud Platform [#158](https://github.com/cloud-barista/cb-ladybug/pull/158)
+- Add support for NHN Cloud [#160](https://github.com/cloud-barista/cb-ladybug/pull/160)
 
 ### Bug Fix
 
-- boostrap.sh output check [#150](https://github.com/cloud-barista/cb-mcks/pull/150)
-- Set default account(cb-user) for VM [#152](https://github.com/cloud-barista/cb-mcks/pull/152)
-- SSH handshake logs [#152](https://github.com/cloud-barista/cb-mcks/pull/152)
-- boostrap.sh "permission" error log hidden [#152](https://github.com/cloud-barista/cb-mcks/pull/152) 
-- datastore "bucket not" error [#152](https://github.com/cloud-barista/cb-mcks/pull/152)
+- boostrap.sh output check [#150](https://github.com/cloud-barista/cb-ladybug/pull/150)
+- Set default account(cb-user) for VM [#152](https://github.com/cloud-barista/cb-ladybug/pull/152)
+- SSH handshake logs [#152](https://github.com/cloud-barista/cb-ladybug/pull/152)
+- boostrap.sh "permission" error log hidden [#152](https://github.com/cloud-barista/cb-ladybug/pull/152) 
+- datastore "bucket not" error [#152](https://github.com/cloud-barista/cb-ladybug/pull/152)
 
 ### Refactoring
 
-- Upgrade to go 1.19 & Update go.mod dependenciesPull requests that update a dependency file [#145](https://github.com/cloud-barista/cb-mcks/pull/145)
-- Create a cluster api request structure [#154](https://github.com/cloud-barista/cb-mcks/pull/156)
+- Upgrade to go 1.19 & Update go.mod [#145](https://github.com/cloud-barista/cb-ladybug/pull/145)
+- Create a cluster api request structure [#154](https://github.com/cloud-barista/cb-ladybug/pull/156)
 
 ### Dependencies
 
-- bump github.com/labstack/echo/v4 from 4.7.2 to 4.9.0 [#147](https://github.com/cloud-barista/cb-mcks/pull/147)
-- Clean up dependencies [#148](https://github.com/cloud-barista/cb-mcks/pull/148)
+- bump github.com/labstack/echo/v4 from 4.7.2 to 4.9.0 [#147](https://github.com/cloud-barista/cb-ladybug/pull/147)
+- Clean up dependencies [#148](https://github.com/cloud-barista/cb-ladybug/pull/148)
 
 ### Note
 
-- Full Changelog: https://github.com/cloud-barista/cb-mcks/compare/v0.6.0...v0.7.0
+- Full Changelog: https://github.com/cloud-barista/cb-ladybug/compare/v0.6.0...v0.7.0
 
 ***
 
@@ -58,38 +58,38 @@
 
 ### API Change
 
-- Add support for k8s 1.23 version [#136](https://github.com/cloud-barista/cb-mcks/pull/136)
-- Improve a cbadm cli [#135](https://github.com/cloud-barista/cb-mcks/pull/135)
+- Add support for k8s 1.23 version [#136](https://github.com/cloud-barista/cb-ladybug/pull/136)
+- Improve a cbadm cli [#135](https://github.com/cloud-barista/cb-ladybug/pull/135)
 
 ### Feature
 
-- Add support for IBM-cloud [#119](https://github.com/cloud-barista/cb-mcks/pull/119)
-- Implement 'get VM SpecList' rest API  feature [#128](https://github.com/cloud-barista/cb-mcks/pull/128)
-- Implement 'get VM SpecList' gRPC API  feature [#129](https://github.com/cloud-barista/cb-mcks/pull/129)
-- Add support for Cloudit [#131](https://github.com/cloud-barista/cb-mcks/pull/131)
-- Add support for k8s 1.23 version [#136](https://github.com/cloud-barista/cb-mcks/pull/136)
-- Add a inline parameters to cbadm commands(create a cluster & add nodes) [#137](https://github.com/cloud-barista/cb-mcks/pull/137)
+- Add support for IBM-cloud [#119](https://github.com/cloud-barista/cb-ladybug/pull/119)
+- Implement 'get VM SpecList' rest API  feature [#128](https://github.com/cloud-barista/cb-ladybug/pull/128)
+- Implement 'get VM SpecList' gRPC API  feature [#129](https://github.com/cloud-barista/cb-ladybug/pull/129)
+- Add support for Cloudit [#131](https://github.com/cloud-barista/cb-ladybug/pull/131)
+- Add support for k8s 1.23 version [#136](https://github.com/cloud-barista/cb-ladybug/pull/136)
+- Add a inline parameters to cbadm commands(create a cluster & add nodes) [#137](https://github.com/cloud-barista/cb-ladybug/pull/137)
 
 ### Bug Fix
 
-- Modify the worker-join process hang when creating a cluster by applying Kilo-CNI [#121](https://github.com/cloud-barista/cb-mcks/pull/121)
-- Duplicated private-ip problem on multiple VPCs [#124](https://github.com/cloud-barista/cb-mcks/pull/124)
-- Delete body for http get Method [#126](https://github.com/cloud-barista/cb-mcks/pull/126)
-- Bump github.com/beego/beego/v2 from 2.0.1 to 2.0.2 [#132](https://github.com/cloud-barista/cb-mcks/pull/132)
-- Insert swapoff into k8s 1.23 install script [#138](https://github.com/cloud-barista/cb-mcks/pull/138)
+- Modify the worker-join process hang when creating a cluster by applying Kilo-CNI [#121](https://github.com/cloud-barista/cb-ladybug/pull/121)
+- Duplicated private-ip problem on multiple VPCs [#124](https://github.com/cloud-barista/cb-ladybug/pull/124)
+- Delete body for http get Method [#126](https://github.com/cloud-barista/cb-ladybug/pull/126)
+- Bump github.com/beego/beego/v2 from 2.0.1 to 2.0.2 [#132](https://github.com/cloud-barista/cb-ladybug/pull/132)
+- Insert swapoff into k8s 1.23 install script [#138](https://github.com/cloud-barista/cb-ladybug/pull/138)
 
 ### Refactoring
 
-- Improve a source structure [#122](https://github.com/cloud-barista/cb-mcks/pull/122)
+- Improve a source structure [#122](https://github.com/cloud-barista/cb-ladybug/pull/122)
 
 ### Documentation
 
-- Tidy markdown documents [#118](https://github.com/cloud-barista/cb-mcks/pull/118)
-- Fix connectioninfo-create.sh 'CSP' add [#130](https://github.com/cloud-barista/cb-mcks/pull/130)
+- Tidy markdown documents [#118](https://github.com/cloud-barista/cb-ladybug/pull/118)
+- Fix connectioninfo-create.sh 'CSP' add [#130](https://github.com/cloud-barista/cb-ladybug/pull/130)
 
 
 ### Note
-- Full Changelog: https://github.com/cloud-barista/cb-mcks/compare/v0.5.0...v0.6.0
+- Full Changelog: https://github.com/cloud-barista/cb-ladybug/compare/v0.5.0...v0.6.0
 
 ***
 
@@ -134,7 +134,7 @@
 - Improve ssh connection (#75, #84)
 
 ### Note
-- Full Changelog: https://github.com/cloud-barista/cb-mcks/compare/v0.4.0...v0.5.0
+- Full Changelog: https://github.com/cloud-barista/cb-ladybug/compare/v0.4.0...v0.5.0
 
 ***
 

@@ -1,4 +1,4 @@
-basePath: /mcks
+basePath: /ladybug
 definitions:
   app.ClusterConfigKubernetesReq:
     properties:

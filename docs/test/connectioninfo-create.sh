@@ -181,7 +181,7 @@ if [ "${v_CSP}" == "AZURE" ]; then
 	# resource group
 	v_RESOURCE_GROUP="${AZURE_RESOURCE_GROUP}"
 	if [ "${v_RESOURCE_GROUP}" == "" ]; then
-		read -e -p "resource group ? [예:cb-mcksRG] : "  v_RESOURCE_GROUP
+		read -e -p "resource group ? [예:cb-ladybugRG] : "  v_RESOURCE_GROUP
 		if [ "${v_RESOURCE_GROUP}" == "" ]; then echo "[ERROR] missing resource group"; exit -1;fi
 	fi
 fi
@@ -268,7 +268,7 @@ if [ "${v_CSP}" == "OPENSTACK" ]; then
 
 		v_OPENSTACK_USERNAME="${OS_USERNAME}"
 		if [ "${v_OPENSTACK_USERNAME}" == "" ]; then
-			read -e -p "Username ? [예:mcks] : "  v_OPENSTACK_USERNAME
+			read -e -p "Username ? [예:ladybug] : "  v_OPENSTACK_USERNAME
 			if [ "${v_OPENSTACK_USERNAME}" == "" ]; then echo "[ERROR] missing <openstack username>"; exit -1;fi
 		fi
 
@@ -347,7 +347,7 @@ if [ "${v_CSP}" == "CLOUDIT" ]; then
 
 		v_CLOUDIT_USERNAME="${CI_USERNAME}"
 		if [ "${v_CLOUDIT_USERNAME}" == "" ]; then
-			read -e -p "Username ? [예:mcks] : "  v_CLOUDIT_USERNAME
+			read -e -p "Username ? [예:ladybug] : "  v_CLOUDIT_USERNAME
 			if [ "${v_CLOUDIT_USERNAME}" == "" ]; then echo "[ERROR] missing <cloudit username>"; exit -1;fi
 		fi
 
@@ -464,7 +464,7 @@ if [ "${v_CSP}" == "NHNCLOUD" ]; then
 
 		v_NHNCLOUD_USERNAME="${NHN_USERNAME}"
 		if [ "${v_NHNCLOUD_USERNAME}" == "" ]; then
-			read -e -p "Username ? [예:mcks] : "  v_NHNCLOUD_USERNAME
+			read -e -p "Username ? [예:ladybug] : "  v_NHNCLOUD_USERNAME
 			if [ "${v_NHNCLOUD_USERNAME}" == "" ]; then echo "[ERROR] missing <nhncloud username>"; exit -1;fi
 		fi
 

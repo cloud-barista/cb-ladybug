@@ -3,7 +3,7 @@ package mcar
 import (
 	"time"
 
-	pb "github.com/cloud-barista/cb-mcks/src/grpc-api/protobuf/cbmcks"
+	pb "github.com/cloud-barista/cb-ladybug/src/grpc-api/protobuf/cbladybug"
 )
 
 // ===== [ Constants and Variables ] =====

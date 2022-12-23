@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/cloud-barista/cb-mcks/src/core/app"
+	"github.com/cloud-barista/cb-ladybug/src/core/app"
 )
 
 func NewNS(ns string) *NS {

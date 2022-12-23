@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/cloud-barista/cb-mcks/src/grpc-api/cbadm/app"
-	"github.com/cloud-barista/cb-mcks/src/utils/lang"
+	"github.com/cloud-barista/cb-ladybug/src/grpc-api/cbadm/app"
+	"github.com/cloud-barista/cb-ladybug/src/utils/lang"
 	"github.com/spf13/cobra"
 )
 

@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/beego/beego/v2/core/validation"
-	"github.com/cloud-barista/cb-mcks/src/core/app"
+	"github.com/cloud-barista/cb-ladybug/src/core/app"
 )
 
 /* new instance of VPC */

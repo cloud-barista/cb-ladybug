@@ -2,7 +2,7 @@ syntax = "proto3";
 
 import "gogoproto/gogo.proto";
 
-package cbmcks;
+package cbladybug;
 
 //////////////////////////////////
 // 공통 메시지 정의
@@ -24,7 +24,7 @@ message StatusResponse {
 }
 
 //////////////////////////////////
-// CB MCKS GRPC 서비스 정의
+// CB-Ladybug GRPC 서비스 정의
 //////////////////////////////////
 
 service MCAR {

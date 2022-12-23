@@ -6,16 +6,16 @@ import (
 	"net"
 	"os"
 
-	gc "github.com/cloud-barista/cb-mcks/src/grpc-api/common"
-	"github.com/cloud-barista/cb-mcks/src/grpc-api/config"
-	"github.com/cloud-barista/cb-mcks/src/grpc-api/logger"
-	pb "github.com/cloud-barista/cb-mcks/src/grpc-api/protobuf/cbmcks"
-	grpc_mcar "github.com/cloud-barista/cb-mcks/src/grpc-api/server/mcar"
+	gc "github.com/cloud-barista/cb-ladybug/src/grpc-api/common"
+	"github.com/cloud-barista/cb-ladybug/src/grpc-api/config"
+	"github.com/cloud-barista/cb-ladybug/src/grpc-api/logger"
+	pb "github.com/cloud-barista/cb-ladybug/src/grpc-api/protobuf/cbladybug"
+	grpc_mcar "github.com/cloud-barista/cb-ladybug/src/grpc-api/server/mcar"
 
 	"google.golang.org/grpc/reflection"
 )
 
-// RunServer - MCKS GRPC 서버 실행
+// RunServer - Ladybug GRPC 서버 실행
 func RunServer() {
 	logger := logger.NewLogger()
 
@@ -26,15 +26,15 @@ func RunServer() {
 		return
 	}
 
-	mckssrv := gConf.GSL.MCKSSrv
+	ladybugsrv := gConf.GSL.LadybugSrv
 
-	conn, err := net.Listen("tcp", mckssrv.Addr)
+	conn, err := net.Listen("tcp", ladybugsrv.Addr)
 	if err != nil {
 		logger.Error("failed to listen: ", err)
 		return
 	}
 
-	cbserver, closer, err := gc.NewCBServer(mckssrv)
+	cbserver, closer, err := gc.NewCBServer(ladybugsrv)
 	if err != nil {
 		logger.Error("failed to create grpc server: ", err)
 		return
@@ -47,17 +47,17 @@ func RunServer() {
 	gs := cbserver.Server
 	pb.RegisterMCARServer(gs, &grpc_mcar.MCARService{})
 
-	if mckssrv.Reflection == "enable" {
-		if mckssrv.Interceptors != nil && mckssrv.Interceptors.AuthJWT != nil {
+	if ladybugsrv.Reflection == "enable" {
+		if ladybugsrv.Interceptors != nil && ladybugsrv.Interceptors.AuthJWT != nil {
 			fmt.Printf("\n\n*** you can run reflection when jwt auth interceptor is not used ***\n\n")
 		} else {
 			reflection.Register(gs)
 		}
 	}
 
-	fmt.Printf("\n[CB-MCKS: Multi-Cloud Kubernetes Service Framework]")
+	fmt.Printf("\n[CB-Ladybug: Multi-Cloud Application Runtime Management Framework]")
 	fmt.Printf("\n   Initiating GRPC API Server....__^..^__....")
-	fmt.Printf("\n\n => grpc server started on %s\n\n", mckssrv.Addr)
+	fmt.Printf("\n\n => grpc server started on %s\n\n", ladybugsrv.Addr)
 
 	if err := gs.Serve(conn); err != nil {
 		logger.Error("failed to serve: ", err)
@@ -88,41 +88,41 @@ func configLoad(cf string) (config.GrpcConfig, error) {
 
 	// Command line 에 지정된 옵션을 설정에 적용 (우선권)
 
-	// MCKS 필수 입력 항목 체크
-	mckssrv := gConf.GSL.MCKSSrv
+	// Ladybug 필수 입력 항목 체크
+	ladybugsrv := gConf.GSL.LadybugSrv
 
-	if mckssrv == nil {
-		return gConf, errors.New("mckssrv field are not specified")
+	if ladybugsrv == nil {
+		return gConf, errors.New("ladybugsrv field are not specified")
 	}
 
-	if mckssrv.Addr == "" {
-		return gConf, errors.New("mckssrv.addr field are not specified")
+	if ladybugsrv.Addr == "" {
+		return gConf, errors.New("ladybugsrv.addr field are not specified")
 	}
 
-	if mckssrv.TLS != nil {
-		if mckssrv.TLS.TLSCert == "" {
-			return gConf, errors.New("mckssrv.tls.tls_cert field are not specified")
+	if ladybugsrv.TLS != nil {
+		if ladybugsrv.TLS.TLSCert == "" {
+			return gConf, errors.New("ladybugsrv.tls.tls_cert field are not specified")
 		}
-		if mckssrv.TLS.TLSKey == "" {
-			return gConf, errors.New("mckssrv.tls.tls_key field are not specified")
+		if ladybugsrv.TLS.TLSKey == "" {
+			return gConf, errors.New("ladybugsrv.tls.tls_key field are not specified")
 		}
 	}
 
-	if mckssrv.Interceptors != nil {
-		if mckssrv.Interceptors.AuthJWT != nil {
-			if mckssrv.Interceptors.AuthJWT.JWTKey == "" {
-				return gConf, errors.New("mckssrv.interceptors.auth_jwt.jwt_key field are not specified")
+	if ladybugsrv.Interceptors != nil {
+		if ladybugsrv.Interceptors.AuthJWT != nil {
+			if ladybugsrv.Interceptors.AuthJWT.JWTKey == "" {
+				return gConf, errors.New("ladybugsrv.interceptors.auth_jwt.jwt_key field are not specified")
 			}
 		}
-		if mckssrv.Interceptors.PrometheusMetrics != nil {
-			if mckssrv.Interceptors.PrometheusMetrics.ListenPort == 0 {
-				return gConf, errors.New("mckssrv.interceptors.prometheus_metrics.listen_port field are not specified")
+		if ladybugsrv.Interceptors.PrometheusMetrics != nil {
+			if ladybugsrv.Interceptors.PrometheusMetrics.ListenPort == 0 {
+				return gConf, errors.New("ladybugsrv.interceptors.prometheus_metrics.listen_port field are not specified")
 			}
 		}
-		if mckssrv.Interceptors.Opentracing != nil {
-			if mckssrv.Interceptors.Opentracing.Jaeger != nil {
-				if mckssrv.Interceptors.Opentracing.Jaeger.Endpoint == "" {
-					return gConf, errors.New("mckssrv.interceptors.opentracing.jaeger.endpoint field are not specified")
+		if ladybugsrv.Interceptors.Opentracing != nil {
+			if ladybugsrv.Interceptors.Opentracing.Jaeger != nil {
+				if ladybugsrv.Interceptors.Opentracing.Jaeger.Endpoint == "" {
+					return gConf, errors.New("ladybugsrv.interceptors.opentracing.jaeger.endpoint field are not specified")
 				}
 			}
 		}

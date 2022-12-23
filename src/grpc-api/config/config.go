@@ -26,8 +26,8 @@ type GrpcConfig struct {
 
 // GrpcServiceList - CB-GRPC 서비스 목록
 type GrpcServiceList struct {
-	MCKSSrv *GrpcServerConfig `mapstructure:"mckssrv"`
-	MCKSCli *GrpcClientConfig `mapstructure:"mckscli"`
+	LadybugSrv *GrpcServerConfig `mapstructure:"ladybugsrv"`
+	LadybugCli *GrpcClientConfig `mapstructure:"ladybugcli"`
 }
 
 // GrpcServerConfig - CB-GRPC 서버 설정 구조
@@ -109,27 +109,27 @@ func (gConf *GrpcConfig) Init() error {
 // initGlobalParams - 전역 설정 초기화
 func (gConf *GrpcConfig) initGlobalParams() {
 
-	if gConf.GSL.MCKSSrv != nil {
+	if gConf.GSL.LadybugSrv != nil {
 
-		if gConf.GSL.MCKSSrv.TLS != nil {
-			if gConf.GSL.MCKSSrv.TLS.TLSCert != "" {
-				gConf.GSL.MCKSSrv.TLS.TLSCert = ReplaceEnvPath(gConf.GSL.MCKSSrv.TLS.TLSCert)
+		if gConf.GSL.LadybugSrv.TLS != nil {
+			if gConf.GSL.LadybugSrv.TLS.TLSCert != "" {
+				gConf.GSL.LadybugSrv.TLS.TLSCert = ReplaceEnvPath(gConf.GSL.LadybugSrv.TLS.TLSCert)
 			}
-			if gConf.GSL.MCKSSrv.TLS.TLSKey != "" {
-				gConf.GSL.MCKSSrv.TLS.TLSKey = ReplaceEnvPath(gConf.GSL.MCKSSrv.TLS.TLSKey)
+			if gConf.GSL.LadybugSrv.TLS.TLSKey != "" {
+				gConf.GSL.LadybugSrv.TLS.TLSKey = ReplaceEnvPath(gConf.GSL.LadybugSrv.TLS.TLSKey)
 			}
 		}
 
-		if gConf.GSL.MCKSSrv.Interceptors != nil {
-			if gConf.GSL.MCKSSrv.Interceptors.Opentracing != nil {
-				if gConf.GSL.MCKSSrv.Interceptors.Opentracing.Jaeger != nil {
+		if gConf.GSL.LadybugSrv.Interceptors != nil {
+			if gConf.GSL.LadybugSrv.Interceptors.Opentracing != nil {
+				if gConf.GSL.LadybugSrv.Interceptors.Opentracing.Jaeger != nil {
 
-					if gConf.GSL.MCKSSrv.Interceptors.Opentracing.Jaeger.ServiceName == "" {
-						gConf.GSL.MCKSSrv.Interceptors.Opentracing.Jaeger.ServiceName = "grpc mcks server"
+					if gConf.GSL.LadybugSrv.Interceptors.Opentracing.Jaeger.ServiceName == "" {
+						gConf.GSL.LadybugSrv.Interceptors.Opentracing.Jaeger.ServiceName = "grpc ladybug server"
 					}
 
-					if gConf.GSL.MCKSSrv.Interceptors.Opentracing.Jaeger.SampleRate == 0 {
-						gConf.GSL.MCKSSrv.Interceptors.Opentracing.Jaeger.SampleRate = 1
+					if gConf.GSL.LadybugSrv.Interceptors.Opentracing.Jaeger.SampleRate == 0 {
+						gConf.GSL.LadybugSrv.Interceptors.Opentracing.Jaeger.SampleRate = 1
 					}
 
 				}
@@ -137,28 +137,28 @@ func (gConf *GrpcConfig) initGlobalParams() {
 		}
 	}
 
-	if gConf.GSL.MCKSCli != nil {
+	if gConf.GSL.LadybugCli != nil {
 
-		if gConf.GSL.MCKSCli.Timeout == 0 {
-			gConf.GSL.MCKSCli.Timeout = 90 * time.Second
+		if gConf.GSL.LadybugCli.Timeout == 0 {
+			gConf.GSL.LadybugCli.Timeout = 90 * time.Second
 		}
 
-		if gConf.GSL.MCKSCli.TLS != nil {
-			if gConf.GSL.MCKSCli.TLS.TLSCA != "" {
-				gConf.GSL.MCKSCli.TLS.TLSCA = ReplaceEnvPath(gConf.GSL.MCKSCli.TLS.TLSCA)
+		if gConf.GSL.LadybugCli.TLS != nil {
+			if gConf.GSL.LadybugCli.TLS.TLSCA != "" {
+				gConf.GSL.LadybugCli.TLS.TLSCA = ReplaceEnvPath(gConf.GSL.LadybugCli.TLS.TLSCA)
 			}
 		}
 
-		if gConf.GSL.MCKSCli.Interceptors != nil {
-			if gConf.GSL.MCKSCli.Interceptors.Opentracing != nil {
-				if gConf.GSL.MCKSCli.Interceptors.Opentracing.Jaeger != nil {
+		if gConf.GSL.LadybugCli.Interceptors != nil {
+			if gConf.GSL.LadybugCli.Interceptors.Opentracing != nil {
+				if gConf.GSL.LadybugCli.Interceptors.Opentracing.Jaeger != nil {
 
-					if gConf.GSL.MCKSCli.Interceptors.Opentracing.Jaeger.ServiceName == "" {
-						gConf.GSL.MCKSCli.Interceptors.Opentracing.Jaeger.ServiceName = "grpc dragonfly client"
+					if gConf.GSL.LadybugCli.Interceptors.Opentracing.Jaeger.ServiceName == "" {
+						gConf.GSL.LadybugCli.Interceptors.Opentracing.Jaeger.ServiceName = "grpc dragonfly client"
 					}
 
-					if gConf.GSL.MCKSCli.Interceptors.Opentracing.Jaeger.SampleRate == 0 {
-						gConf.GSL.MCKSCli.Interceptors.Opentracing.Jaeger.SampleRate = 1
+					if gConf.GSL.LadybugCli.Interceptors.Opentracing.Jaeger.SampleRate == 0 {
+						gConf.GSL.LadybugCli.Interceptors.Opentracing.Jaeger.SampleRate = 1
 					}
 
 				}

@@ -1,6 +1,6 @@
 version: 1
 grpc:
-  mckssrv:
+  ladybugsrv:
     addr: :50254
     #reflection: enable
     #tls:
@@ -14,7 +14,7 @@ grpc:
       opentracing:
         jaeger:
           endpoint: localhost:6834
-          service_name: mcks grpc server
+          service_name: ladybug grpc server
           sample_rate: 1
   tumblebugcli:
     server_addr: 127.0.0.1:50252

@@ -30,7 +30,7 @@ export AZURE_TENANT_ID="uuid"
 export AZURE_SUBSCRIPTION_ID="uuid"
 
 export AZURE_REGION="japaneast" 
-export AZURE_RESOURCE_GROUP="mcks-test"
+export AZURE_RESOURCE_GROUP="ladybug-test"
 
 ./connectioninfo-create.sh AZURE
 
@@ -58,8 +58,8 @@ export TENCENT_ZONE="ap-seoul-1"
 
 # Openstack
 export OS_AUTH_URL="http://123.456.789.123:5000/v3"
-export OS_USERNAME="mcks"
-export OS_PASSWORD="mcks1234"
+export OS_USERNAME="ladybug"
+export OS_PASSWORD="ladybug1234"
 export OS_USER_DOMAIN_NAME="default"
 export OS_PROJECT_ID="1234"
 
@@ -81,8 +81,8 @@ export IBM_ZONE="jp-tok-1"
 # Cloudit
 export CI_IDENTITY_ENDPOINT="http://123.456.789.123:9090"
 export CI_AUTH_TOKEN="XXXXXXXXXXKEYXXXXXX"
-export CI_USERNAME="mcks"
-export CI_PASSWORD="mcks1234"
+export CI_USERNAME="ladybug"
+export CI_PASSWORD="ladybug1234"
 export CI_TENANT_ID="tnt1234"
 
 export CI_REGION="Region"

@@ -3,7 +3,7 @@
 # usage
 if [ "$#" -lt 1 ]; then 
 	echo "./cluster-list.sh <namespace>"
-	echo "./cluster-list.sh cb-mcks-ns"
+	echo "./cluster-list.sh cb-ladybug-ns"
 	exit 0; 
 fi
 
@@ -23,7 +23,7 @@ if [ "${v_NAMESPACE}" == "" ]; then
 fi
 if [ "${v_NAMESPACE}" == "" ]; then echo "[ERROR] missing <namespace>"; exit -1; fi
 
-c_URL_MCKS_NS="${c_URL_MCKS}/ns/${v_NAMESPACE}"
+c_URL_LADYBUG_NS="${c_URL_LADYBUG}/ns/${v_NAMESPACE}"
 
 
 # ------------------------------------------------------------------------------
@@ -37,16 +37,16 @@ echo "- Namespace			             is '${v_NAMESPACE}'"
 # list
 list() {
 
-	if [ "$MCKS_CALL_METHOD" == "REST" ]; then
+	if [ "$LADYBUG_CALL_METHOD" == "REST" ]; then
 		
-		curl -sX GET ${c_URL_MCKS_NS}/clusters -H "${c_CT}" | jq;
+		curl -sX GET ${c_URL_LADYBUG_NS}/clusters -H "${c_CT}" | jq;
 
-	elif [ "$MCKS_CALL_METHOD" == "GRPC" ]; then
+	elif [ "$LADYBUG_CALL_METHOD" == "GRPC" ]; then
 
 		$APP_ROOT/src/grpc-api/cbadm/cbadm cluster list --config $APP_ROOT/src/grpc-api/cbadm/grpc_conf.yaml -o json --ns ${v_NAMESPACE}
 		
 	else
-		echo "[ERROR] missing MCKS_CALL_METHOD"; exit -1;
+		echo "[ERROR] missing LADYBUG_CALL_METHOD"; exit -1;
 	fi
 	
 }

@@ -6,10 +6,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/cloud-barista/cb-mcks/src/core/app"
-	"github.com/cloud-barista/cb-mcks/src/core/model"
-	"github.com/cloud-barista/cb-mcks/src/core/tumblebug"
-	"github.com/cloud-barista/cb-mcks/src/utils/lang"
+	"github.com/cloud-barista/cb-ladybug/src/core/app"
+	"github.com/cloud-barista/cb-ladybug/src/core/model"
+	"github.com/cloud-barista/cb-ladybug/src/core/tumblebug"
+	"github.com/cloud-barista/cb-ladybug/src/utils/lang"
 
 	logger "github.com/sirupsen/logrus"
 )
@@ -119,7 +119,8 @@ func (self *MCIR) CreateIfNotExist() (model.ClusterReason, string) {
 
 	// Create a Firewall
 	/* NCP Classic CSP는 Security Group 생성 및 삭제를 REST API를 통해서는 지원하지 않음. 조회만 가능함.
-	 * mcks명명규칙에 맞춰 console에서 미리 생성해야 정상 동작함. 예) mcks-config-ncp-kr-sg  (mcks=namespace, kr=region 나머지는 고정)*/
+	   ladybug 명명규칙에 맞춰 console에서 미리 생성해야 정상 동작함.
+	   예) cb-ladybug-ns-config-ncp-kr-sg  (cb-ladybug-ns=namespace, kr=region, 나머지는 고정) */
 	fw := tumblebug.NewFirewall(self.csp, self.namespace, self.firewallName, self.config)
 	fw.VPCId = self.vpcName
 	exists, err = fw.GET()

@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cloud-barista/cb-mcks/src/core/app"
-	"github.com/cloud-barista/cb-mcks/src/core/model"
+	"github.com/cloud-barista/cb-ladybug/src/core/app"
+	"github.com/cloud-barista/cb-ladybug/src/core/model"
 	ssh "github.com/cloud-barista/cb-spider/cloud-control-manager/vm-ssh"
 
 	logger "github.com/sirupsen/logrus"

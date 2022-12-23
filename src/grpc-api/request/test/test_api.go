@@ -5,8 +5,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/cloud-barista/cb-mcks/src/grpc-api/logger"
-	lb_api "github.com/cloud-barista/cb-mcks/src/grpc-api/request"
+	"github.com/cloud-barista/cb-ladybug/src/grpc-api/logger"
+	lb_api "github.com/cloud-barista/cb-ladybug/src/grpc-api/request"
 	"github.com/cloud-barista/cb-spider/interface/api"
 	sp_api "github.com/cloud-barista/cb-spider/interface/api"
 	tb_api "github.com/cloud-barista/cb-tumblebug/src/api/grpc/request"
@@ -133,7 +133,7 @@ func main() {
 	time.Sleep(60 * time.Second)
 }
 
-// SimpleLBApiTest - 환경설정함수를 이용한 간단한 MCKS API 호출
+// SimpleLBApiTest - 환경설정함수를 이용한 간단한 Ladybug API 호출
 func SimpleLBApiTest() {
 
 	fmt.Print("\n\n============= SimpleLBApiTest() =============\n")
@@ -181,7 +181,7 @@ func SimpleLBApiTest() {
 	mcar.Close()
 }
 
-// ConfigLBApiTest - 환경설정파일을 이용한 MCKS API 호출
+// ConfigLBApiTest - 환경설정파일을 이용한 Ladybug API 호출
 func ConfigLBApiTest() {
 
 	fmt.Print("\n\n============= ConfigLBApiTest() =============\n")

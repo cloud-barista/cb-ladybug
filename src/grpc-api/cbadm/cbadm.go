@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/cloud-barista/cb-mcks/src/grpc-api/cbadm/cmd"
+	"github.com/cloud-barista/cb-ladybug/src/grpc-api/cbadm/cmd"
 )
 
 // ===== [ Constants and Variables ] =====

@@ -3,14 +3,14 @@ package main
 import (
 	"sync"
 
-	"github.com/cloud-barista/cb-mcks/src/core/app"
-	grpcserver "github.com/cloud-barista/cb-mcks/src/grpc-api/server"
-	restapi "github.com/cloud-barista/cb-mcks/src/rest-api"
+	"github.com/cloud-barista/cb-ladybug/src/core/app"
+	grpcserver "github.com/cloud-barista/cb-ladybug/src/grpc-api/server"
+	restapi "github.com/cloud-barista/cb-ladybug/src/rest-api"
 )
 
-// @title CB-MCKS REST API
+// @title CB-Ladybug REST API
 // @version latest
-// @description CB-MCKS REST API
+// @description CB-Ladybug REST API
 
 // @contact.name API Support
 // @contact.url http://cloud-barista.github.io
@@ -20,7 +20,7 @@ import (
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
 // @host localhost:1470
-// @BasePath /mcks
+// @BasePath /ladybug
 
 // @securityDefinitions.basic BasicAuth
 func main() {

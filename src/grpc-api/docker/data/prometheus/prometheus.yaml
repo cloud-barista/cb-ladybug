@@ -24,7 +24,7 @@ scrape_configs:
   #   static_configs:
   #     - targets: ['localhost:9090']
 
-  - job_name: 'cbmcksserver'
+  - job_name: 'cbladybugserver'
     scrape_interval: 10s
     static_configs:
       - targets: ['192.168.201.207:9095']

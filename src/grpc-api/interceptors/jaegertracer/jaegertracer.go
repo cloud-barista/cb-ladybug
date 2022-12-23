@@ -8,7 +8,7 @@ import (
 	jaeger "github.com/uber/jaeger-client-go"
 	config "github.com/uber/jaeger-client-go/config"
 
-	grpcconfig "github.com/cloud-barista/cb-mcks/src/grpc-api/config"
+	grpcconfig "github.com/cloud-barista/cb-ladybug/src/grpc-api/config"
 )
 
 // InitJaeger - Jaeger Tracer 초기화

@@ -10,9 +10,9 @@ import (
 	"fmt"
 	"html/template"
 
-	"github.com/cloud-barista/cb-mcks/src/core/provision"
-	"github.com/cloud-barista/cb-mcks/src/core/spider"
-	"github.com/cloud-barista/cb-mcks/src/core/tumblebug"
+	"github.com/cloud-barista/cb-ladybug/src/core/provision"
+	"github.com/cloud-barista/cb-ladybug/src/core/spider"
+	"github.com/cloud-barista/cb-ladybug/src/core/tumblebug"
 )
 
 // Imported from cloud-provider-aws/pkg/providers/v2/tags.go

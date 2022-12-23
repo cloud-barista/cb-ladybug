@@ -8,10 +8,10 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/cloud-barista/cb-mcks/src/core/app"
-	"github.com/cloud-barista/cb-mcks/src/core/model"
-	"github.com/cloud-barista/cb-mcks/src/core/tumblebug"
-	"github.com/cloud-barista/cb-mcks/src/utils/lang"
+	"github.com/cloud-barista/cb-ladybug/src/core/app"
+	"github.com/cloud-barista/cb-ladybug/src/core/model"
+	"github.com/cloud-barista/cb-ladybug/src/core/tumblebug"
+	"github.com/cloud-barista/cb-ladybug/src/utils/lang"
 	logger "github.com/sirupsen/logrus"
 
 	"golang.org/x/sync/errgroup"

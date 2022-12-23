@@ -7,12 +7,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cloud-barista/cb-mcks/src/core/app"
-	"github.com/cloud-barista/cb-mcks/src/core/model"
-	"github.com/cloud-barista/cb-mcks/src/core/provision"
-	"github.com/cloud-barista/cb-mcks/src/core/spider"
-	"github.com/cloud-barista/cb-mcks/src/core/tumblebug"
-	"github.com/cloud-barista/cb-mcks/src/utils/lang"
+	"github.com/cloud-barista/cb-ladybug/src/core/app"
+	"github.com/cloud-barista/cb-ladybug/src/core/model"
+	"github.com/cloud-barista/cb-ladybug/src/core/provision"
+	"github.com/cloud-barista/cb-ladybug/src/core/spider"
+	"github.com/cloud-barista/cb-ladybug/src/core/tumblebug"
+	"github.com/cloud-barista/cb-ladybug/src/utils/lang"
 
 	logger "github.com/sirupsen/logrus"
 )

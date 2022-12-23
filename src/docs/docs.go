@@ -965,7 +965,7 @@ type swaggerInfo struct {
 var SwaggerInfo = swaggerInfo{
 	Version:     "latest",
 	Host:        "localhost:1470",
-	BasePath:    "/mcks",
+	BasePath:    "/ladybug",
 	Schemes:     []string{},
 	Title:       "CB-MCKS REST API",
 	Description: "CB-MCKS REST API",

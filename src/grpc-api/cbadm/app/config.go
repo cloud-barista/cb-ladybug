@@ -17,10 +17,10 @@ type conf struct {
 }
 
 type ConfigContext struct {
-	Name      string `yaml:"name"`
-	Namespace string `yaml:"namespace"`
-	Mckscli   *CliConfig
-	Spidercli *CliConfig
+	Name       string `yaml:"name"`
+	Namespace  string `yaml:"namespace"`
+	Ladybugcli *CliConfig
+	Spidercli  *CliConfig
 }
 
 type CliConfig struct {
@@ -76,11 +76,11 @@ func OnConfigInitialize(cfgFile string) error {
 	// set default
 	viper.SetDefault("current-context", "")
 	viper.SetDefault("contexts.local.name", "local")
-	viper.SetDefault("contexts.local.mckscli.server_addr", "127.0.0.1:50254")
-	viper.SetDefault("contexts.local.mckscli.timeout", "1000s")
-	viper.SetDefault("contexts.local.mckscli.interceptors.opentracing.jaeger", map[string]string{
+	viper.SetDefault("contexts.local.ladybugcli.server_addr", "127.0.0.1:50254")
+	viper.SetDefault("contexts.local.ladybugcli.timeout", "1000s")
+	viper.SetDefault("contexts.local.ladybugcli.interceptors.opentracing.jaeger", map[string]string{
 		"endpoint":     "localhost:6834",
-		"service_name": "mcks grpc client",
+		"service_name": "ladybug grpc client",
 		"sample_rate":  "1",
 	})
 	viper.SetDefault("contexts.local.spidercli.server_addr", "127.0.0.1:2048")

@@ -1,12 +1,12 @@
 @startuml
 
-header **Cloud-Barista MCKS** (v0.7.0-cortado)
+header **CB-Ladybug** (v0.7.0-cortado)
 title Delete a cluster
 hide footbox
 
 participant	"Client"	as webtool		#d1e0ff
-participant	"MCKS"		as provider
-database	"MCKS data"	as db
+participant	"Ladybug"	as provider
+database	"Ladybug data"	as db
 participant	"Tumblebug"	as tumblebug	#d1e0ff
 
 
