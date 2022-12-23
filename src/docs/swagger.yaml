@@ -1,25 +1,56 @@
 basePath: /ladybug
 definitions:
+  app.CSP:
+    enum:
+    - aws
+    - gcp
+    - azure
+    - alibaba
+    - tencent
+    - openstack
+    - ibm
+    - ncpvpc
+    - ncp
+    - cloudit
+    - nhncloud
+    type: string
+    x-enum-varnames:
+    - CSP_AWS
+    - CSP_GCP
+    - CSP_AZURE
+    - CSP_ALIBABA
+    - CSP_TENCENT
+    - CSP_OPENSTACK
+    - CSP_IBM
+    - CSP_NCPVPC
+    - CSP_NCP
+    - CSP_CLOUDIT
+    - CSP_NHNCLOUD
   app.ClusterConfigKubernetesReq:
     properties:
       etcd:
+        allOf:
+        - $ref: '#/definitions/app.Etcd'
         enum:
         - local
         - external
         example: local
-        type: string
       loadbalancer:
+        allOf:
+        - $ref: '#/definitions/app.Loadbalancer'
         enum:
         - haproxy
         - nlb
         example: haproxy
-        type: string
       networkCni:
+        allOf:
+        - $ref: '#/definitions/app.NetworkCni'
         enum:
         - canal
         - kilo
+        - flannel
+        - calico
         example: kilo
-        type: string
       podCidr:
         example: 10.244.0.0/16
         type: string
@@ -61,6 +92,13 @@ definitions:
       name:
         example: cluster-01
         type: string
+      serviceType:
+        allOf:
+        - $ref: '#/definitions/app.ServiceType'
+        default: multi
+        enum:
+        - multi
+        - single
       worker:
         items:
           $ref: '#/definitions/app.NodeSetReq'
@@ -75,6 +113,48 @@ definitions:
         example: 163.154.154.89
         type: string
     type: object
+  app.Etcd:
+    enum:
+    - local
+    - external
+    type: string
+    x-enum-varnames:
+    - ETCD_LOCAL
+    - ETCD_EXTERNAL
+  app.Kind:
+    enum:
+    - Status
+    - Cluster
+    - ClusterList
+    - Node
+    - NodeList
+    type: string
+    x-enum-varnames:
+    - KIND_STATUS
+    - KIND_CLUSTER
+    - KIND_CLUSTER_LIST
+    - KIND_NODE
+    - KIND_NODE_LIST
+  app.Loadbalancer:
+    enum:
+    - haproxy
+    - nlb
+    type: string
+    x-enum-varnames:
+    - LB_HAPROXY
+    - LB_NLB
+  app.NetworkCni:
+    enum:
+    - kilo
+    - canal
+    - flannel
+    - calico
+    type: string
+    x-enum-varnames:
+    - NETWORKCNI_KILO
+    - NETWORKCNI_CANAL
+    - NETWORKCNI_FLANNEL
+    - NETWORKCNI_CALICO
   app.NodeReq:
     properties:
       controlPlane:
@@ -94,6 +174,8 @@ definitions:
       count:
         example: 3
         type: integer
+      role:
+        type: string
       rootDisk:
         properties:
           size:
@@ -107,12 +189,28 @@ definitions:
         example: t2.medium
         type: string
     type: object
+  app.ROLE:
+    enum:
+    - control-plane
+    - worker
+    type: string
+    x-enum-varnames:
+    - CONTROL_PLANE
+    - WORKER
+  app.ServiceType:
+    enum:
+    - multi
+    - single
+    type: string
+    x-enum-varnames:
+    - ST_MULTI
+    - ST_SINGLE
   app.Status:
     properties:
       code:
         type: integer
       kind:
-        type: string
+        $ref: '#/definitions/app.Kind'
       message:
         example: Any message
         type: string
@@ -131,12 +229,13 @@ definitions:
       description:
         type: string
       etcd:
+        allOf:
+        - $ref: '#/definitions/app.Etcd'
         default: local
         enum:
         - local
         - external
         example: local
-        type: string
       installMonAgent:
         default: "yes"
         example: "no"
@@ -144,16 +243,17 @@ definitions:
       k8sVersion:
         type: string
       kind:
-        type: string
+        $ref: '#/definitions/app.Kind'
       label:
         type: string
       loadbalancer:
+        allOf:
+        - $ref: '#/definitions/app.Loadbalancer'
         default: haproxy
         enum:
         - haproxy
         - nlb
         example: haproxy
-        type: string
       mcis:
         type: string
       name:
@@ -161,14 +261,22 @@ definitions:
       namespace:
         type: string
       networkCni:
+        allOf:
+        - $ref: '#/definitions/app.NetworkCni'
         enum:
         - canal
         - kilo
-        type: string
       nodes:
         items:
           $ref: '#/definitions/model.Node'
         type: array
+      serviceType:
+        allOf:
+        - $ref: '#/definitions/app.ServiceType'
+        default: multi
+        enum:
+        - multi
+        - single
       status:
         $ref: '#/definitions/model.ClusterStatus'
     type: object
@@ -179,7 +287,7 @@ definitions:
           $ref: '#/definitions/model.Cluster'
         type: array
       kind:
-        type: string
+        $ref: '#/definitions/app.Kind'
     type: object
   model.ClusterStatus:
     properties:
@@ -203,6 +311,8 @@ definitions:
       credential:
         type: string
       csp:
+        allOf:
+        - $ref: '#/definitions/app.CSP'
         enum:
         - aws
         - gcp
@@ -212,22 +322,27 @@ definitions:
         - openstack
         - ibm
         - cloudit
-        type: string
+        - ncp
+        - ncpvpc
+        - nhncloud
       cspLabel:
         type: string
       kind:
-        type: string
+        $ref: '#/definitions/app.Kind'
       name:
+        type: string
+      privateIp:
         type: string
       publicIp:
         type: string
       regionLabel:
         type: string
       role:
+        allOf:
+        - $ref: '#/definitions/app.ROLE'
         enum:
         - control-plane
         - worker
-        type: string
       spec:
         type: string
       zoneLabel:
@@ -240,7 +355,7 @@ definitions:
           $ref: '#/definitions/model.Node'
         type: array
       kind:
-        type: string
+        $ref: '#/definitions/app.Kind'
     type: object
   service.SpecList:
     properties:
@@ -277,11 +392,11 @@ info:
     email: contact-to-cloud-barista@googlegroups.com
     name: API Support
     url: http://cloud-barista.github.io
-  description: CB-MCKS REST API
+  description: CB-Ladybug REST API
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  title: CB-MCKS REST API
+  title: CB-Ladybug REST API
   version: latest
 paths:
   /healthy:
