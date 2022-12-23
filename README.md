@@ -75,7 +75,7 @@ code:200
 * Execute or Run
 * Generate an updated swagger.yaml
 ```
-$ go get -u github.com/swaggo/swag/cmd/swag
+$ go install github.com/swaggo/swag/cmd/swag@latest
 
 # in src/ folder
 $ swag init

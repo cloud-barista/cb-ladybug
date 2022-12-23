@@ -1,8 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "CB-MCKS REST API",
-        "title": "CB-MCKS REST API",
+        "description": "CB-Ladybug REST API",
+        "title": "CB-Ladybug REST API",
         "contact": {
             "name": "API Support",
             "url": "http://cloud-barista.github.io",
@@ -537,30 +537,73 @@
         }
     },
     "definitions": {
+        "app.CSP": {
+            "type": "string",
+            "enum": [
+                "aws",
+                "gcp",
+                "azure",
+                "alibaba",
+                "tencent",
+                "openstack",
+                "ibm",
+                "ncpvpc",
+                "ncp",
+                "cloudit",
+                "nhncloud"
+            ],
+            "x-enum-varnames": [
+                "CSP_AWS",
+                "CSP_GCP",
+                "CSP_AZURE",
+                "CSP_ALIBABA",
+                "CSP_TENCENT",
+                "CSP_OPENSTACK",
+                "CSP_IBM",
+                "CSP_NCPVPC",
+                "CSP_NCP",
+                "CSP_CLOUDIT",
+                "CSP_NHNCLOUD"
+            ]
+        },
         "app.ClusterConfigKubernetesReq": {
             "type": "object",
             "properties": {
                 "etcd": {
-                    "type": "string",
                     "enum": [
                         "local",
                         "external"
                     ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/app.Etcd"
+                        }
+                    ],
                     "example": "local"
                 },
                 "loadbalancer": {
-                    "type": "string",
                     "enum": [
                         "haproxy",
                         "nlb"
                     ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/app.Loadbalancer"
+                        }
+                    ],
                     "example": "haproxy"
                 },
                 "networkCni": {
-                    "type": "string",
                     "enum": [
                         "canal",
-                        "kilo"
+                        "kilo",
+                        "flannel",
+                        "calico"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/app.NetworkCni"
+                        }
                     ],
                     "example": "kilo"
                 },
@@ -624,6 +667,18 @@
                     "type": "string",
                     "example": "cluster-01"
                 },
+                "serviceType": {
+                    "default": "multi",
+                    "enum": [
+                        "multi",
+                        "single"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/app.ServiceType"
+                        }
+                    ]
+                },
                 "worker": {
                     "type": "array",
                     "items": {
@@ -644,6 +699,60 @@
                     "example": "163.154.154.89"
                 }
             }
+        },
+        "app.Etcd": {
+            "type": "string",
+            "enum": [
+                "local",
+                "external"
+            ],
+            "x-enum-varnames": [
+                "ETCD_LOCAL",
+                "ETCD_EXTERNAL"
+            ]
+        },
+        "app.Kind": {
+            "type": "string",
+            "enum": [
+                "Status",
+                "Cluster",
+                "ClusterList",
+                "Node",
+                "NodeList"
+            ],
+            "x-enum-varnames": [
+                "KIND_STATUS",
+                "KIND_CLUSTER",
+                "KIND_CLUSTER_LIST",
+                "KIND_NODE",
+                "KIND_NODE_LIST"
+            ]
+        },
+        "app.Loadbalancer": {
+            "type": "string",
+            "enum": [
+                "haproxy",
+                "nlb"
+            ],
+            "x-enum-varnames": [
+                "LB_HAPROXY",
+                "LB_NLB"
+            ]
+        },
+        "app.NetworkCni": {
+            "type": "string",
+            "enum": [
+                "kilo",
+                "canal",
+                "flannel",
+                "calico"
+            ],
+            "x-enum-varnames": [
+                "NETWORKCNI_KILO",
+                "NETWORKCNI_CANAL",
+                "NETWORKCNI_FLANNEL",
+                "NETWORKCNI_CALICO"
+            ]
         },
         "app.NodeReq": {
             "type": "object",
@@ -673,6 +782,9 @@
                     "type": "integer",
                     "example": 3
                 },
+                "role": {
+                    "type": "string"
+                },
                 "rootDisk": {
                     "type": "object",
                     "properties": {
@@ -692,6 +804,28 @@
                 }
             }
         },
+        "app.ROLE": {
+            "type": "string",
+            "enum": [
+                "control-plane",
+                "worker"
+            ],
+            "x-enum-varnames": [
+                "CONTROL_PLANE",
+                "WORKER"
+            ]
+        },
+        "app.ServiceType": {
+            "type": "string",
+            "enum": [
+                "multi",
+                "single"
+            ],
+            "x-enum-varnames": [
+                "ST_MULTI",
+                "ST_SINGLE"
+            ]
+        },
         "app.Status": {
             "type": "object",
             "properties": {
@@ -699,7 +833,7 @@
                     "type": "integer"
                 },
                 "kind": {
-                    "type": "string"
+                    "$ref": "#/definitions/app.Kind"
                 },
                 "message": {
                     "type": "string",
@@ -727,11 +861,15 @@
                     "type": "string"
                 },
                 "etcd": {
-                    "type": "string",
                     "default": "local",
                     "enum": [
                         "local",
                         "external"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/app.Etcd"
+                        }
                     ],
                     "example": "local"
                 },
@@ -744,17 +882,21 @@
                     "type": "string"
                 },
                 "kind": {
-                    "type": "string"
+                    "$ref": "#/definitions/app.Kind"
                 },
                 "label": {
                     "type": "string"
                 },
                 "loadbalancer": {
-                    "type": "string",
                     "default": "haproxy",
                     "enum": [
                         "haproxy",
                         "nlb"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/app.Loadbalancer"
+                        }
                     ],
                     "example": "haproxy"
                 },
@@ -768,10 +910,14 @@
                     "type": "string"
                 },
                 "networkCni": {
-                    "type": "string",
                     "enum": [
                         "canal",
                         "kilo"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/app.NetworkCni"
+                        }
                     ]
                 },
                 "nodes": {
@@ -779,6 +925,18 @@
                     "items": {
                         "$ref": "#/definitions/model.Node"
                     }
+                },
+                "serviceType": {
+                    "default": "multi",
+                    "enum": [
+                        "multi",
+                        "single"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/app.ServiceType"
+                        }
+                    ]
                 },
                 "status": {
                     "$ref": "#/definitions/model.ClusterStatus"
@@ -795,7 +953,7 @@
                     }
                 },
                 "kind": {
-                    "type": "string"
+                    "$ref": "#/definitions/app.Kind"
                 }
             }
         },
@@ -830,7 +988,6 @@
                     "type": "string"
                 },
                 "csp": {
-                    "type": "string",
                     "enum": [
                         "aws",
                         "gcp",
@@ -839,16 +996,27 @@
                         "tencent",
                         "openstack",
                         "ibm",
-                        "cloudit"
+                        "cloudit",
+                        "ncp",
+                        "ncpvpc",
+                        "nhncloud"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/app.CSP"
+                        }
                     ]
                 },
                 "cspLabel": {
                     "type": "string"
                 },
                 "kind": {
-                    "type": "string"
+                    "$ref": "#/definitions/app.Kind"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "privateIp": {
                     "type": "string"
                 },
                 "publicIp": {
@@ -858,10 +1026,14 @@
                     "type": "string"
                 },
                 "role": {
-                    "type": "string",
                     "enum": [
                         "control-plane",
                         "worker"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/app.ROLE"
+                        }
                     ]
                 },
                 "spec": {
@@ -882,7 +1054,7 @@
                     }
                 },
                 "kind": {
-                    "type": "string"
+                    "$ref": "#/definitions/app.Kind"
                 }
             }
         },
