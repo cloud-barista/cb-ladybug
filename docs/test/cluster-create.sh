@@ -56,32 +56,34 @@ create() {
 			"config": {
 				"installMonAgent": "",
 				"kubernetes": {
+					"version": "1.23.14",
+					"etcd": "local",
+					"loadbalancer": "haproxy",
 					"networkCni": "canal",
 					"podCidr": "10.244.0.0/16",
 					"serviceCidr": "10.96.0.0/12",
 					"serviceDnsDomain": "cluster.local"
-					"loadbalancer": "",
 				}
 			},
 			"controlPlane": [
 				{
-					"connection": "config-azure-koreacentral",
-					"count": 3,
-					"spec": "Standard_B2s",
+					"connection": "config-aws-ap-northeast-2",
+					"count": 1,
+					"spec": "t2.medium",
 					"rootDisk": {
-						"type": "defalut",
-						"size": "defalut"
-					},
+						"type": "default",
+						"size": "default"
+					}
 				}
 			],
 			"worker": [
 				{
-					"connection": "config-ibm-jp-tok",
+					"connection": "config-aws-ap-northeast-2",
 					"count": 1,
-					"spec": "bx2-2x8",
+					"spec": "t2.medium",
 					"rootDisk": {
-						"type": "defalut",
-						"size": "defalut"
+						"type": "default",
+						"size": "default"
 					}
 				}
 			]
