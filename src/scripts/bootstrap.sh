@@ -33,6 +33,10 @@ sudo curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-ke
 sudo apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"
 sudo apt-get update
 
+# cri-tools
+sudo apt-get install -y cri-tools=1.25.*
+sudo apt-mark hold cri-tools
+
 # container runtime
 sudo apt-get install -y containerd.io=1.2.13-2
 cat <<EOF | sudo tee /etc/modules-load.d/containerd.conf
