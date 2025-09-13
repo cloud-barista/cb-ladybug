@@ -10,6 +10,20 @@
 [![Release Version](https://img.shields.io/github/v/release/cloud-barista/cb-ladybug?color=blue)](https://github.com/cloud-barista/cb-ladybug/releases/latest)
 [![License](https://img.shields.io/github/license/cloud-barista/cb-ladybug?color=blue)](https://github.com/cloud-barista/cb-ladybug/blob/master/LICENSE)
 
+
+<br>
+
+---
+
+> ⚠️ **Archived Repository**  
+> This repository has been archived and is no longer actively maintained.  
+> It is kept for historical reference, and no new issues or pull requests are being accepted.  
+
+---
+
+<br>
+
+
 ```
 [NOTE]
 CB-Ladybug is currently under development. (The latest version is v0.7.0 (Cortado))
